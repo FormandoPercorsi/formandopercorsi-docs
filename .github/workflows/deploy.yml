@@ -1,0 +1,36 @@
+name: DocumentationDeploy
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Build
+      run: npm run build
+      env:
+        CI: ""
+      
+    - name: Deploy to server
+      uses: easingthemes/ssh-deploy@v2.2.4
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.OVH_SERVER_PRIVATE_KEY }}
+        REMOTE_HOST: ${{ secrets.OVH_SERVER_ADDRESS }}
+        REMOTE_USER: ${{ secrets.OVH_SERVER_USERNAME }}
+        REMOTE_PORT: ${{ secrets.OVH_SERVER_PORT }}
+        SOURCE: "."
+        TARGET: "/var/www/docs.formandopercorsi.com/html"
+
+    - name: Change permissions
+      run: |
+        ssh -o StrictHostKeyChecking=no -i /home/runner/.ssh/deploy_key ${{ secrets.OVH_SERVER_USERNAME }}@${{ secrets.OVH_SERVER_ADDRESS }} -p ${{ secrets.OVH_SERVER_PORT }} "cd /var/www/docs.formandopercorsi.com/html && chown -R :maintainers ."
