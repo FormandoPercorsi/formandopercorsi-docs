@@ -32,7 +32,50 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+nav {
+  background-color: #282c34;
+  /* Colore di sfondo */
+  padding: 10px 20px;
+  /* Spaziatura interna */
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  /* Rende gli elementi della lista orizzontali */
+  justify-content: center;
+  /* Centra gli elementi della lista */
+}
+
+nav ul li {
+  display: inline;
+  margin-right: 20px;
+  /* Aumenta lo spazio tra gli elementi */
+}
+
+nav ul li:last-child {
+  margin-right: 0;
+  /* Rimuove il margine destro dall'ultimo elemento */
+}
+
+nav ul li a {
+  text-decoration: none;
+  /* Rimuove il sottolineato dai link */
+  color: #61dafb;
+  /* Colore dei link */
+  font-weight: bold;
+  /* Rende il testo dei link in grassetto */
+}
+
+nav ul li a:hover {
+  color: #ffffff;
+  /* Cambia il colore dei link al passaggio del mouse */
 }

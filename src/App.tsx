@@ -1,12 +1,35 @@
 import './App.css';
 import { RedocStandalone } from 'redoc';
+import { Routes, Route, Link } from 'react-router-dom';
 
 function App() {
+
   return (
-    // <RedocStandalone specUrl={process.env.REACT_APP_DOC_URL} />
+    <div>
+      <nav>
+        <ul>
+          <li><Link to="/">Production</Link></li>
+          <li><Link to="/preproduction">Pre-Production</Link></li>
+          <li><Link to="/develop">Develop</Link></li>
+        </ul>
+      </nav>
+      <Routes>
+        <Route path="/develop" element={<DocPage specUrl="https://dev.api.formandopercorsi.com/doc/openapi.json" />} />
+        <Route path="/preproduction" element={<DocPage specUrl="https://preprod.api.formandopercorsi.com/doc/openapi.json" />} />
+        <Route path="/" element={<DocPage specUrl="https://api.formandopercorsi.com/doc/openapi.json" />} />
+      </Routes>
+    </div>
+  );
+}
+
+interface DocPageProps {
+  specUrl: string;
+}
+
+function DocPage({ specUrl }: DocPageProps) {
+  return (
     <RedocStandalone
-      // specUrl="/doc/openapi.json"
-      specUrl="https://api.formandopercorsi.com/doc/openapi.json"
+      specUrl={specUrl}
       options={{
         nativeScrollbars: true,
         theme: {
@@ -19,14 +42,12 @@ function App() {
             width: '260px',
             backgroundColor: '#F3E8E8'
           },
-          logo: {
-          },
+          logo: {},
           typography: {
             fontSize: '16px',
             lineHeight: '1.4'
           },
-          rightPanel: {
-          },
+          rightPanel: {},
         },
         hideHostname: false,
         hideDownloadButton: true,
@@ -34,6 +55,6 @@ function App() {
       }}
     />
   );
-}
+};
 
 export default App;

@@ -1,36 +1,96 @@
-name: DocumentationDeploy
+# name: DocumentationDeploy
+
+# on:
+#   push:
+#     branches:
+#       - master
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+    
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v2
+      
+#     - name: Install dependencies
+#       run: npm install
+      
+#     - name: Build
+#       run: npm run build
+#       env:
+#         CI: ""
+      
+#     - name: Deploy to server
+#       uses: easingthemes/ssh-deploy@v2.2.4
+#       with:
+#         SSH_PRIVATE_KEY: ${{ secrets.OVH_SERVER_PRIVATE_KEY }}
+#         REMOTE_HOST: ${{ secrets.OVH_SERVER_ADDRESS }}
+#         REMOTE_USER: ${{ secrets.OVH_SERVER_USERNAME }}
+#         REMOTE_PORT: ${{ secrets.OVH_SERVER_PORT }}
+#         SOURCE: "."
+#         TARGET: "/var/www/docs.formandopercorsi.com/html"
+
+#     - name: Change permissions
+#       run: |
+#         ssh -o StrictHostKeyChecking=no -i /home/runner/.ssh/deploy_key ${{ secrets.OVH_SERVER_USERNAME }}@${{ secrets.OVH_SERVER_ADDRESS }} -p ${{ secrets.OVH_SERVER_PORT }} "cd /var/www/docs.formandopercorsi.com/html && chown -R :maintainers ."
+
+name: Formando Percorsi API Documentation - Deploy to Documentation Server
 
 on:
   push:
+    branches:
+      - master
+  pull_request:
     branches:
       - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+    if: github.event_name == 'push'
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      
-    - name: Install dependencies
-      run: npm install
-      
-    - name: Build
-      run: npm run build
-      env:
-        CI: ""
-      
-    - name: Deploy to server
-      uses: easingthemes/ssh-deploy@v2.2.4
-      with:
-        SSH_PRIVATE_KEY: ${{ secrets.OVH_SERVER_PRIVATE_KEY }}
-        REMOTE_HOST: ${{ secrets.OVH_SERVER_ADDRESS }}
-        REMOTE_USER: ${{ secrets.OVH_SERVER_USERNAME }}
-        REMOTE_PORT: ${{ secrets.OVH_SERVER_PORT }}
-        SOURCE: "."
-        TARGET: "/var/www/docs.formandopercorsi.com/html"
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Change permissions
-      run: |
-        ssh -o StrictHostKeyChecking=no -i /home/runner/.ssh/deploy_key ${{ secrets.OVH_SERVER_USERNAME }}@${{ secrets.OVH_SERVER_ADDRESS }} -p ${{ secrets.OVH_SERVER_PORT }} "cd /var/www/docs.formandopercorsi.com/html && chown -R :maintainers ."
+      - name: Add masks for secrets
+        run: |
+          echo "::add-mask::${{ secrets.OVH_SERVER_PRIVATE_KEY }}"
+          echo "::add-mask::${{ secrets.OVH_SERVER_ADDRESS }}"
+          echo "::add-mask::${{ secrets.OVH_SERVER_USERNAME }}"
+          echo "::add-mask::${{ secrets.OVH_SERVER_PORT }}"
+
+      - name: SSH and kill running containers
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.OVH_SERVER_ADDRESS }}
+          username: ${{ secrets.OVH_SERVER_USERNAME }}
+          key: ${{ secrets.OVH_SERVER_PRIVATE_KEY }}
+          port: ${{ secrets.OVH_SERVER_PORT }}
+          script: |
+            if [ -d /var/www/docs.formandopercorsi.com/html/.docker/production ]; then
+              cd /var/www/docs.formandopercorsi.com/html
+              docker compose -f .docker/production/docker-compose.yml down
+            fi
+
+      - name: Deploy to server
+        uses: easingthemes/ssh-deploy@v2.2.4
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.OVH_SERVER_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.OVH_SERVER_ADDRESS }}
+          REMOTE_USER: ${{ secrets.OVH_SERVER_USERNAME }}
+          REMOTE_PORT: ${{ secrets.OVH_SERVER_PORT }}
+          SOURCE: "."
+          TARGET: "/var/www/docs.formandopercorsi.com/html"
+          EXCLUDE: "/.git, /.github, /node_modules"
+
+      - name: SSH and Deploy with Docker Compose on Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.OVH_SERVER_ADDRESS }}
+          username: ${{ secrets.OVH_SERVER_USERNAME }}
+          key: ${{ secrets.OVH_SERVER_PRIVATE_KEY }}
+          port: ${{ secrets.OVH_SERVER_PORT }}
+          script: |
+            cd /var/www/docs.formandopercorsi.com/html
+            docker compose -f .docker/production/docker-compose.yml up --build -d
