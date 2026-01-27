@@ -38,12 +38,7 @@
 name: Formando Percorsi API Documentation - Deploy to Documentation Server
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+  workflow_dispatch:
 
 jobs:
   deploy:
