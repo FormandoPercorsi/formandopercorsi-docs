@@ -6,6 +6,10 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
 
     steps:
       # Checkout the code
