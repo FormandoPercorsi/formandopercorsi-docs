@@ -9,14 +9,14 @@ function App() {
       <nav>
         <ul>
           {/* <li><Link to="/">Production</Link></li> */}
-          <li><Link to="/">Pre-Production</Link></li>
+          <li><Link to="/">Production</Link></li>
           <li><Link to="/develop">Develop</Link></li>
         </ul>
       </nav>
       <Routes>
         <Route path="/develop" element={<DocPage specUrl="https://dev.api.formandopercorsi.com/doc/openapi.json" />} />
-        <Route path="/" element={<DocPage specUrl="https://preprod.api.formandopercorsi.com/doc/openapi.json" />} />
-        {/* <Route path="/" element={<DocPage specUrl="https://api.formandopercorsi.com/doc/openapi.json" />} /> */}
+        {/* <Route path="/" element={<DocPage specUrl="https://preprod.api.formandopercorsi.com/doc/openapi.json" />} /> */}
+        <Route path="/" element={<DocPage specUrl="https://api.formandopercorsi.com/doc/openapi.json" />} />
       </Routes>
     </div>
   );
