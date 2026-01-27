@@ -2,6 +2,11 @@ import './App.css';
 import { RedocStandalone } from 'redoc';
 import { Routes, Route, Link } from 'react-router-dom';
 
+// Health check component
+function Health() {
+  return <div style={{ display: 'none' }}>OK</div>;
+}
+
 function App() {
 
   return (
@@ -17,6 +22,7 @@ function App() {
         <Route path="/develop" element={<DocPage specUrl="https://dev.api.formandopercorsi.com/doc/openapi.json" />} />
         {/* <Route path="/" element={<DocPage specUrl="https://preprod.api.formandopercorsi.com/doc/openapi.json" />} /> */}
         <Route path="/" element={<DocPage specUrl="https://api.formandopercorsi.com/doc/openapi.json" />} />
+        <Route path="/heath" element={<Health />} />
       </Routes>
     </div>
   );
