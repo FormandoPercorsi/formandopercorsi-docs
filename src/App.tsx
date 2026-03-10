@@ -56,7 +56,7 @@ function DocPage({ specUrl }: DocPageProps) {
           rightPanel: {},
         },
         hideHostname: false,
-        hideDownloadButton: true,
+        hideDownloadButton: false,
         hideLoading: true,
       }}
     />
