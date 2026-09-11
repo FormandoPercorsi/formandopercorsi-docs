@@ -4,67 +4,60 @@ title: Percorsi formativi
 
 # Percorsi formativi
 
-Un percorso formativo permette di prenotare più lezioni contemporaneamente a un prezzo scontato rispetto alle singole lezioni — un pacchetto di ore, eventualmente distribuite come lezioni settimanali ricorrenti.
+Un percorso formativo è un insieme di lezioni prenotate in un'unica operazione a condizioni economiche più favorevoli rispetto alle lezioni singole: un monte ore che può essere distribuito liberamente nel calendario oppure organizzato come appuntamento settimanale ricorrente.
 
-I pacchetti disponibili (numero di ore, se prevedono lezioni periodiche, prezzo) sono interamente configurati lato admin e recuperabili con:
+I pacchetti disponibili — monte ore, eventuale periodicità, prezzo — sono configurati dall'amministrazione e possono essere recuperati dal client insieme alle altre opzioni di prenotazione. Gli endpoint coinvolti sono documentati nelle sezioni [Lesson](/api/lesson) e [Availability](/api/availability) della API Reference.
 
-```
-GET /api/lesson/available-trainings
-```
+## Sequenza di prenotazione
 
-## Il flusso di prenotazione
+La prenotazione di un percorso segue le stesse fasi di una lezione singola, con due differenze: la selezione riguarda più lezioni contemporaneamente, e nel caso periodico la ricerca deve considerare la ripetizione dello stesso slot per più settimane.
 
-### 1. Scelta del figlio, materia, durata, location, insegnante preferito
+### 1. Definizione della richiesta
 
-Stessi endpoint della prenotazione di una singola lezione:
+Il client raccoglie le opzioni disponibili per la famiglia autenticata: studenti, materie compatibili con la scuola e l'anno di corso dello studente, durate ammesse, modalità di erogazione ed eventuali insegnanti preferiti. Le relative operazioni sono raggruppate sotto [Lesson](/api/lesson), [Family Students](/api/family-students), [Family Student Subjects](/api/family-student-subjects) e [Family Favourite Teachers](/api/family-favourite-teachers).
 
-```
-GET /api/lesson/available-sons
-GET /api/lesson/available-subjects
-GET /api/lesson/available-lengths
-GET /api/lesson/available-locations
-GET /api/family/teacher          # insegnanti preferiti
-```
+Dopo la scelta della materia va acquisito il numero di lezioni settimanali previste, informazione necessaria alle fasi successive.
 
-Selezionata una materia, va chiesto quante lezioni a settimana si intendono svolgere (default 1) — questa informazione serve per i passaggi successivi.
+### 2. Selezione delle lezioni sul calendario
 
-### 2. Scelta delle lezioni sul calendario
+La ricerca degli slot disponibili viene richiamata più volte, una per ciascuna lezione da collocare: a ogni chiamata si aggiungono alla richiesta le lezioni già selezionate, così che il sistema tenga conto degli impegni progressivamente assunti.
+
+Per i percorsi periodici la richiesta deve indicare anche per quante settimane consecutive lo slot deve ripetersi: vengono così proposte solo le disponibilità che reggono per l'intera durata del percorso. Il valore si ricava dai parametri del pacchetto:
 
 ```
-POST /api/availability/calendar
+Monte ore del percorso:  12 ore
+Durata delle lezioni:    1,5 ore
+Lezioni a settimana:     2
+
+settimane consecutive = 12 / (1,5 × 2) = 4
 ```
 
-Al primo invio bastano i parametri già raccolti: `student_id`, `teacher_id`, `subject_id`, `searched_lesson_length`, `location`. Se il percorso scelto prevede lezioni periodiche, va aggiunto anche `available_n_consecutive_weeks`: solo le disponibilità che reggono anche per quel numero di settimane a seguire vengono mostrate. Il calcolo è a carico del frontend:
+La selezione prosegue finché tutte le lezioni non periodiche sono collocate oppure, nel caso periodico, finché è raggiunto il numero di lezioni settimanali previsto: le successive vengono programmate di conseguenza fino a esaurimento del monte ore.
 
-```
-Percorso: 12 ore (periodiche)
-Durata lezioni: 1.5 ore
-Lezioni a settimana: 2
-available_n_consecutive_weeks = 12 / (1.5 × 2) = 4
-```
+:::note
+Richiedere più settimane di calendario in una singola chiamata riduce sensibilmente il numero di richieste necessarie a completare la selezione.
+:::
 
-`n_weeks_visualized` impostato oltre 1 riduce il numero di chiamate al backend.
+### 3. Scelta dell'insegnante
 
-Dopo la selezione della prima lezione, si richiama lo stesso endpoint aggiungendo la lezione scelta a `selected_lessons` (gli altri parametri restano invariati), finché tutte le lezioni non periodiche sono programmate, oppure — nel caso periodico — finché il numero di lezioni "a settimana" impostato è raggiunto (le restanti vengono schedulate di conseguenza fino a esaurimento ore).
+Individuati gli orari, la ricerca degli insegnanti disponibili viene effettuata indicando **tutte** le lezioni che si intendono prenotare. Per ciascuna lezione richiesta la risposta riporta sia le disponibilità che coincidono esattamente con l'orario desiderato, sia quelle prossime a esso. L'ordine in cui gli insegnanti vengono restituiti è già quello di pertinenza descritto in [Ordinamento dei risultati di ricerca](/guides/ranking-insegnanti).
 
-### 3. Scelta dell'insegnante disponibile
-
-```
-POST /api/availability/search
-```
-
-Parametri: `student_id`, `teacher_id`, `subject_id`, `location`, `availability_kind` (in base al tipo di percorso), `required_lessons` (**tutte** le lezioni che si intendono prenotare). La risposta è un array in cui, per ogni lezione richiesta, sono mostrate le disponibilità esattamente nell'orario richiesto e quelle negli orari vicini — vedi [Ranking insegnanti](/guides/ranking-insegnanti) per come vengono ordinati i risultati.
-
-Una UI che mostri questo livello di dettaglio grezzo non è ragionevole: conviene una lista di insegnanti disponibili, segnalando quali hanno disponibilità esatta e quali solo vicina, con la possibilità di espandere ciascuno per vedere l'elenco completo di orari proposti.
+La struttura della risposta è pensata per essere rielaborata dal client, non presentata così com'è. Si consiglia di mostrare un elenco di insegnanti, segnalando per ciascuno se la disponibilità è esatta o approssimata, e di consentire l'espansione del singolo profilo per consultare l'elenco completo degli orari proposti.
 
 ### 4. Conferma e pagamento
 
-```
-POST /api/lesson/training
-```
+La conferma del percorso restituisce il collegamento a una sessione di pagamento, con le stesse modalità previste per la lezione singola. Il seguito del processo — incasso, ripartizione dei compensi e fatturazione — è descritto in [Pagamenti, payout e fatturazione](/guides/pagamenti).
 
-Come per la lezione singola, restituisce un link a una sessione di checkout Stripe — vedi [Pagamenti & Fatturazione](/guides/pagamenti) per cosa succede da quel momento in poi.
+## Differenze rispetto alla lezione singola
+
+| Aspetto | Lezione singola | Percorso formativo |
+| --- | --- | --- |
+| Selezione | Un solo slot | Più slot, selezionati in sequenza |
+| Prezzo | Tariffa ordinaria | Condizioni dedicate al pacchetto |
+| Cancellazione | Ammessa entro la finestra prevista | Non ammessa: le lezioni possono essere modificate, non cancellate |
+
+L'asimmetria sulla cancellazione è rilevante per chi realizza un client: una lezione appartenente a un percorso non può essere annullata, ma solo spostata. Le implicazioni sulla copertura assicurativa sono descritte in [Copertura assicurativa](/guides/assicurazione).
 
 :::note
-`available_n_consecutive_weeks`, `start_bookable` ed `end_bookable` (vedi [Disponibilità](/guides/disponibilita)) non risultano attualmente consumati dal frontend web. Verificare lo stato di avanzamento di "Training Periodici" prima di assumere che il flusso periodico sia già pienamente operativo in produzione.
+Gli indicatori di prenotabilità agli estremi e il contatore delle settimane consecutive descritti in [Disponibilità](/guides/disponibilita) non risultano attualmente utilizzati dall'applicazione web. È opportuno verificare lo stato di adozione della prenotazione periodica prima di considerarla pienamente operativa.
 :::

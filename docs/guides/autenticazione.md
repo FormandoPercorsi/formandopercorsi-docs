@@ -4,33 +4,37 @@ title: Autenticazione
 
 # Autenticazione
 
-L'autenticazione è basata su **JWT** a vita breve più un **refresh token** più lungo, memorizzato in un cookie HttpOnly. Il pattern è quello classico: si scambiano le credenziali una volta, poi si rinnova il JWT in autonomia finché il refresh token resta valido.
+L'accesso all'API è regolato da un token JWT di breve durata, accompagnato da un refresh token di durata più lunga conservato in un cookie `HttpOnly`. Le credenziali vengono trasmesse una sola volta, all'accesso; da quel momento il client rinnova il token in autonomia finché il refresh token resta valido.
 
-## I tre endpoint
+Il contratto completo degli endpoint è nella sezione [Auth](/api/auth) della API Reference.
 
-| Endpoint | Metodo | Cosa fa |
+## Operazioni disponibili
+
+| Operazione | Metodo e percorso | Descrizione |
 | --- | --- | --- |
-| `/api/auth/signin` | POST | Login con email, password e categoria utente (`family`, `teacher`, `admin`). |
-| `/api/auth/refresh-token` | POST | Rigenera il JWT usando il refresh token. |
-| `/api/auth/refresh-token` | DELETE | Logout e invalidazione del refresh token. |
+| Accesso | `POST /api/auth/signin` | Autenticazione con email, password e categoria utente (`family`, `teacher`, `admin`). |
+| Rinnovo | `POST /api/auth/refresh-token` | Emette un nuovo token JWT a partire dal refresh token. |
+| Uscita | `DELETE /api/auth/refresh-token` | Invalida il refresh token lato server. |
 
-Nota la seconda riga: il logout **non** è un endpoint `/signout` a sé — è una `DELETE` sullo stesso path del refresh.
+:::note
+L'uscita non dispone di un percorso dedicato: è una `DELETE` sullo stesso percorso usato per il rinnovo.
+:::
 
-## Durate
+## Durate e conservazione
 
-- Il JWT scade dopo **10 minuti** (`params['jwt']['expire']`, 600 secondi).
-- Il refresh token dura **30 giorni** (`params['jwt']['refreshTokenExpire']`).
-- Il refresh token vive in un cookie HttpOnly, limitato al path `/api/auth/refresh-token` — non è mai leggibile da JavaScript.
+- Il token JWT ha validità di **10 minuti**.
+- Il refresh token ha validità di **30 giorni**.
+- Il refresh token è conservato in un cookie `HttpOnly` limitato al percorso `/api/auth/refresh-token`, e non è quindi accessibile al codice JavaScript del client.
 
-## Il flusso
+## Sequenza di accesso
 
-1. `POST /api/auth/signin` con `{email, password, category}` → risposta con `token` (JWT), `refreshtoken`, `category`, `user`.
-2. Ogni richiesta successiva porta `Authorization: Bearer <token>`.
-3. Quando il JWT scade, `POST /api/auth/refresh-token` con `{refreshtoken}` restituisce un nuovo JWT.
-4. Il logout è una `DELETE /api/auth/refresh-token`, che invalida il refresh token lato server.
+1. `POST /api/auth/signin` con `email`, `password` e `category`. La risposta contiene il token JWT, il refresh token, la categoria e i dati dell'utente.
+2. Ogni richiesta successiva riporta l'intestazione `Authorization: Bearer <token>`.
+3. Alla scadenza del token, `POST /api/auth/refresh-token` restituisce un nuovo JWT.
+4. `DELETE /api/auth/refresh-token` chiude la sessione.
 
 ```javascript
-async function login(email, password, category) {
+async function signin(email, password, category) {
   const response = await fetch('/api/auth/signin', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -39,7 +43,7 @@ async function login(email, password, category) {
   return response.json(); // { token, refreshtoken, category, user }
 }
 
-async function refreshToken(refreshtoken) {
+async function refresh(refreshtoken) {
   const response = await fetch('/api/auth/refresh-token', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -47,27 +51,32 @@ async function refreshToken(refreshtoken) {
   });
   return (await response.json()).token;
 }
-
-async function logout() {
-  await fetch('/api/auth/refresh-token', {method: 'DELETE'});
-}
 ```
 
-## Come si comporta in pratica un client che lo implementa bene
+## Gestione del rinnovo lato client
 
-Il frontend web attuale (`formandopercorsi-frontend`) tiene **due meccanismi di refresh indipendenti** attivi insieme, ed è un pattern sensato da replicare altrove:
+La breve durata del token rende necessaria una strategia di rinnovo esplicita. L'implementazione adottata dall'applicazione web combina due meccanismi indipendenti, ed è un riferimento utile per qualunque altro client:
 
-- un interceptor Axios che intercetta le risposte `401` e chiama il refresh **in modo reattivo**;
-- uno scheduler proattivo che decodifica il JWT per leggerne la scadenza (`exp`) e programma il rinnovo **prima** che scada, più un refresh extra su `visibilitychange` se il token risulta scaduto quando la tab torna visibile dopo essere stata in background.
+- un **rinnovo reattivo**, che intercetta le risposte `401` e ritenta la richiesta dopo aver ottenuto un nuovo token;
+- un **rinnovo preventivo**, che legge la scadenza dichiarata nel token e programma il rinnovo prima che si verifichi, con un controllo aggiuntivo quando l'applicazione torna in primo piano dopo un periodo in secondo piano.
 
-In pratica l'endpoint di refresh viene chiamato più spesso "in anticipo" che "per errore" — un `401` isolato è quindi un evento raro, non il meccanismo primario. Le richieste `401` concorrenti durante un refresh già in corso vengono accodate e rieseguite una volta ottenuto il nuovo token, invece di scatenare refresh multipli in parallelo. Gli endpoint di auth stessi (`signin`, `signup`, `password-reset`, `refresh-token`) vanno esclusi da questo retry automatico: un loro `401` va propagato al chiamante così com'è, altrimenti si rischia un loop.
+Con entrambi attivi, il rinnovo avviene di norma in anticipo e una risposta `401` diventa un evento eccezionale anziché il meccanismo ordinario.
 
-Un fallimento del refresh (token scaduto/invalido) va trattato come logout definitivo: pulizia dello stato locale e redirect al login.
+Due accorgimenti sono necessari perché il meccanismo sia corretto:
 
-:::caution
-I ruoli utente (family/teacher/admin) letti dalla risposta di signin sono comodi da tenere in cache lato client per decidere cosa mostrare in UI, ma **non sono un confine di sicurezza**: qualunque cosa il client tenga in `localStorage` è visibile e modificabile da chi controlla il browser. L'unico controllo che conta è quello che il backend fa sul JWT ad ogni richiesta. Se si cifra il valore lato client per offuscarlo, va tenuto presente che una chiave di cifratura distribuita nel bundle JS pubblico non è un segreto — è offuscamento, non protezione.
+- Le richieste che ricevono `401` mentre un rinnovo è già in corso vanno **accodate** e rieseguite al termine, per evitare rinnovi multipli in parallelo.
+- Gli endpoint di autenticazione stessi vanno **esclusi** dal ritentativo automatico: un loro `401` va propagato al chiamante, altrimenti si genera un ciclo di richieste.
+
+Il fallimento di un rinnovo, dovuto a refresh token scaduto o non valido, va trattato come chiusura definitiva della sessione: azzeramento dello stato locale e ritorno alla schermata di accesso.
+
+:::caution Conservazione dei dati di sessione lato client
+La categoria utente restituita all'accesso può essere conservata dal client per determinare cosa mostrare nell'interfaccia, ma **non costituisce un controllo di sicurezza**: qualunque dato conservato nel browser è visibile e modificabile da chi vi ha accesso. L'unico controllo efficace è quello che il server esegue sul token a ogni richiesta. Anche la cifratura di questi valori lato client non muta la sostanza: una chiave distribuita all'interno del bundle pubblico non è un segreto, e l'operazione va considerata offuscamento, non protezione.
 :::
 
-## Roadmap: Passkey
+## Accesso tramite Google
 
-È prevista in futuro l'integrazione di **Passkey** (WebAuthn) per un login senza password, con impronte digitali, riconoscimento facciale o dispositivi hardware. Il backend dovrà gestire la registrazione e verifica delle passkey; il frontend dovrà supportare il flusso WebAuthn.
+L'accesso può avvenire anche tramite Google, inviando il token rilasciato da Google insieme alla categoria utente. Nella risposta, un valore di `terms_and_conditions` pari a `0` indica che l'utente sta accedendo per la prima volta e deve ancora accettare i termini di servizio.
+
+## Evoluzioni previste
+
+È prevista l'introduzione di **Passkey** (WebAuthn) come modalità di accesso senza password, basata su riconoscimento biometrico o dispositivi hardware. L'adozione richiederà sia la gestione della registrazione e verifica delle credenziali lato server, sia il supporto del flusso WebAuthn nei client.

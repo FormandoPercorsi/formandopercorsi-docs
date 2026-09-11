@@ -1,64 +1,74 @@
 ---
-title: Il frontend web
+title: Applicazione web
 ---
 
-# Il frontend web
+# Applicazione web
 
-Questa pagina raccoglie informazioni su come il frontend web (`formandopercorsi-frontend`) usa concretamente l'API — cose che non emergono dalla sola API Reference perché sono decisioni implementative del client, non del contratto REST.
+L'applicazione web è il client attualmente in uso per famiglie, insegnanti e amministrazione. È un progetto distinto dalla piattaforma e comunica con essa esclusivamente tramite l'API REST documentata in questo sito.
 
-## Configurazione ambiente
+Questa pagina descrive le scelte implementative del client, ossia i comportamenti che non discendono dal contratto REST e che quindi non sono deducibili dalla [API Reference](/api/formando-percorsi-api). Sono informazioni utili sia a chi lavora su questa applicazione, sia a chi ne realizza un'altra e deve sapere quali responsabilità ricadono sul client.
 
-| Variabile | Uso |
+## Configurazione
+
+| Variabile | Finalità |
 | --- | --- |
-| `REACT_APP_BACKEND_URL` | Base URL del backend; il client Axios la usa come `baseURL + '/api'` |
-| `REACT_APP_ENCRYPTION_KEY` | Cifra (AES) i ruoli utente salvati in `localStorage` — vedi la nota di sicurezza in [Autenticazione](/guides/autenticazione) |
-| `REACT_APP_GOOGLE_CLIENT_ID` | Google Sign-In |
-| `REACT_APP_ENABLE_LOGS` | Abilita log applicativi extra |
-| `REACT_APP_MAINTENANCE_MODE` | Se `true`, tutte le rotte (tranne `/admin/*`) mostrano una pagina di manutenzione |
+| `REACT_APP_BACKEND_URL` | Indirizzo base della piattaforma. |
+| `REACT_APP_GOOGLE_CLIENT_ID` | Accesso tramite Google. |
+| `REACT_APP_GOOGLE_MAPS_KEY` | Selezione degli indirizzi su mappa. |
+| `REACT_APP_ENCRYPTION_KEY` | Offuscamento dei dati di sessione conservati nel browser; si vedano le considerazioni in [Autenticazione](/guides/autenticazione). |
+| `REACT_APP_ENABLE_LOGS` | Attivazione della registrazione applicativa estesa. |
+| `REACT_APP_MAINTENANCE_MODE` | Se attiva, presenta una pagina di manutenzione su tutte le rotte a eccezione dell'area amministrativa. |
 
-:::warning Gap noto
-`EditableMap.tsx` referenzia `REACT_APP_GOOGLE_MAPS_KEY`, che non è presente nel file `.env` versionato — va procurata a parte per il setup locale della mappa indirizzi.
+:::warning
+La chiave per le mappe è referenziata dal codice ma non è inclusa nel file di configurazione versionato: va reperita separatamente per predisporre l'ambiente locale della selezione indirizzi.
 :::
 
-## Client API
+## Accesso all'API
 
-Istanza Axios singola con un interceptor di richiesta che inietta `Authorization: Bearer <token>` da `localStorage.authToken`, e un interceptor di risposta che gestisce i `401`. Per il comportamento completo di login/refresh/logout vedi [Autenticazione](/guides/autenticazione).
+Il client utilizza un'unica istanza del client HTTP, con un'intercettazione in uscita che applica il token di autenticazione a ogni richiesta e una in entrata che gestisce le risposte `401` attivando il rinnovo. La strategia di rinnovo completa è descritta in [Autenticazione](/guides/autenticazione).
 
-## Prenotazione: regole che vivono solo nel client
+## Ruoli e navigazione
 
-Vedi [Disponibilità](/guides/disponibilita) e [Percorsi formativi](/guides/percorsi-formativi) per il modello dati; qui invece le scelte implementative del frontend, non deducibili dall'API Reference:
+Le tre categorie di utenza corrispondono ad altrettante aree dell'applicazione, con rotte separate. Un controllo di autorizzazione protegge ogni pagina: reindirizza alla schermata di accesso chi non è autenticato e impedisce l'accesso alle aree non pertinenti alla propria categoria.
 
-- **Parsing difensivo** della risposta di `/availability/search`: il payload può arrivare come array, oggetto singolo o assente, sia per `availabilities` che per `exact_availabilities`/`near_availabilities`. Stesso pattern per `/headquarter`.
-- **Selezione automatica dello slot più vicino**: per i percorsi formativi, `all_alternatives[]` è ordinato per vicinanza all'orario desiderato e il frontend seleziona di default il primo elemento quando non esiste uno slot esatto.
-- **Location `home`**: senza un `address_id` selezionato, il backend ripiega sul default della famiglia e il controllo del raggio di copertura può fallire con `400` — il frontend forza un sotto-flusso di creazione/selezione indirizzo prima di procedere.
-- **Cutoff di 48 ore** per cancellazione/modifica, hardcoded lato client in due punti indipendenti — corrisponde a `criticalTimes.lessonDeletionFromFamiliesWarningTime` lato backend (vedi [Assicurazione](/guides/assicurazione)). Asimmetria da conoscere: le lezioni singole restano cancellabili entro le 48 ore, quelle di un percorso formativo no (solo modificabili).
-- **Codice promo `FREE26`** hardcoded: applicato automaticamente quando `GET /promotion` restituisce una promozione di tipo `free_lesson_teacher_paid` compatibile.
-- **Nessun campo referral** nel form di registrazione famiglia — coerente con l'assenza di UI referral, vedi [Referral & Crediti](/guides/referral-crediti).
-- **Nessun indicatore di ranking** in `TeacherCard.tsx`: gli insegnanti sono mostrati nell'ordine restituito dall'API, già ordinato server-side — vedi [Ranking insegnanti](/guides/ranking-insegnanti).
+## Regole che risiedono nel client
+
+Il modello dati è descritto in [Disponibilità](/guides/disponibilita) e [Percorsi formativi](/guides/percorsi-formativi). Quanto segue riguarda invece decisioni prese dal client.
+
+- **Interpretazione difensiva delle risposte di ricerca.** Alcune risposte possono presentarsi come elenco, come oggetto singolo o risultare assenti. Il client normalizza questi casi prima di utilizzarli; lo stesso vale per l'elenco delle sedi, esposto in [Headquarter](/api/headquarter).
+- **Selezione automatica dello slot più prossimo.** Nei percorsi formativi le alternative sono restituite in ordine di vicinanza all'orario desiderato; in assenza di una corrispondenza esatta il client preseleziona la prima.
+- **Gestione dell'indirizzo per le lezioni a domicilio.** Senza un indirizzo esplicitamente selezionato la piattaforma ricade sull'indirizzo predefinito della famiglia, e la verifica del raggio di copertura può fallire. Il client anticipa quindi la selezione o creazione dell'indirizzo, esposta in [Family Addresses](/api/family-addresses).
+- **Soglia di 48 ore** per cancellazione e modifica, replicata nel client in due punti indipendenti. Corrisponde al parametro descritto in [Copertura assicurativa](/guides/assicurazione).
+- **Codice promozionale applicato automaticamente** quando la piattaforma espone una promozione compatibile fra quelle disponibili in [Promotion](/api/promotion).
+- **Assenza del campo di invito** nel modulo di registrazione, coerentemente con lo stato di adozione descritto in [Crediti e programma referral](/guides/referral-crediti).
+- **Assenza di indicatori di ordinamento** nella presentazione degli insegnanti, che sono mostrati nella sequenza restituita dall'API; si veda [Ordinamento dei risultati di ricerca](/guides/ranking-insegnanti).
 
 ## Pagamenti e fatture
 
-Vedi [Pagamenti & Fatturazione](/guides/pagamenti) per il flusso end-to-end. Lato client: redirect pieno del browser verso Stripe Checkout, pagine dedicate di successo/annullo, e uno stato fattura mostrato in UI che è un sottoinsieme hardcoded dei valori reali del backend — da tenere sincronizzato se cambiano.
+Il pagamento avviene tramite reindirizzamento completo del browser verso la pagina di pagamento, con pagine dedicate per l'esito positivo e per l'annullamento. In caso di annullamento il client rilascia esplicitamente l'ordine rimasto in sospeso, così da non lasciare prenotazioni pendenti.
+
+Il flusso completo è descritto in [Pagamenti, payout e fatturazione](/guides/pagamenti).
 
 ## Notifiche
 
-Polling di `GET /api/notification` ogni 5 minuti, più refresh on-demand dopo azioni di prenotazione/modifica/cancellazione. Diversi tipi esistenti lato backend non sono ancora gestiti — elenco completo in [Notifiche](/guides/notifiche).
+Le notifiche sono recuperate per interrogazione periodica ogni cinque minuti, con richieste aggiuntive dopo le azioni che possono generarne. Non è impiegato alcun canale in tempo reale. I tipi non gestiti sono elencati in [Notifiche](/guides/notifiche).
 
-## Ruoli e routing
+## Integrazioni
 
-Tre categorie utente: `family`, `teacher`, `admin` (parametro `category` su signin/signup). Un HOC di autenticazione protegge ogni pagina: reindirizza chi non è loggato al login, allontana i teacher da `/family/*` e viceversa, allontana i non-admin da `/admin/*`. Le rotte sono organizzate a specchio (`/family/*`, `/teacher/*`, `/admin/*`), ciascuna con le proprie pagine.
+- **Accesso tramite Google**, con trasmissione del token rilasciato da Google e della categoria utente.
+- **Mappe Google** per la selezione degli indirizzi.
+- **Nessuna integrazione diretta con il calendario**: la sincronizzazione degli impegni degli insegnanti avviene interamente da server a server.
 
-## Integrazioni terze parti
+## Duplicazioni da mantenere allineate
 
-- **Google Sign-In**: invia `{google_token, category}` a `/auth/signin`; `terms_and_conditions === 0` nella risposta segnala un primo accesso via Google.
-- **Google Maps**: usato per la selezione di indirizzi.
-- **Nessuna integrazione diretta con Google Calendar**: la sincronizzazione calendario dei docenti è interamente server-to-server, il frontend non è coinvolto.
-- **Nessun canale realtime**: nessun WebSocket/SSE in tutto il repository, solo polling e refresh on-demand.
+Alcune informazioni sono replicate nel client e devono essere aggiornate quando cambiano lato piattaforma. Ogni voce di questo elenco è un punto di rottura silenzioso: una modifica lato server non produce un errore, ma un comportamento errato nell'interfaccia.
 
-## Riepilogo: cosa duplica il frontend e va tenuto sincronizzato
+| Elemento duplicato | Conseguenza di un disallineamento |
+| --- | --- |
+| Sottoinsieme degli stati fattura rappresentati nell'interfaccia | Uno stato non previsto non viene presentato all'utente. |
+| Estrazione della durata della lezione dal testo descrittivo della fattura | Una modifica alla formulazione della descrizione rende la durata non più leggibile. |
+| Codice promozionale gestito in modo specifico | La promozione non viene più applicata automaticamente. |
+| Soglia di 48 ore per cancellazione e modifica | L'interfaccia consente o impedisce azioni in modo difforme dalla piattaforma. |
+| Corrispondenza fra tipo di notifica e testo presentato | Le notifiche non previste appaiono prive di significato. |
 
-- Gli stati fattura mostrati in UI (sottoinsieme di `Invoice::STATUS_*`).
-- Il pattern di parsing della descrizione fattura per estrarne la durata lezione.
-- Il codice promozionale `FREE26`.
-- La soglia di 48 ore per cancellazione/modifica lezione.
-- La mappatura tipo-notifica → testo/icona.
+La dipendenza dal testo descrittivo della fattura è la più fragile dell'elenco, poiché trasforma una stringa destinata alla lettura umana in un contratto di fatto fra piattaforma e client.

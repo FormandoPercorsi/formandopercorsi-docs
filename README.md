@@ -66,7 +66,20 @@ Il plugin genera una categoria per ogni tag OpenAPI (circa 30, in ordine di appa
 
 ## Scrivere una guida
 
-Aggiungi un file Markdown in `docs/guides/`, poi referenzialo in `sidebars.ts` sotto `guidesSidebar`. Nessuna convenzione di "sezione per sviluppatori frontend / sezione per non sviluppatori": si scrive un unico testo scorrevole, con le informazioni tecniche necessarie intrecciate nella spiegazione — chi legge sa già cosa gli serve.
+Aggiungi un file Markdown in `docs/guides/`, poi referenzialo in `sidebars.ts` sotto `guidesSidebar`. Convenzioni in uso:
+
+- **Registro formale e impersonale.** Niente rivolgersi al lettore in seconda persona, niente titoli colloquiali ("come funziona davvero...", "dove vive il codice"). Si descrivono processi e regole, non impressioni.
+- **Nessuna sezione per tipo di lettore.** Non si separa il testo in parti "per sviluppatori" e "per non sviluppatori": un unico testo scorrevole, con le informazioni tecniche intrecciate nella spiegazione.
+- **Prospettiva di sistema, non di implementazione.** Si parte da cosa accade, per quali soggetti e con quali vincoli; il dettaglio implementativo entra solo quando spiega un comportamento osservabile. In particolare si evitano elenchi di classi, metodi e file del backend, e i dump di schema: invecchiano rapidamente e spostano il baricentro della documentazione su un solo componente del sistema.
+- **Collegamenti alla API Reference dove pertinente.** Ogni area funzionale dovrebbe rimandare alla sezione corrispondente della reference.
+
+### Come si linka la API Reference
+
+Le pagine della reference sono generate a ogni build a partire dallo spec dell'ambiente, quindi non tutti i percorsi sono ugualmente stabili. Con `onBrokenLinks: 'throw'` un collegamento non risolto interrompe la build, perciò vale questa regola:
+
+- **Si linkano le pagine di tag**, nella forma `/api/<nome-tag-in-kebab-case>` (es. `/api/family-students` per il tag `Family Students`). Il plugin genera una pagina per ogni tag **dichiarato** nello spec e usato da almeno un'operazione: i tag usati dalle operazioni ma mai dichiarati con `#[OA\Tag(...)]` **non** hanno una pagina e non vanno linkati.
+- **Non si linkano le singole operazioni.** Il loro slug deriva dal `summary` dell'endpoint, che cambia con molta più frequenza del nome di un tag.
+- Quando manca un bersaglio adatto, si rimanda all'indice `/api/formando-percorsi-api`.
 
 ## Build e deploy
 

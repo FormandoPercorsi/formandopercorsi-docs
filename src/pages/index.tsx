@@ -45,22 +45,22 @@ const cards: CardItem[] = [
     emoji: '📖',
     description: (
       <>
-        Come funziona davvero la piattaforma: disponibilità e prenotazioni, come girano i soldi tra
-        famiglie, insegnanti, scuole esterne e fatturazione, autenticazione, notifiche. Regole di
-        business e casi limite che non stanno in una tabella di endpoint.
+        I processi e le regole che governano la piattaforma: disponibilità e prenotazioni,
+        ripartizione dei compensi fra insegnanti, scuole partner e piattaforma, fatturazione,
+        autenticazione e comunicazioni verso gli utenti.
       </>
     ),
     to: '/intro',
-    linkLabel: 'Esplora le guide →',
+    linkLabel: 'Consulta le guide →',
   },
   {
     title: 'API Reference',
     emoji: '🔌',
     description: (
       <>
-        Ogni endpoint dell'API REST, organizzato per area (autenticazione, prenotazioni, insegnanti,
-        pagamenti, amministrazione...), con schema di richiesta/risposta, codici di errore ed esempi
-        pronti da provare direttamente dal browser.
+        Il contratto REST completo, organizzato per area funzionale: parametri, struttura di
+        richiesta e risposta, codici di errore ed esempi eseguibili direttamente dal browser, per
+        l'ambiente di produzione e per quello di sviluppo.
       </>
     ),
     to: '/api/formando-percorsi-api',
