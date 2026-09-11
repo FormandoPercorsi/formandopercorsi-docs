@@ -13,8 +13,9 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
+    "fetch-spec": "node scripts/fetch-openapi.js",
     "prepare-spec": "node scripts/prepare-openapi.js",
-    "gen-api-docs": "npm run prepare-spec && docusaurus gen-api-docs all",
+    "gen-api-docs": "npm run fetch-spec && npm run prepare-spec && docusaurus gen-api-docs all",
     "clean-api-docs": "docusaurus clean-api-docs all"
   },
   "dependencies": {

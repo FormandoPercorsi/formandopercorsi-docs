@@ -27,10 +27,9 @@
  * and sidebars.ts) because `develop` and `main` (production) can genuinely
  * diverge -- develop may already have an endpoint or field that hasn't been
  * promoted to production yet. Each environment's raw spec is a straight copy
- * of that branch's `web/doc/openapi.yaml`, refreshed with:
- *
- *   git -C <path-to-formandopercorsi-backend> show origin/main:web/doc/openapi.yaml    > openapi/formandopercorsi.production.yaml
- *   git -C <path-to-formandopercorsi-backend> show origin/develop:web/doc/openapi.yaml > openapi/formandopercorsi.develop.yaml
+ * of that branch's `web/doc/openapi.yaml`, fetched automatically by
+ * `scripts/fetch-openapi.js` (runs before this script in `npm run gen-api-docs`)
+ * -- nobody needs to copy it over by hand.
  *
  * Usage:
  *   node scripts/prepare-openapi.js                    # processes every environment in ENVIRONMENTS below

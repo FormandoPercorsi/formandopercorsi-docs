@@ -13,11 +13,12 @@ docs/
   api/                   # generato da docusaurus-plugin-openapi-docs per l'ambiente di produzione, NON modificare a mano
   api-develop/           # generato da docusaurus-plugin-openapi-docs per l'ambiente di sviluppo, NON modificare a mano
 openapi/
-  formandopercorsi.production.yaml        # copia dello spec di produzione (branch main del backend)
-  formandopercorsi.develop.yaml           # copia dello spec di sviluppo (branch develop del backend)
+  formandopercorsi.production.yaml        # fetchato da scripts/fetch-openapi.js dal branch main del backend, NON committato
+  formandopercorsi.develop.yaml           # fetchato da scripts/fetch-openapi.js dal branch develop del backend, NON committato
   formandopercorsi.production.docs.yaml   # generato da scripts/prepare-openapi.js, è quello che legge il plugin
   formandopercorsi.develop.docs.yaml      # generato da scripts/prepare-openapi.js, è quello che legge il plugin
 scripts/
+  fetch-openapi.js    # scarica gli spec aggiornati dal repo backend (vedi sotto)
   prepare-openapi.js  # ripulisce entrambi gli spec prima della generazione (vedi sotto)
 sidebars.ts           # sidebar "Guide" scritta a mano + due sidebar "API Reference" (produzione/sviluppo), ciascuna raggruppata per tag
 docusaurus.config.ts
@@ -36,18 +37,22 @@ npm run start        # dev server con hot reload, su http://localhost:3000
 
 ## Aggiornare lo spec API
 
-Quando il backend cambia endpoint:
+Nessun passo manuale: `npm run gen-api-docs` (e quindi anche `npm run build`, che lo esegue come primo passo) scarica da solo lo spec aggiornato di entrambi i branch prima di rigenerare le pagine. `openapi/formandopercorsi.production.yaml` e `.develop.yaml` non sono più file committati nel repository — sono scritti a ogni run da `scripts/fetch-openapi.js` e ignorati da git.
+
+Ogni build prende quindi lo stato attuale di `web/doc/openapi.yaml` su `main`/`develop` in quel momento (il backend lo tiene aggiornato rigenerandolo con `php docs/doc_generate.php` e committandolo insieme alle modifiche agli endpoint) — non c'è una copia "congelata" da tenere sincronizzata a mano, ma bisogna comunque **rilanciare la build dei docs** ogni volta che si vuole che la reference rifletta l'ultimo stato del backend: non è fetch a runtime nel browser (vedi "Perché non fetch a runtime" più sotto).
+
+`scripts/fetch-openapi.js` recupera `web/doc/openapi.yaml` da `FormandoPercorsi/formandopercorsi-backend` in uno di due modi, nell'ordine:
+
+1. **Clone locale**: se è impostata la variabile d'ambiente `BACKEND_REPO_PATH` (percorso di un clone locale del repo backend), usa `git show origin/<branch>:web/doc/openapi.yaml` — comodo in locale se hai già i due repo affiancati (assicurati che i remote-tracking branch siano aggiornati con `git fetch` prima).
+2. **GitHub API**: altrimenti, usa `GITHUB_TOKEN` (o `GH_TOKEN`) per leggere il file via l'API REST di GitHub — necessario perché il repo backend è privato. Serve un token con permesso di lettura su `formandopercorsi-backend`.
 
 ```bash
-# 1. copia gli spec aggiornati dal repo backend, uno per branch
-git -C ../formandopercorsi-backend show origin/main:web/doc/openapi.yaml    > openapi/formandopercorsi.production.yaml
-git -C ../formandopercorsi-backend show origin/develop:web/doc/openapi.yaml > openapi/formandopercorsi.develop.yaml
+# opzione locale
+BACKEND_REPO_PATH=../formandopercorsi-backend npm run gen-api-docs
 
-# 2. rigenera le pagine di reference per entrambi gli ambienti (include automaticamente la pulizia degli spec)
-npm run gen-api-docs
+# opzione con token
+GITHUB_TOKEN=ghp_xxx npm run gen-api-docs
 ```
-
-`npm run build` esegue già `gen-api-docs` come primo passo, quindi non è un passo che si può dimenticare in produzione — ma se il backend rilascia un nuovo endpoint tra un deploy e l'altro, il sito docs non lo vedrà finché non viene ribuildato con gli spec aggiornati (l'endpoint reference **non** è più fetchata live dal browser come nella vecchia versione Redoc — vedi "Perché non fetch a runtime" più sotto).
 
 ### Cosa fa `scripts/prepare-openapi.js`
 
@@ -80,3 +85,5 @@ npm run serve     # serve la build localmente per un ultimo controllo
 ```
 
 Il `Dockerfile`/`nginx.conf`/`docker-compose.yml` e i workflow in `.github/workflows/` sono invariati rispetto alla versione precedente: build Node → serve statico con nginx, deploy via SSH+Docker Compose sul server OVH (workflow manuale) o push immagine su ECR/DockerHub.
+
+Ovunque giri `npm run build` (locale o nel workflow di deploy) deve poter raggiungere `formandopercorsi-backend` in uno dei due modi descritti in "Aggiornare lo spec API" — un `GITHUB_TOKEN`/`GH_TOKEN` con permesso di lettura su quel repo va quindi configurato come secret dove gira la build, se non si usa `BACKEND_REPO_PATH`.
