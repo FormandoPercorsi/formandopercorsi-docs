@@ -40,7 +40,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           routeBasePath: '/',
           docItemComponent: '@theme/ApiItem',
-          editUrl: 'https://github.com/FormandoPercorsi/formandopercorsi-docs/tree/main/',
+          editUrl: 'https://github.com/FormandoPercorsi/formandopercorsi-docs/tree/master/',
         },
         blog: false,
         theme: {
