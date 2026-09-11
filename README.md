@@ -39,21 +39,12 @@ npm run start        # dev server con hot reload, su http://localhost:3000
 
 Nessun passo manuale: `npm run gen-api-docs` (e quindi anche `npm run build`, che lo esegue come primo passo) scarica da solo lo spec aggiornato di entrambi gli ambienti prima di rigenerare le pagine. `openapi/formandopercorsi.production.yaml` e `.develop.yaml` non sono file committati nel repository — sono scritti a ogni run da `scripts/fetch-openapi.js` e ignorati da git. Bisogna comunque **rilanciare la build dei docs** ogni volta che si vuole che la reference rifletta l'ultimo stato del backend: non è fetch a runtime nel browser (vedi "Perché non fetch a runtime" più sotto).
 
-`scripts/fetch-openapi.js` recupera lo spec in uno di tre modi, nell'ordine:
+`scripts/fetch-openapi.js` recupera lo spec **esclusivamente** dagli endpoint live del backend, niente altro:
 
-1. **Endpoint live** (fonte primaria): `web/doc/openapi.yaml` è servito come file statico dal backend stesso — `Alias /doc /app/web/doc` in Apache, nessuna autenticazione (`Require all granted`) — ed è rigenerato dal codice sorgente a ogni build dell'immagine Docker (`php docs/doc_generate.php` gira dentro `formandopercorsi-backend.Dockerfile`). Quindi `https://api.formandopercorsi.com/doc/openapi.yaml` e `https://dev.api.formandopercorsi.com/doc/openapi.yaml` riflettono esattamente cosa è **effettivamente deployato** in quel momento in ciascun ambiente — non solo cosa è committato sul branch. Nessun token richiesto.
-2. **Clone locale** (fallback): se è impostata la variabile d'ambiente `BACKEND_REPO_PATH` (percorso di un clone locale del repo backend), usa `git show origin/<branch>:web/doc/openapi.yaml` — utile quando l'endpoint live non è raggiungibile (rete ristretta, ambiente non ancora deployato dopo l'ultima modifica) e hai i due repo affiancati (assicurati che i remote-tracking branch siano aggiornati con `git fetch` prima).
-3. **GitHub API** (fallback): altrimenti, usa `GITHUB_TOKEN` (o `GH_TOKEN`) per leggere il file via l'API REST di GitHub — necessario perché il repo backend è privato. Serve un token con permesso di lettura su `formandopercorsi-backend`.
+`web/doc/openapi.yaml` è servito come file statico dal backend stesso — `Alias /doc /app/web/doc` in Apache, nessuna autenticazione (`Require all granted`) — ed è rigenerato dal codice sorgente a ogni build dell'immagine Docker (`php docs/doc_generate.php` gira dentro `formandopercorsi-backend.Dockerfile`). Quindi `https://api.formandopercorsi.com/doc/openapi.yaml` e `https://dev.api.formandopercorsi.com/doc/openapi.yaml` riflettono esattamente cosa è **effettivamente deployato** in quel momento in ciascun ambiente — non solo cosa è committato sul branch, che può essere disallineato (es. una feature mergiata senza rigenerare/committare lo spec). Nessun token richiesto, nessuna dipendenza dal repo `formandopercorsi-backend` (né un suo clone locale né l'API di GitHub): se l'endpoint live non è raggiungibile, la build fallisce esplicitamente invece di usare in silenzio uno snapshot potenzialmente disallineato.
 
 ```bash
-# normalmente basta così: fetcha dagli endpoint live, nessuna configurazione
 npm run gen-api-docs
-
-# fallback locale, se l'endpoint live non è raggiungibile
-BACKEND_REPO_PATH=../formandopercorsi-backend npm run gen-api-docs
-
-# fallback con token GitHub
-GITHUB_TOKEN=ghp_xxx npm run gen-api-docs
 ```
 
 ### Cosa fa `scripts/prepare-openapi.js`
@@ -88,4 +79,4 @@ npm run serve     # serve la build localmente per un ultimo controllo
 
 Il `Dockerfile`/`nginx.conf`/`docker-compose.yml` e i workflow in `.github/workflows/` sono invariati rispetto alla versione precedente: build Node → serve statico con nginx, deploy via SSH+Docker Compose sul server OVH (workflow manuale) o push immagine su ECR/DockerHub.
 
-Ovunque giri `npm run build` (locale o nel workflow di deploy) deve poter raggiungere `api.formandopercorsi.com`/`dev.api.formandopercorsi.com` in uscita — normale per un server con accesso a Internet, quindi nessuna configurazione aggiuntiva nel caso comune. Serve un fallback (`BACKEND_REPO_PATH` o `GITHUB_TOKEN`/`GH_TOKEN`, vedi "Aggiornare lo spec API") solo se quella rete è ristretta, come capita in alcuni ambienti sandbox/CI.
+Ovunque giri `npm run build` (locale o nel workflow di deploy) deve poter raggiungere in uscita `api.formandopercorsi.com` e `dev.api.formandopercorsi.com` — normale per un server con accesso a Internet, nessuna configurazione aggiuntiva richiesta. Se quella rete è ristretta (capita in alcuni ambienti sandbox/CI), `npm run build` fallisce esplicitamente sul fetch dello spec: non esiste un fallback silenzioso.
