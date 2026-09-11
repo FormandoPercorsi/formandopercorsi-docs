@@ -39,6 +39,8 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Family Students',
       'Family Student Subjects',
       'Family Favourite Teachers',
+      'Family Addresses',
+      'Family Referral',
       'Lesson',
       'Availability',
       'Availability Group',
@@ -53,7 +55,7 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
   },
   {label: 'Pagamenti & Fatturazione', tags: ['Invoice', 'InvoiceLegislation', 'CreditNote']},
   {label: 'Notifiche', tags: ['Notification']},
-  {label: 'Anagrafiche geografiche', tags: ['City', 'Province', 'School']},
+  {label: 'Anagrafiche geografiche', tags: ['City', 'Province', 'School', 'Headquarter']},
   {
     label: 'Amministrazione',
     tags: [
@@ -79,20 +81,17 @@ function buildApiSidebar(generatedSidebar: unknown, infoDocId: string, envLabel:
     );
   }
 
+  // A tag configured in a group but absent from *this* generated sidebar is
+  // tolerated, not an error: fetch-openapi.js's live endpoint can be ahead of
+  // its git-based fallback (a brand-new tag not yet reflected in the
+  // committed web/doc/openapi.yaml), so a build using the fallback would
+  // otherwise fail on content that simply isn't in that particular spec yet.
+  // The real failure mode -- a tag no group claims, above -- still throws,
+  // since that one means content silently vanishing from navigation.
   const groups = TOPIC_GROUPS.map(({label, tags}) => {
-    const items = tags.map((tag) => {
-      const category = byLabel.get(tag);
-      if (!category) {
-        throw new Error(
-          `sidebars.ts: OpenAPI tag "${tag}" referenced in group "${label}" (${envLabel}) was not found in the ` +
-            `generated sidebar. Run "npm run gen-api-docs" again, or update the grouping in sidebars.ts if the ` +
-            `tag was renamed/removed in the ${envLabel} spec.`,
-        );
-      }
-      return category;
-    });
+    const items = tags.map((tag) => byLabel.get(tag)).filter((category): category is SidebarItem => Boolean(category));
     return {type: 'category', label, items, collapsed: true} as SidebarItem;
-  });
+  }).filter((group) => (group.items as unknown[]).length > 0);
 
   return [{type: 'doc', id: infoDocId}, ...groups] as unknown as SidebarsConfig[string];
 }
