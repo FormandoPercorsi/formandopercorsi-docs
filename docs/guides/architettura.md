@@ -51,10 +51,12 @@ La distinzione fra ambienti è determinata dalla configurazione (`YII_ENV`/`YII_
 
 Nessuno dei rilasci è automatico. La pubblicazione avviene in due passaggi distinti:
 
-1. Dopo il push sul branch di riferimento, si avvia manualmente il workflow **ECR Deployment Workflow** su GitHub Actions, che costruisce e pubblica le immagini applicative per quel branch.
-2. Il rilascio effettivo sui servizi in esecuzione viene avviato separatamente con lo strumento operativo `./fpc deploy` del repository [`FormandoPercorsi/aws`](https://github.com/FormandoPercorsi/aws). Se la release contiene nuove migrazioni del database, queste vanno eseguite prima del rilascio dei servizi. La procedura completa è documentata in quel repository, in `docs/how-to/deploy/backend.md`.
+1. Dopo il push sul branch di riferimento si costruiscono e pubblicano le immagini applicative per quel branch, avviando il workflow **ECR Deployment Workflow** su GitHub Actions — manualmente dalla scheda Actions oppure con `./fpc build --component backend` dal repository [`FormandoPercorsi/aws`](https://github.com/FormandoPercorsi/aws), che avvia lo stesso workflow e ne attende il completamento.
+2. Il rilascio effettivo sui servizi in esecuzione viene avviato separatamente con lo strumento operativo `./fpc deploy` dello stesso repository. Se la release contiene nuove migrazioni del database, queste vanno eseguite prima del rilascio dei servizi. La procedura completa è documentata in quel repository, in `docs/how-to/deploy/backend.md`.
 
 Poiché la specifica OpenAPI viene rigenerata dal codice sorgente a ogni costruzione dell'immagine, la [API Reference](/api/formando-percorsi-api) di ciascun ambiente rispecchia ciò che in quell'ambiente è effettivamente in esecuzione.
+
+Questa documentazione viene a sua volta costruita scaricando la specifica dal backend **in esecuzione**: perché l'API Reference recepisca nuove annotazioni OpenAPI, l'immagine della documentazione va ricostruita e rilasciata dopo il rilascio del backend. Aggiungendo `--with-docs` al comando di deploy del backend questi passaggi avvengono contestualmente.
 
 ## Elaborazioni asincrone
 
