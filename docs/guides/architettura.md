@@ -8,7 +8,12 @@ title: Architettura e moduli
 
 `formandopercorsi-backend` è **l'intero backend**: un'API REST Yii2 (PHP) autenticata via JWT che serve i client di famiglie/studenti/insegnanti e il pannello admin. Non esiste un backend-for-frontend o un gateway separato — routing, logica di business, persistenza, job asincroni e integrazioni con terze parti (Stripe, fatturazione elettronica Acube, Google Calendar, WhatsApp) vivono tutti qui. I frontend sono repository separati.
 
-Lo **stesso codice** viene distribuito su tre ambienti, ciascuno sul proprio sottodominio: `develop` → `dev.api.formandopercorsi.com`, pre-produzione → `preprod.api.formandopercorsi.com`, `main`/produzione → `api.formandopercorsi.com`. L'ambiente è determinato da `YII_ENV`/`YII_DEBUG`, non da un fork o da branch diversi. Nessuno dei tre deploy è automatico: vengono avviati manualmente come parte del processo di deploy AWS del team (non documentato in questo repository).
+Lo **stesso codice** viene distribuito su tre ambienti, ciascuno sul proprio sottodominio: `develop` → `dev.api.formandopercorsi.com`, pre-produzione → `preprod.api.formandopercorsi.com`, `main`/produzione → `api.formandopercorsi.com`. L'ambiente è determinato da `YII_ENV`/`YII_DEBUG`, non da un fork o da branch diversi.
+
+Nessuno dei tre deploy è automatico. Il rilascio è in due passi separati:
+
+1. Push su `develop`/`main`, poi lancio manuale (pulsante "Run workflow") della **ECR Deployment Workflow** in GitHub Actions sul repository `formandopercorsi-backend`: costruisce e pubblica su ECR le immagini Docker per quel branch (`rest`, `queue`, `cron`).
+2. Rollout effettivo sui servizi ECS tramite `./fpc deploy` dal repository [`FormandoPercorsi/aws`](https://github.com/FormandoPercorsi/aws) — se la release include nuove migrazioni, vanno eseguite prima (`./fpc run -- php yii migrate`) e solo dopo si esegue il deploy dei servizi `rest`+`queue`. Procedura completa in quel repository, `docs/how-to/deploy/backend.md`.
 
 ## Il percorso di una richiesta
 
