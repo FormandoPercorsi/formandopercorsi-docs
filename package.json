@@ -52,7 +52,7 @@
     ]
   },
   "engines": {
-    "node": ">=20.0"
+    "node": ">=20.19.0"
   },
   "overrides": {
     "memfs": "4.50.0"
