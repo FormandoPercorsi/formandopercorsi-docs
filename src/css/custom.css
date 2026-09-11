@@ -1,0 +1,32 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* Formando PerCorsi brand red, matching the color already used in the
+   previous Redoc-based docs site (#D10C33). */
+:root {
+  --ifm-color-primary: #d10c33;
+  --ifm-color-primary-dark: #bc0b2e;
+  --ifm-color-primary-darker: #b20a2b;
+  --ifm-color-primary-darkest: #930823;
+  --ifm-color-primary-light: #e02a4d;
+  --ifm-color-primary-lighter: #e33a5a;
+  --ifm-color-primary-lightest: #e9647c;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #ff5f7e;
+  --ifm-color-primary-dark: #ff4266;
+  --ifm-color-primary-darker: #ff335a;
+  --ifm-color-primary-darkest: #f00d38;
+  --ifm-color-primary-light: #ff7c96;
+  --ifm-color-primary-lighter: #ff8ba3;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.1);
+}
+

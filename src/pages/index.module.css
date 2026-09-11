@@ -1,0 +1,82 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.heroBanner {
+  padding: 5rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--ifm-color-primary-darkest) 0%, var(--ifm-color-primary) 100%);
+}
+
+.heroBanner :global(.hero__title),
+.heroBanner :global(.hero__subtitle) {
+  color: #fff;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 2.5rem 1.5rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.secondaryButton {
+  color: #fff;
+  border-color: #fff;
+}
+
+.secondaryButton:hover {
+  color: var(--ifm-color-primary-darkest);
+  background: #fff;
+}
+
+.cards {
+  padding: 3.5rem 0;
+}
+
+.cardCol {
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover {
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border-color: var(--ifm-color-primary);
+}
+
+.cardEmoji {
+  font-size: 2.5rem;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.cardLink {
+  margin-top: auto;
+  padding-top: 1rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+}
