@@ -8,15 +8,18 @@ Sito di documentazione di Formando PerCorsi: guide discorsive + API reference ge
 
 ```
 docs/
-  intro.md          # pagina di atterraggio delle guide
-  guides/            # guide scritte a mano (Markdown)
-  api/               # generato da docusaurus-plugin-openapi-docs, NON modificare a mano
+  intro.md              # pagina di atterraggio delle guide
+  guides/                # guide scritte a mano (Markdown)
+  api/                   # generato da docusaurus-plugin-openapi-docs per l'ambiente di produzione, NON modificare a mano
+  api-develop/           # generato da docusaurus-plugin-openapi-docs per l'ambiente di sviluppo, NON modificare a mano
 openapi/
-  formandopercorsi.yaml        # copia dello spec esportato dal backend (web/doc/openapi.yaml)
-  formandopercorsi.docs.yaml   # generato da scripts/prepare-openapi.js, è quello che legge il plugin
+  formandopercorsi.production.yaml        # copia dello spec di produzione (branch main del backend)
+  formandopercorsi.develop.yaml           # copia dello spec di sviluppo (branch develop del backend)
+  formandopercorsi.production.docs.yaml   # generato da scripts/prepare-openapi.js, è quello che legge il plugin
+  formandopercorsi.develop.docs.yaml      # generato da scripts/prepare-openapi.js, è quello che legge il plugin
 scripts/
-  prepare-openapi.js  # ripulisce lo spec prima della generazione (vedi sotto)
-sidebars.ts           # sidebar "Guide" scritta a mano + sidebar "API Reference" raggruppata per tag
+  prepare-openapi.js  # ripulisce entrambi gli spec prima della generazione (vedi sotto)
+sidebars.ts           # sidebar "Guide" scritta a mano + due sidebar "API Reference" (produzione/sviluppo), ciascuna raggruppata per tag
 docusaurus.config.ts
 ```
 
@@ -27,19 +30,24 @@ npm install
 npm run start        # dev server con hot reload, su http://localhost:3000
 ```
 
+## Due ambienti, due spec, due alberi di reference
+
+`develop` e `main` (produzione) del backend possono divergere: `develop` può già avere un endpoint o un campo non ancora promosso in produzione. Per non mostrare come "disponibile" qualcosa che in produzione non c'è ancora (o viceversa, nascondere qualcosa che c'è già in sviluppo), il sito genera **due alberi di reference separati** dai due spec branch-specific, selezionabili dal menu a tendina "API Reference" in navbar (`Produzione (main)` / `Sviluppo (develop)`).
+
 ## Aggiornare lo spec API
 
 Quando il backend cambia endpoint:
 
 ```bash
-# 1. copia lo spec aggiornato dal repo backend
-cp ../formandopercorsi-backend/web/doc/openapi.yaml openapi/formandopercorsi.yaml
+# 1. copia gli spec aggiornati dal repo backend, uno per branch
+git -C ../formandopercorsi-backend show origin/main:web/doc/openapi.yaml    > openapi/formandopercorsi.production.yaml
+git -C ../formandopercorsi-backend show origin/develop:web/doc/openapi.yaml > openapi/formandopercorsi.develop.yaml
 
-# 2. rigenera le pagine di reference (include automaticamente la pulizia dello spec)
+# 2. rigenera le pagine di reference per entrambi gli ambienti (include automaticamente la pulizia degli spec)
 npm run gen-api-docs
 ```
 
-`npm run build` esegue già `gen-api-docs` come primo passo, quindi non è un passo che si può dimenticare in produzione — ma se il backend rilascia un nuovo endpoint tra un deploy e l'altro, il sito docs non lo vedrà finché non viene ribuildato con lo spec aggiornato (l'endpoint reference **non** è più fetchata live dal browser come nella vecchia versione Redoc — vedi "Perché non fetch a runtime" più sotto).
+`npm run build` esegue già `gen-api-docs` come primo passo, quindi non è un passo che si può dimenticare in produzione — ma se il backend rilascia un nuovo endpoint tra un deploy e l'altro, il sito docs non lo vedrà finché non viene ribuildato con gli spec aggiornati (l'endpoint reference **non** è più fetchata live dal browser come nella vecchia versione Redoc — vedi "Perché non fetch a runtime" più sotto).
 
 ### Cosa fa `scripts/prepare-openapi.js`
 
@@ -48,7 +56,7 @@ Lo spec esportato dal backend (via swagger-php) ha due difetti puramente cosmeti
 1. **Tag duplicati**: alcuni tag (es. `Family`, `Lesson`, `Topic`) compaiono più volte nell'elenco dei tag di primo livello, a volte con descrizioni diverse — senza dedup, il sito mostrerebbe due categorie diverse con lo stesso nome. Lo script tiene la descrizione più completa e scarta i duplicati.
 2. **`operationId` illeggibili**: swagger-php assegna un `operationId` automaticamente, ma come hash opaco (es. `74fba823e08bb7452c422ae12a8376ac`), che il plugin usa sia come id della pagina generata sia come slug dell'URL. Lo script lo sostituisce con uno slug leggibile derivato da tag + summary (es. `auth-signin`).
 
-Nessuno dei due tocca a quali endpoint appartiene un tag, né gli schema di richiesta/risposta — solo metadati di presentazione.
+Nessuno dei due tocca a quali endpoint appartiene un tag, né gli schema di richiesta/risposta — solo metadati di presentazione. Lo script elabora entrambi gli ambienti in un'unica esecuzione (`node scripts/prepare-openapi.js`, senza argomenti); passare invece `<inputPath> <outputPath>` esplicitamente elabora un unico file ad hoc, utile per test locali.
 
 ### Perché non fetch a runtime
 
@@ -56,7 +64,7 @@ La vecchia versione (Redoc) faceva fetch dello spec **a runtime nel browser**, q
 
 ## Organizzazione della sidebar "API Reference"
 
-Il plugin genera una categoria per ogni tag OpenAPI (circa 30, in ordine di apparizione nello spec). `sidebars.ts` le **raggruppa** in una manciata di sezioni tematiche (Autenticazione, Famiglia & Prenotazioni, Insegnanti, Contenuti didattici, Pagamenti & Fatturazione, Notifiche, Anagrafiche geografiche, Amministrazione) leggendo le categorie generate per etichetta, non copiandole a mano — quindi resta valido dopo ogni rigenerazione. Per aggiungere un nuovo tag a un gruppo esistente, basta aggiungerne il nome all'array corrispondente in `sidebars.ts`; un tag nuovo non ancora assegnato a nessun gruppo farà fallire la build con un errore esplicito (non sparirà silenziosamente dalla sidebar).
+Il plugin genera una categoria per ogni tag OpenAPI (circa 30, in ordine di apparizione nello spec). `sidebars.ts` le **raggruppa** in una manciata di sezioni tematiche (Autenticazione, Famiglia & Prenotazioni, Insegnanti, Contenuti didattici, Pagamenti & Fatturazione, Notifiche, Anagrafiche geografiche, Amministrazione) leggendo le categorie generate per etichetta, non copiandole a mano — quindi resta valido dopo ogni rigenerazione. La stessa funzione (`buildApiSidebar`) costruisce sia la sidebar di produzione che quella di sviluppo, a partire dai rispettivi `docs/api/sidebar` e `docs/api-develop/sidebar` generati. Per aggiungere un nuovo tag a un gruppo esistente, basta aggiungerne il nome all'array corrispondente in `sidebars.ts`; un tag presente nello spec generato ma non ancora assegnato a nessun gruppo (in uno qualsiasi dei due ambienti) fa fallire la build con un errore esplicito, così non sparisce mai silenziosamente dalla sidebar.
 
 ## Scrivere una guida
 

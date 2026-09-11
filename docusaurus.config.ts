@@ -58,9 +58,17 @@ const config: Config = {
         id: 'api',
         docsPluginId: 'classic',
         config: {
-          formando: {
-            specPath: 'openapi/formandopercorsi.docs.yaml',
+          production: {
+            specPath: 'openapi/formandopercorsi.production.docs.yaml',
             outputDir: 'docs/api',
+            sidebarOptions: {
+              groupPathsBy: 'tag',
+              categoryLinkSource: 'tag',
+            },
+          } satisfies OpenApiPlugin.Options,
+          develop: {
+            specPath: 'openapi/formandopercorsi.develop.docs.yaml',
+            outputDir: 'docs/api-develop',
             sidebarOptions: {
               groupPathsBy: 'tag',
               categoryLinkSource: 'tag',
@@ -93,10 +101,13 @@ const config: Config = {
           label: 'Guide',
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'apiSidebar',
-          position: 'left',
+          type: 'dropdown',
           label: 'API Reference',
+          position: 'left',
+          items: [
+            {type: 'docSidebar', sidebarId: 'apiSidebar', label: 'Produzione (main)'},
+            {type: 'docSidebar', sidebarId: 'apiDevSidebar', label: 'Sviluppo (develop)'},
+          ],
         },
         {
           href: 'https://github.com/FormandoPercorsi',
@@ -112,7 +123,8 @@ const config: Config = {
           title: 'Documentazione',
           items: [
             {label: 'Guide', to: '/intro'},
-            {label: 'API Reference', to: '/api/formando-percorsi-api'},
+            {label: 'API Reference (produzione)', to: '/api/formando-percorsi-api'},
+            {label: 'API Reference (sviluppo)', to: '/api-develop/formando-percorsi-api'},
           ],
         },
         {

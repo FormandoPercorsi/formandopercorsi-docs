@@ -8,7 +8,7 @@ title: Architettura e moduli
 
 `formandopercorsi-backend` è **l'intero backend**: un'API REST Yii2 (PHP) autenticata via JWT che serve i client di famiglie/studenti/insegnanti e il pannello admin. Non esiste un backend-for-frontend o un gateway separato — routing, logica di business, persistenza, job asincroni e integrazioni con terze parti (Stripe, fatturazione elettronica Acube, Google Calendar, WhatsApp) vivono tutti qui. I frontend sono repository separati.
 
-Lo **stesso codice** viene distribuito su `develop` (deploy automatico), pre-produzione e `master`/produzione: l'ambiente è determinato da `YII_ENV`/`YII_DEBUG`, non da un fork o da branch diversi.
+Lo **stesso codice** viene distribuito su tre ambienti, ciascuno sul proprio sottodominio: `develop` → `dev.api.formandopercorsi.com`, pre-produzione → `preprod.api.formandopercorsi.com`, `main`/produzione → `api.formandopercorsi.com`. L'ambiente è determinato da `YII_ENV`/`YII_DEBUG`, non da un fork o da branch diversi. Nessuno dei tre deploy è automatico: vengono avviati manualmente come parte del processo di deploy AWS del team (non documentato in questo repository).
 
 ## Il percorso di una richiesta
 
