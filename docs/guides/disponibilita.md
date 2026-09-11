@@ -4,17 +4,21 @@ title: Disponibilità
 
 # Disponibilità
 
-La disponibilità di un insegnante passa per tre livelli, ciascuno derivato dal precedente:
+La disponibilità di un insegnante non è un dato unico, ma il risultato di tre livelli successivi: ciò che l'insegnante dichiara, ciò che resta realmente libero una volta considerati impegni e spostamenti, e infine gli slot che una famiglia può effettivamente selezionare e acquistare.
 
-1. **Availability** — le fasce orarie che l'insegnante dichiara come genericamente disponibili.
-2. **Effective Availability (EA)** — il tempo libero che resta togliendo le lezioni già prenotate e il tempo di viaggio.
-3. **Consecutive Availability (CA)** — gli slot concreti e prenotabili (15 minuti o più) dentro ogni EA.
+| Livello | Significato |
+| --- | --- |
+| **Availability** | Fasce orarie che l'insegnante dichiara come disponibili. |
+| **Effective Availability** | Tempo realmente libero, al netto delle lezioni già prenotate e dei tempi di spostamento. |
+| **Consecutive Availability** | Slot concreti e prenotabili, derivati per ciascuna combinazione di durata e modalità ammesse. |
 
-Tutti gli orari sono in timezone `Europe/Rome`, formato `Y-m-d H:i:s`.
+Solo il primo livello è inserito dall'insegnante; gli altri due sono derivati dal sistema e si aggiornano a ogni variazione rilevante. Gli endpoint di gestione sono documentati nelle sezioni [Availability](/api/availability) e [Availability Group](/api/availability-group) della API Reference.
 
-## Availability
+Tutti gli orari sono espressi nel fuso `Europe/Rome`, nel formato `Y-m-d H:i:s`.
 
-Tabella `availability`: `teacher_id`, `start_date_time`/`end_date_time` (intervalli di 15 minuti, `start < end`), `location_settings` (JSON con località abilitate e tempo di preavviso), e opzionalmente `availability_group_id` se fa parte di un pattern ricorrente.
+## Disponibilità dichiarata
+
+Una disponibilità è definita dall'insegnante che la inserisce, da un intervallo di inizio e fine allineato a multipli di 15 minuti, e dalle modalità di erogazione abilitate su quella fascia, ciascuna con il proprio preavviso minimo di prenotazione:
 
 ```json
 {
@@ -25,48 +29,47 @@ Tabella `availability`: `teacher_id`, `start_date_time`/`end_date_time` (interva
 }
 ```
 
-Le sovrapposizioni tra availability sono permesse ma sconsigliate.
+Le quattro modalità corrispondono a lezione online, a domicilio dell'insegnante, presso una sede, e a domicilio dello studente con partenza dalla sede. Una disponibilità può inoltre appartenere a un gruppo, quando è stata inserita come parte di uno schema ricorrente.
 
-## Tempo di viaggio e come blocca le fasce
+La sovrapposizione fra disponibilità dichiarate è ammessa dal sistema, ma è sconsigliata perché rende meno prevedibile il risultato della derivazione.
 
-Il tempo di viaggio (minuti necessari per raggiungere/lasciare una lezione fuori casa) si comporta diversamente a seconda della location:
+## Effetto degli spostamenti
 
-- **Lezioni a domicilio dell'insegnante (`home`)**: bloccano *tutte* le location per l'intera durata della lezione + il tempo di viaggio prima e dopo — l'insegnante è impegnato a insegnare, non può spostarsi.
-- **Lezioni non a domicilio (a casa dello studente, in sede, online)**: bloccano `home` e `home_from_headquarter` per durata + tempo di viaggio (l'insegnante deve fisicamente spostarsi), ma bloccano `online`/`headquarter` solo per la durata della lezione, senza buffer (può insegnare online o stare in sede subito prima/dopo essersi spostato).
+Il tempo di spostamento dichiarato dall'insegnante determina quanto una lezione occupa oltre la propria durata. La regola distingue due casi, secondo una logica di disponibilità fisica:
 
-Esempio: lezione 14:00–15:00, tempo di viaggio 30 minuti. Se è a domicilio, blocca tutto da 13:30 a 15:30. Se è a casa dello studente, blocca `home`/`home_from_headquarter` da 13:30 a 15:30, ma `online`/`headquarter` solo da 14:00 a 15:00.
+- **Lezione a domicilio dell'insegnante.** Occupa *tutte* le modalità per l'intera durata più il tempo di spostamento prima e dopo: l'insegnante sta ricevendo a casa propria e non può fare altro.
+- **Lezione altrove** (a domicilio dello studente, in sede oppure online). Occupa le modalità che richiedono la presenza a casa propria per la durata più il tempo di spostamento, ma occupa le modalità online e in sede per la sola durata: al termine dello spostamento l'insegnante può insegnare online o essere in sede immediatamente prima o dopo.
 
-## Effective Availability
+A titolo di esempio, per una lezione dalle 14:00 alle 15:00 con 30 minuti di spostamento: se è a domicilio dell'insegnante, l'intera fascia 13:30–15:30 risulta occupata per qualunque modalità; se è a domicilio dello studente, la fascia 13:30–15:30 risulta occupata per le modalità domiciliari, mentre online e in sede risultano occupate solo dalle 14:00 alle 15:00.
 
-Un'EA è il blocco continuo di tempo realmente libero: availability dichiarata, meno le finestre bloccate da ogni lezione secondo la regola sopra. Ogni frammento risultante diventa un'EA separata, con due flag booleani che indicano se è prenotabile esattamente al bordo:
+## Tempo effettivamente libero
 
-- `start_bookable = false` significa che una lezione finisce esattamente all'inizio dell'EA (serve un margine prima di poter iniziare a prenotare lì).
-- `end_bookable = false` significa il simmetrico: una lezione inizia esattamente alla fine dell'EA.
+Una Effective Availability è un blocco continuo di tempo libero: la disponibilità dichiarata, meno le finestre occupate secondo la regola precedente. Ogni frammento risultante costituisce un blocco a sé, con due indicatori che segnalano se è prenotabile esattamente ai propri estremi:
 
-Esempio: disponibilità 10:00–18:00 con due lezioni a domicilio (11:00–12:00 e 13:00–14:00, viaggio 15 min) produce tre EA: `10:00–10:45` (start_bookable, non end_bookable), `12:15–12:45` (né l'uno né l'altro), `14:15–18:00` (end_bookable, non start_bookable).
+- l'estremo iniziale non è prenotabile quando una lezione termina esattamente in quell'istante;
+- l'estremo finale non è prenotabile quando una lezione inizia esattamente in quell'istante.
 
-**Codice**: `AvailabilityCreationHelper::createEffectiveAvailabilitiesForAvailability($availability)`.
+Una disponibilità dalle 10:00 alle 18:00, con due lezioni a domicilio dalle 11:00 alle 12:00 e dalle 13:00 alle 14:00 e 15 minuti di spostamento, produce tre blocchi: 10:00–10:45, 12:15–12:45 e 14:15–18:00.
 
-## Consecutive Availability
+## Slot prenotabili
 
-Una CA è uno slot specifico e acquistabile, di durata fissa (tipicamente 1, 1,5 o 2 ore). Per ogni EA vengono create CA per ogni combinazione di durata abilitata × location abilitata, a intervalli di 15 minuti, solo se lo slot rientra nei limiti dell'EA.
+Una Consecutive Availability è lo slot che la famiglia seleziona in fase di prenotazione: ha durata fissa, tipicamente una, una e mezza o due ore. Per ogni blocco di tempo libero il sistema genera uno slot per ciascuna combinazione di durata e modalità ammesse, a intervalli di 15 minuti, purché lo slot ricada interamente nel blocco.
 
-### `n_consecutive_weeks`: il meccanismo delle lezioni ricorrenti
+### Lezioni ricorrenti
 
-Ogni CA porta un contatore `n_consecutive_weeks`: da quella settimana in poi, quante settimane consecutive esiste ancora lo stesso slot identico. Se un insegnante ha 14:00–15:00 libero ogni lunedì per 8 settimane, il sistema crea 8 CA (una per settimana), con il contatore che scende da 8 a 1. Questo permette a uno studente di prenotare un'unica lezione ricorrente per più settimane in una sola transazione: il sistema trova la CA della prima settimana desiderata e verifica che `n_consecutive_weeks` copra quante settimane servono.
+Ogni slot riporta per quante settimane consecutive, a partire da quella di riferimento, lo stesso slot si ripete identico. Se un insegnante è libero ogni lunedì dalle 14:00 alle 15:00 per otto settimane, il sistema genera otto slot e il contatore decresce da otto a uno.
 
-**Codice**: `ConsecutiveAvailabilitiesHelper::createConsecutiveAvailabilities()`.
+Questo dato consente di prenotare in un'unica operazione una lezione ricorrente su più settimane: il sistema individua lo slot della prima settimana desiderata e verifica che il contatore copra il numero di settimane richiesto. È il meccanismo su cui si basano i [percorsi formativi](/guides/percorsi-formativi) periodici.
 
-## Cosa succede quando un insegnante cambia il proprio tempo di viaggio
+## Variazione del tempo di spostamento
 
-`PATCH /teacher {"travel_time_min": 30}` innesca `TravelTimeAvailabilityHelper::updateAvailabilitiesOnTravelTimeChange($teacher, $oldTT, $newTT)`, che deve aggiornare EA e CA intorno a ogni lezione futura. La logica dipende dalla direzione del cambiamento:
+Quando un insegnante modifica il proprio tempo di spostamento, il sistema ricalcola tempo libero e slot attorno a ogni lezione futura. Il comportamento dipende dalla direzione della variazione:
 
-- **Diminuzione** (es. 30→15 min): la finestra bloccata si restringe, appare nuovo tempo libero prima e/o dopo la lezione. Si cercano le EA precedentemente rimosse dalla vecchia finestra e si ripristinano se non confliggono con lo stato attuale (`handleHomeLessonFreedTimeSlots()`).
-- **Aumento** (es. 15→30 min): la finestra bloccata si espande, alcune EA esistenti possono ricadere (parzialmente o del tutto) dentro la nuova finestra. Ogni EA coinvolta viene gestita con una logica a 4 casi: **completamente dentro** → cancellata; **a cavallo** → divisa in due; **overlap parziale a inizio/fine** → accorciata (`handleHomeLessonOverlappingEffectiveAvailabilitiesOnIncrease()`).
-- **Nessun cambiamento** → nessuna elaborazione.
+- **Riduzione.** La finestra occupata si restringe e si libera tempo prima e dopo ogni lezione. Il sistema ripristina i blocchi precedentemente rimossi, verificando che non siano nel frattempo entrati in conflitto con altri impegni.
+- **Aumento.** La finestra occupata si estende e alcuni blocchi ricadono, in tutto o in parte, dentro la nuova finestra. Ogni blocco coinvolto viene eliminato se interamente compreso, suddiviso in due se attraversato, oppure accorciato se la sovrapposizione riguarda solo un estremo.
 
-Dopo aver sistemato tutte le EA, le CA vengono cancellate in blocco per le EA rimosse e ricreate per quelle nuove/modificate. L'intero processo gira dentro una singola transazione database: se un passaggio fallisce, tutto viene annullato.
+Al termine, gli slot prenotabili vengono rigenerati per i blocchi modificati. L'intera operazione è racchiusa in un'unica transazione: se un passaggio fallisce, nessuna modifica viene applicata.
 
-## Da tenere presente
-
-`available_n_consecutive_weeks`, `start_bookable` ed `end_bookable` sono pensati per supportare la prenotazione di percorsi periodici (vedi [Percorsi formativi](/guides/percorsi-formativi)) — ma il frontend web attuale non li legge/usa ancora da nessuna parte. Prima di assumere che siano già sfruttati in produzione (o di rimuoverli pensando siano dead code), va verificato lo stato di avanzamento della feature "Training Periodici".
+:::note
+Gli indicatori di prenotabilità agli estremi e il contatore delle settimane consecutive sono predisposti per la prenotazione dei percorsi periodici, ma l'applicazione web attualmente in uso non li utilizza. È opportuno verificarne lo stato di adozione prima di assumerli operativi, e altrettanto prima di considerarli codice inutilizzato.
+:::

@@ -1,108 +1,98 @@
 ---
-title: Ranking insegnanti
+title: Ordinamento dei risultati di ricerca
 ---
 
-# Come vengono ordinati gli insegnanti in ricerca
+# Ordinamento dei risultati di ricerca
 
-`POST /api/availability/search` restituisce alle famiglie gli insegnanti disponibili per le lezioni richieste, già ordinati. L'ordinamento è calcolato **in SQL prima della paginazione**, combinando due gruppi di segnali:
+Quando una famiglia cerca un insegnante per una o più lezioni, il sistema restituisce i profili disponibili già ordinati per pertinenza. L'ordinamento è calcolato prima della paginazione, così che la prima pagina contenga effettivamente le proposte migliori e la navigazione fra pagine resti coerente. L'endpoint di ricerca è documentato nella sezione [Availability](/api/availability) della API Reference.
 
-- uno **score precalcolato offline**, ricalcolato ogni notte e conservato in `teacher_score`: disponibilità utile, tempestività, affidabilità, carico, sovraqualifica, esposizione, boost per i nuovi insegnanti;
-- due componenti **live**, che dipendono dalla richiesta specifica e non possono essere precalcolate: l'aderenza agli orari richiesti e la continuità didattica con lo studente.
+L'ordinamento combina due gruppi di segnali:
 
-La separazione è deliberata: garantisce una risposta veloce dell'endpoint anche con un ranking sofisticato.
+- un **punteggio precalcolato**, aggiornato ogni notte per ciascun insegnante, che sintetizza disponibilità offerta, tempestività di inserimento, affidabilità, carico di lavoro, adeguatezza al livello richiesto ed esposizione recente;
+- due **componenti calcolate al momento**, che dipendono dalla richiesta specifica e non possono essere precalcolate: l'aderenza agli orari richiesti e la continuità didattica con lo studente.
 
-## La formula
+La separazione è deliberata: consente di mantenere un ordinamento articolato senza penalizzare i tempi di risposta della ricerca.
 
-```
-RANK =  1.0 × fit                     (live)
-      + 2.5 × continuità               (live)
-      + score precalcolato             (teacher_score.score)
-```
+## Composizione del punteggio
 
 ```
-score =  0.9 × ore_utili
-       + 0.15 × ore_non_utili
-       + 0.5 × tempestività
-       + 0.8 × affidabilità
-       − 0.3 × carico
-       + 0.4 × boost_nuovo
-       − 0.6 × esposizione
-       − 1.2 × sovraqualifica
+ordinamento =  1,0 × aderenza oraria        (calcolata al momento)
+             + 2,5 × continuità didattica   (calcolata al momento)
+             + punteggio precalcolato
 ```
 
-Tutte le componenti sono normalizzate in `[0, 1]` prima di essere pesate, così i pesi restano confrontabili tra loro.
+```
+punteggio precalcolato =  0,90 × ore utili disponibili
+                        + 0,15 × ore non utili disponibili
+                        + 0,50 × tempestività
+                        + 0,80 × affidabilità
+                        − 0,30 × carico
+                        + 0,40 × sostegno ai nuovi insegnanti
+                        − 0,60 × esposizione recente
+                        − 1,20 × sovraqualifica
+```
 
-## Le componenti live
+Tutte le componenti sono normalizzate nell'intervallo `[0, 1]` prima di essere pesate, in modo che i pesi siano confrontabili fra loro.
 
-| Componente | Come si calcola | Peso |
+## Componenti calcolate al momento
+
+| Componente | Criterio | Peso |
 | --- | --- | --- |
-| **Fit orario** | Per ogni lezione richiesta, la distanza in minuti dallo slot più vicino dell'insegnante, dentro una finestra di ±45 minuti: `fit = 1 − Σ distanze / (45 × n_lezioni)`. Vale 1 se ogni lezione combacia al minuto. | 1.0 |
-| **Continuità** | `1.0` se l'insegnante ha già fatto lezione con quello studente, `0.5` se con un fratello, `0` altrimenti. | 2.5 |
+| **Aderenza oraria** | Per ogni lezione richiesta si misura la distanza in minuti dallo slot disponibile più vicino, entro una finestra di ±45 minuti. Il valore è massimo quando ogni lezione coincide esattamente con l'orario richiesto. | 1,0 |
+| **Continuità didattica** | Valore pieno se l'insegnante ha già svolto lezioni con quello studente, dimezzato se le ha svolte con un fratello, nullo altrimenti. | 2,5 |
 
-Il peso 2.5 sulla continuità è scelto perché deve **dominare**: un insegnante che la famiglia conosce già batte qualunque combinazione di segnali offline — è il segnale più forte che la proposta sia gradita.
+Il peso attribuito alla continuità è il più alto dell'intera formula, ed è una scelta deliberata: un insegnante che la famiglia conosce già deve prevalere su qualunque combinazione di segnali generali, perché è l'indicazione più attendibile che la proposta sarà gradita.
 
-## Le componenti precalcolate
+## Componenti precalcolate
 
-Tutte valutate sulla finestra `[oggi, oggi + 89 giorni]`, la stessa della ricerca.
+Tutte valutate sull'orizzonte dei 90 giorni successivi, lo stesso considerato dalla ricerca.
 
-| Componente | Fonte | Definizione | Peso |
-| --- | --- | --- | --- |
-| Ore utili libere | `effective_availability` | Minuti liberi in fascia 14:00–19:00 (giorno contato solo se l'affaccio è ≥ 60 min), con decadimento lineare da 1.0 (oggi) a 0.3 (giorno 89), saturato a 3000 minuti decaduti. | +0.9 |
-| Ore non utili libere | `effective_availability` | Il complemento, fuori fascia. Satura a 6000 minuti. | +0.15 |
-| Tempestività | `availability_group.processed_at` | Giorni di anticipo tra inserimento e inizio della disponibilità, media pesata sui minuti. Satura a 45 giorni. | +0.5 |
-| Affidabilità | `lesson.deletion_reason`, ultimi 365 giorni | `1 − tasso_cancellazione / 0.25`, attenuato da un prior bayesiano di 10 pseudo-lezioni. | +0.8 |
-| Carico | lezioni future non cancellate | `minuti_prenotati / (prenotati + liberi)`. | −0.3 |
-| Boost nuovo | `user.created_at` + lezioni erogate | `1.0` sotto le 5 lezioni con account creato da meno di 90 giorni, decresce a 0 alle 15 lezioni. | +0.4 |
-| Esposizione | `teacher_search_exposure` | Quanto è stato mostrato di recente, saturato a 20. | −0.6 |
-| Sovraqualifica | `teacher_subject` + `school` | Vedi sotto. | −1.2 |
+| Componente | Criterio | Peso |
+| --- | --- | --- |
+| Ore utili disponibili | Minuti liberi nella fascia pomeridiana 14:00–19:00, con decadimento dal giorno corrente verso la fine dell'orizzonte, fino a una soglia di saturazione. | +0,90 |
+| Ore non utili disponibili | Minuti liberi al di fuori di quella fascia, con soglia di saturazione più alta. | +0,15 |
+| Tempestività | Anticipo con cui le disponibilità vengono inserite rispetto alla data a cui si riferiscono, mediato sui minuti offerti. | +0,50 |
+| Affidabilità | Tasso di cancellazione dell'ultimo anno, attenuato per non penalizzare chi ha svolto poche lezioni. | +0,80 |
+| Carico | Quota di tempo già prenotato rispetto al tempo complessivamente offerto. | −0,30 |
+| Sostegno ai nuovi insegnanti | Vantaggio temporaneo per i profili recenti con poche lezioni all'attivo, che si esaurisce con l'esperienza acquisita. | +0,40 |
+| Esposizione recente | Quante volte il profilo è già stato mostrato nei risultati di ricerca. | −0,60 |
+| Sovraqualifica | Distanza fra il livello scolastico abitualmente coperto dall'insegnante e quello richiesto. | −1,20 |
 
-**Perché le ore utili sono assolute e non percentuali**: si premia chi inserisce più disponibilità utili, non chi ha una percentuale alta su poche ore — un insegnante che mette dieci pomeriggi batte chi ne mette uno solo, anche se "tutti utili" per entrambi. La saturazione impedisce che chi ne inserisce quantità enormi monopolizzi i risultati.
+Due criteri meritano una spiegazione, perché il loro comportamento non è immediato:
 
-**Perché il decadimento sull'orizzonte**: senza, un insegnante con molte ore fra tre mesi e niente la settimana prossima scavalcherebbe chi è disponibile subito — l'opposto di ciò che serve a chi sta prenotando ora. Le colonne `useful_minutes`/`other_minutes` salvano il valore grezzo non decaduto per diagnostica; il decadimento entra solo nello score.
+**Le ore disponibili sono conteggiate in valore assoluto, non in percentuale.** L'obiettivo è premiare chi mette a disposizione più tempo utile, non chi presenta una percentuale elevata su poche ore offerte: un insegnante che rende disponibili dieci pomeriggi deve prevalere su chi ne rende disponibile uno solo. La soglia di saturazione impedisce che quantità molto elevate monopolizzino i risultati.
 
-### Sovraqualifica attenuata dalla scarsità
+**Le ore più lontane nel tempo pesano meno.** Senza decadimento, un insegnante con molta disponibilità fra tre mesi e nessuna nell'immediato scavalcherebbe chi è disponibile subito, in contrasto con l'esigenza di chi sta prenotando.
 
-L'obiettivo è duplice: premiare i profili più preparati sulle richieste difficili, ma anche non "sprecarli" su richieste semplici quando servono altrove. La difficoltà è un ordinale ricavato da livello scuola + anno (elementari 1–5, medie 6–8, superiori 9–13, università 14). `gap = max(0, difficoltà_tipica_insegnante − difficoltà_richiesta)`, dove la difficoltà tipica è la mediana sulle celle dichiarate per quella materia, pesata sulle lezioni svolte quando ce ne sono almeno 3.
+### Sovraqualifica e scarsità
 
-Il malus vale `min(1, gap/5) × abundance`, dove `abundance = clamp((n_insegnanti_nella_cella − 1) / 7, 0, 1)`. Con un solo insegnante idoneo per quella cella il malus si annulla del tutto: un profilo alto non deve sparire quando è l'unica opzione disponibile.
+Il criterio persegue due obiettivi insieme: valorizzare i profili più preparati sulle richieste impegnative ed evitare di impiegarli su richieste elementari quando sono necessari altrove. La difficoltà di una richiesta è espressa come livello ordinale ricavato da grado scolastico e anno di corso, dalla scuola primaria all'università; la penalizzazione cresce con la distanza fra il livello abitualmente coperto dall'insegnante e quello richiesto.
 
-## Rotazione: come si evita di proporre sempre gli stessi
+La penalizzazione è però attenuata dalla scarsità: quando per quella combinazione di materia e livello esiste un solo insegnante idoneo, si annulla del tutto. Un profilo qualificato non deve sparire dai risultati proprio quando è l'unica opzione disponibile.
 
-Ogni pagina di risultati incrementa `impressions_since` per gli insegnanti mostrati. Il decadimento avviene **solo nel job notturno**, non in tempo reale:
+## Rotazione dell'esposizione
 
-```
-exposure_snapshot = exposure_snapshot × 0.7 + impressions_since   (emivita ≈ 2 giorni)
-impressions_since = 0
-```
+Ogni pagina di risultati incrementa un contatore di esposizione per i profili mostrati. Il contatore viene però attenuato **solo durante l'elaborazione notturna**, mai durante la navigazione.
 
-Congelare il malus dentro la giornata è deliberato: se si muovesse in tempo reale, navigare pagina 1 → 2 → 3 riordinerebbe l'`ORDER BY` tra una richiesta e l'altra, producendo insegnanti duplicati o saltati. Così si ottiene rotazione reale (chi è stato molto esposto oggi scende domani) con ordinamento perfettamente stabile durante la navigazione.
+La scelta è deliberata: se la penalizzazione da esposizione variasse in tempo reale, l'ordinamento cambierebbe fra una pagina e la successiva, con il risultato di mostrare due volte alcuni insegnanti e di ometterne altri. Congelandola nell'arco della giornata si ottiene una rotazione effettiva — chi è stato molto esposto oggi scende domani — mantenendo un ordinamento stabile durante la consultazione.
 
-## Dove vive il codice
+## Comportamento in caso di dati mancanti
 
-| File | Ruolo |
-| --- | --- |
-| `services/availability/ranking/TeacherScoreComputationService.php` | Calcolo offline dello score |
-| `services/availability/ranking/TeacherRankingOrderExpression.php` | Aggregati di distanza, predicato a finestra, join e `ORDER BY` |
-| `services/availability/projectors/FamilySolutionsProjector.php` | Paginazione ordinata, scrittura dell'esposizione |
-| `commands/TeacherScoreController.php` | `teacher-score/recompute`, `teacher-score/recompute-teacher` |
+Il punteggio precalcolato è applicato come contributo facoltativo: se per un insegnante non è ancora disponibile, o se l'elaborazione notturna non è andata a buon fine, viene impiegato un valore neutro. Una tabella dei punteggi vuota o non aggiornata **degrada la qualità dell'ordinamento, ma non fa sparire alcun insegnante dai risultati**. A parità di punteggio l'ordinamento ricade su un criterio deterministico, così che la paginazione resti coerente.
 
-`teacher_score` ha una riga per cella `(teacher_id, subject_id, school_id, school_class)` — la stessa granularità di `teacher_subject`. `subject_id = 0`, `school_id = 0`, `school_class = ''` sono sentinelle per "qualsiasi", usate come fallback quando la ricerca non specifica la materia.
+## Configurazione ed esercizio
 
-Il job notturno gira ogni notte alle 05:30 UTC (dopo la derivazione delle disponibilità delle 05:00), è set-based (una decina di query aggregate), e scrive con pattern **upsert-then-reap** (mai truncate-then-insert): `INSERT ... ON DUPLICATE KEY UPDATE` seguito da `DELETE ... WHERE computed_at < :run_started_at`, così le ricerche in corso non vedono mai la tabella vuota.
+Pesi, soglie di saturazione, orizzonte temporale, fascia oraria considerata utile e parametri di decadimento sono interamente configurabili. È previsto un interruttore di disattivazione che riporta l'ordinamento al comportamento precedente senza necessità di annullare un rilascio.
+
+La modifica di un peso richiede sia il rilascio della nuova configurazione sia una rielaborazione completa dei punteggi, poiché i pesi delle componenti precalcolate sono già incorporati nel punteggio memorizzato.
 
 ```shell
-php yii teacher-score/recompute [--dryRun=1]        # tutti gli insegnanti
-php yii teacher-score/recompute-teacher <id>        # uno solo (cold start / ops)
+php yii teacher-score/recompute [--dryRun=1]   # rielabora tutti gli insegnanti
+php yii teacher-score/recompute-teacher <id>   # rielabora un singolo insegnante
 ```
 
-`--dryRun=1` calcola tutto senza scrivere nulla (né azzerare `impressions_since`), e stampa le prime 20 variazioni di punteggio.
-
-La query a runtime usa sempre `LEFT JOIN` verso `teacher_score` (mai `INNER JOIN`) con `COALESCE(score, 0.6)`: una tabella vuota o stantia degrada l'ordine, non fa sparire insegnanti. Il tie-break finale `teacher_id ASC` rende la paginazione deterministica.
-
-## Configurazione e kill switch
-
-Tutto in `config/params.php`, chiave `teacherRanking`: pesi, saturazioni, finestra, decadimenti, fascia oraria utile, soglie del cold start. `'enabled' => false` è il kill switch: riporta l'ordinamento al comportamento precedente (`ORDER BY availability.teacher_id ASC`) senza bisogno di un rollback del deploy. Cambiare un peso richiede un deploy **e** una riesecuzione di `teacher-score/recompute`, perché i pesi offline sono già ripiegati dentro `score`.
+L'elaborazione notturna è pianificata dopo la derivazione delle disponibilità, ed è progettata per non lasciare mai la base dati in uno stato intermedio: i nuovi punteggi sostituiscono i precedenti e solo al termine vengono rimosse le righe non più aggiornate, così che le ricerche in corso non vedano mai dati assenti. L'esecuzione in modalità di prova calcola i nuovi punteggi senza scrivere nulla e riporta le variazioni più rilevanti.
 
 :::note
-Il frontend web attuale non mostra alcun indicatore visivo di ranking (nessuna stella, nessun punteggio): gli insegnanti vengono semplicemente renderizzati nell'ordine in cui l'API li restituisce, che è già l'ordine calcolato qui. Il ranking è quindi "invisibile" per design.
+L'applicazione web non mostra alcun indicatore di ordinamento: gli insegnanti sono presentati nella sequenza restituita dall'API, che è già quella descritta in questa pagina. L'ordinamento è quindi deliberatamente non visibile all'utente finale.
 :::

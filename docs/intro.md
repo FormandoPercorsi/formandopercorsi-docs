@@ -3,18 +3,26 @@ title: Introduzione
 slug: /intro
 ---
 
-# Formando PerCorsi
+# Documentazione di Formando PerCorsi
 
-Formando PerCorsi è una piattaforma di ripetizioni: famiglie prenotano lezioni con insegnanti, i pagamenti passano da Stripe, e un intero sistema di disponibilità, prezzi, assicurazione, referral e fatturazione tiene insieme il tutto. Questo sito raccoglie tutto quello che serve per lavorarci sopra o semplicemente per capire come funziona.
+Formando PerCorsi è una piattaforma per l'erogazione di lezioni private. Le famiglie individuano e prenotano lezioni con insegnanti qualificati, il pagamento è gestito tramite Stripe, e il sistema amministra l'intero ciclo che ne consegue: disponibilità degli insegnanti, determinazione del prezzo, copertura assicurativa facoltativa, crediti, ripartizione dei compensi e fatturazione elettronica.
 
-## Cosa trovi qui
+Questa documentazione descrive il funzionamento della piattaforma e l'interfaccia applicativa attraverso cui i client vi accedono.
 
-**Le guide** in questa sezione spiegano *come funzionano davvero* le parti del sistema meno ovvie da un elenco di endpoint: le regole di business, le scelte progettuali, i casi limite, le cose che si scoprono solo leggendo il codice. Sono scritte per essere utili a chiunque debba lavorare con questi sistemi — che si stia integrando un endpoint, si stia orientando in un pezzo di codice nuovo, o si voglia semplicemente capire come vengono gestiti i soldi di una prenotazione.
+## Struttura della documentazione
 
-La **[API Reference](/api/formando-percorsi-api)** documenta ogni endpoint REST: parametri, corpo della richiesta, forma della risposta, codici di errore, con esempi pronti da eseguire direttamente dal browser.
+**Guide.** Descrivono i processi e le regole che governano ciascuna area della piattaforma: quali soggetti partecipano a un processo, in quale ordine avvengono le operazioni, quali condizioni determinano un esito piuttosto che un altro, quali vincoli vanno rispettati da chi integra il sistema.
 
-## Da dove iniziare
+**[API Reference](/api/formando-percorsi-api).** Documenta il contratto REST completo: per ogni endpoint, parametri, corpo della richiesta, struttura della risposta, codici di errore ed esempi eseguibili direttamente dal browser. È generata dalla specifica OpenAPI pubblicata dal backend ed è disponibile in due varianti, selezionabili dal menu "API Reference" nella barra di navigazione: ambiente di produzione e ambiente di sviluppo.
 
-- Se stai configurando l'ambiente di sviluppo per la prima volta: [Setup locale](/guides/setup-locale).
-- Se vuoi un quadro d'insieme di come è organizzato il backend: [Architettura e moduli](/guides/architettura).
-- Se ti serve capire un'area specifica (autenticazione, prenotazioni, pagamenti...), vai dritto alla guida corrispondente nel menu a sinistra.
+Le due parti sono complementari. Le guide rimandano alle sezioni corrispondenti della reference; la reference documenta il dettaglio di ogni singola operazione.
+
+## Percorsi di lettura
+
+| Obiettivo | Punto di partenza |
+| --- | --- |
+| Comprendere la piattaforma nel suo insieme | [Panoramica della piattaforma](/guides/piattaforma) |
+| Integrare un client applicativo | [Autenticazione](/guides/autenticazione), poi l'area funzionale di interesse |
+| Comprendere i flussi economici | [Pagamenti, payout e fatturazione](/guides/pagamenti) |
+| Sviluppare sul backend | [Architettura del sistema](/guides/architettura) e [Ambiente di sviluppo locale](/guides/setup-locale) |
+| Consultare il contratto di un endpoint | [API Reference](/api/formando-percorsi-api) |
