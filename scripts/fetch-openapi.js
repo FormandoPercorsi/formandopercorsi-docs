@@ -138,6 +138,10 @@ async function fetchSpec(env) {
 }
 
 (async () => {
+  // openapi/ holds nothing but generated files now (see .gitignore), so a
+  // fresh checkout/Docker build context won't have the directory at all --
+  // git doesn't track empty directories.
+  fs.mkdirSync(OPENAPI_DIR, {recursive: true});
   for (const env of ENVIRONMENTS) {
     await fetchSpec(env);
   }
