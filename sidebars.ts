@@ -62,6 +62,7 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Admin - Availability',
       'Admin - Finance',
       'Admin - Lessons',
+      'Admin - Price Changes',
       'Admin - Users',
       'Admin - Tracking Metrics',
       'Metric Options',
