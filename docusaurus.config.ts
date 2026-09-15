@@ -20,6 +20,18 @@ const config: Config = {
   organizationName: 'FormandoPercorsi',
   projectName: 'formandopercorsi-docs',
 
+  // Keep this at 'throw': a dead link in a guide is worse than a failed build.
+  //
+  // It does mean guides must not deep-link a per-tag API page (`/api/<tag>`) whose tag is not
+  // yet in **production**. The two API trees are generated from two different live specs -- `/api`
+  // from api.formandopercorsi.com, `/api-develop` from dev.api... (see scripts/fetch-openapi.js)
+  // -- and a backend feature reaches dev well before prod, so `/api/<new-tag>` is missing while
+  // `/api-develop/<new-tag>` is already there. The build then fails here, on a deploy, far from
+  // the commit that added the link. sidebars.ts tolerates the same asymmetry on purpose (a tag
+  // configured but absent from a tree is skipped, not an error); links have no such escape.
+  //
+  // So: name a new administrative area in prose and add its link only once it is live in
+  // production.
   onBrokenLinks: 'throw',
   markdown: {
     hooks: {
