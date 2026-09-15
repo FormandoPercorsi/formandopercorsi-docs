@@ -28,7 +28,9 @@ Il soggetto che incassa è definito **provider** dell'ordine: è la scuola ester
 
 ## Composizione del prezzo
 
-Il prezzo di una lezione non è calcolato in percentuale al momento della prenotazione: è un valore configurato dall'amministrazione per ogni combinazione di **durata della lezione** e **città di fatturazione della famiglia**, con una configurazione di riferimento applicata quando la città non ha un listino dedicato.
+Il prezzo di una lezione non è calcolato in percentuale al momento della prenotazione: è un valore configurato dall'amministrazione per ogni combinazione di **durata della lezione**, **città di fatturazione della famiglia** e **regime fiscale dell'insegnante**, con una configurazione di riferimento applicata quando la città o il regime non hanno un listino dedicato.
+
+I listini sono **versionati**: un aggiornamento non riscrive la tariffa esistente, ne crea una nuova versione che entra in vigore a una data stabilita. Fino a quel giorno i preventivi continuano a usare quella precedente, e uno storico permette di ritirare un aggiornamento sia prima che dopo la sua entrata in vigore. Una città senza listino proprio segue quello di riferimento finché non le viene aperto il suo, dopodiché va aggiornata a parte. Il prezzo resta comunque **congelato sull'ordine** al momento della prenotazione: un cambio di listino non tocca nulla di già venduto.
 
 Per ciascuna combinazione sono definiti, come importi assoluti e non come percentuali:
 
@@ -80,7 +82,9 @@ L'elaborazione procede in quest'ordine:
 
 Le lezioni che cambiano fascia dopo essere già state elaborate vengono ricalcolate registrando **la sola differenza**: nessun importo già trasferito viene duplicato.
 
-Ogni passaggio alimenta un rendiconto inviato all'amministrazione insieme ai documenti emessi. Un errore su un singolo soggetto non interrompe l'elaborazione degli altri.
+Ogni passaggio alimenta un rendiconto inviato all'amministrazione insieme ai documenti emessi, e consultabile anche dall'area amministrativa insieme alle somme effettivamente movimentate, lezione per lezione.
+
+Un errore su un singolo soggetto non interrompe l'elaborazione degli altri: è una scelta deliberata, perché una posizione problematica non deve costare il compenso a tutti gli altri. Ne consegue però che un'elaborazione può concludersi correttamente pur avendo saltato qualcuno, quindi ogni esecuzione viene registrata insieme alle posizioni che non è riuscita a trattare: l'esito complessivo va sempre letto insieme a quell'elenco.
 
 ## Documenti fiscali
 
