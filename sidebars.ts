@@ -15,8 +15,9 @@ type SidebarItem = {label?: string; type?: string; [key: string]: unknown};
  * sidebar -- which would silently go stale on the next regeneration -- we
  * re-group the *generated* category objects by their tag label into a
  * handful of topic groups that mirror how someone actually thinks about the
- * product. Add a new backend tag to a group below when it shows up;
- * everything else keeps working unchanged.
+ * product. Add a new backend tag to a group below when it shows up; one that
+ * nobody has filed yet lands in the "Altro" group rather than breaking the
+ * build, so everything else keeps working unchanged.
  *
  * The same grouping is applied to both the production and develop API trees
  * (see docusaurus.config.ts) since they share the same tag structure -- only
@@ -29,6 +30,9 @@ function categoriesByLabel(generatedSidebar: unknown): Map<string, SidebarItem> 
       .map((item) => [item.label as string, item]),
   );
 }
+
+/** Where tags no group claims end up, so a new backend tag never breaks the build. */
+const FALLBACK_GROUP_LABEL = 'Altro';
 
 const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
   {label: 'Autenticazione', tags: ['Auth']},
@@ -60,12 +64,15 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
     label: 'Amministrazione',
     tags: [
       'Admin - Availability',
+      'Admin - Band Changes',
+      'Admin - Bands',
       'Admin - External Schools',
       'Admin - Finance',
       'Admin - Job Runs',
       'Admin - Lessons',
       'Admin - Monitoring',
       'Admin - Price Changes',
+      'Admin - Provisioning',
       'Admin - Settlements',
       'Admin - Tracking Metrics',
       'Admin - Users',
@@ -79,10 +86,15 @@ function buildApiSidebar(generatedSidebar: unknown, infoDocId: string, envLabel:
   const coveredTags = new Set(TOPIC_GROUPS.flatMap((group) => group.tags));
   const uncovered = [...byLabel.keys()].filter((tag) => !coveredTags.has(tag));
   if (uncovered.length > 0) {
-    throw new Error(
-      `sidebars.ts: OpenAPI tag(s) ${uncovered.map((t) => `"${t}"`).join(', ')} in the ${envLabel} spec are not ` +
-        `assigned to any group in TOPIC_GROUPS, so their endpoints would be missing from the sidebar. Add them ` +
-        `to an existing group (or a new one) above.`,
+    // A tag no group claims used to throw, which meant a backend shipping a
+    // brand-new tag broke the docs build until someone edited this file. The
+    // endpoints still have to reach the sidebar, so they are collected into a
+    // fallback group instead; the warning is the reminder to file them under a
+    // real topic above.
+    console.warn(
+      `[sidebars] OpenAPI tag(s) ${uncovered.map((t) => `"${t}"`).join(', ')} in the ${envLabel} spec are not ` +
+        `assigned to any group in TOPIC_GROUPS: they are shown under "${FALLBACK_GROUP_LABEL}". Add them to an ` +
+        `existing group (or a new one) in sidebars.ts.`,
     );
   }
 
@@ -91,12 +103,19 @@ function buildApiSidebar(generatedSidebar: unknown, infoDocId: string, envLabel:
   // its git-based fallback (a brand-new tag not yet reflected in the
   // committed web/doc/openapi.yaml), so a build using the fallback would
   // otherwise fail on content that simply isn't in that particular spec yet.
-  // The real failure mode -- a tag no group claims, above -- still throws,
-  // since that one means content silently vanishing from navigation.
   const groups = TOPIC_GROUPS.map(({label, tags}) => {
     const items = tags.map((tag) => byLabel.get(tag)).filter((category): category is SidebarItem => Boolean(category));
     return {type: 'category', label, items, collapsed: true} as SidebarItem;
   }).filter((group) => (group.items as unknown[]).length > 0);
+
+  if (uncovered.length > 0) {
+    groups.push({
+      type: 'category',
+      label: FALLBACK_GROUP_LABEL,
+      items: uncovered.map((tag) => byLabel.get(tag) as SidebarItem),
+      collapsed: true,
+    } as SidebarItem);
+  }
 
   return [{type: 'doc', id: infoDocId}, ...groups] as unknown as SidebarsConfig[string];
 }

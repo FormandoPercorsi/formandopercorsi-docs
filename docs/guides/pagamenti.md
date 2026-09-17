@@ -45,6 +45,10 @@ Le **fasce di ore** (*pricing band*) rappresentano il monte ore mensile effettiv
 
 Poiché la fascia di un insegnante dipende da tutte le lezioni che svolgerà nel mese, comprese quelle non ancora prenotate, **al momento della prenotazione non è possibile sapere quale ripartizione si applicherà**. Il sistema registra quindi sull'ordine tutte le ripartizioni possibili, una per fascia, e sceglie quella corretta soltanto in fase di liquidazione, quando il monte ore effettivo è noto.
 
+Le fasce sono sempre quattro e i loro confini sono anch'essi **versionati**, per la stessa ragione per cui lo sono i listini, ma con una conseguenza più delicata: la liquidazione mensile riattribuisce la fascia al mese che sta chiudendo, e rieseguirla su un mese già chiuso deve restare un'operazione a vuoto. Se i limiti fossero un solo insieme modificabile, spostarne uno riattribuirebbe anche tutti i mesi già liquidati e sposterebbe denaro fra piattaforma e insegnante alla prima riesecuzione. Le fasce vengono quindi risolte **alla data del mese che si sta liquidando**, e un aggiornamento dei limiti non può avere decorrenza nel passato. La fascia a cui ciascuna lezione è stata effettivamente liquidata resta inoltre registrata sulla lezione stessa, che è l'unica fonte attendibile di quanto è stato davvero pagato.
+
+Poiché i limiti determinano quanto ciascun insegnante percepisce, l'amministrazione dispone di un **prospetto di simulazione** che, mese per mese, mette a confronto tre letture: la distribuzione degli insegnanti ottenuta con i limiti in vigore in quel mese, quella con cui le lezioni sono state realmente liquidate, e quella che si otterrebbe con i limiti proposti. Le prime due possono legittimamente divergere per un insegnante prossimo a un confine, e rendere visibile quella divergenza è precisamente lo scopo di tenerle distinte.
+
 Il prezzo proposto alla famiglia può inoltre essere modificato da un codice promozionale, dal credito eventualmente maturato dalla famiglia — si veda [Crediti e programma referral](/guides/referral-crediti) — e dall'eventuale acquisto della [copertura assicurativa](/guides/assicurazione).
 
 ## Incasso
@@ -72,7 +76,7 @@ php yii payments/process-daily-payouts               # giornaliero, elabora gli 
 
 L'elaborazione procede in quest'ordine:
 
-1. Per ogni insegnante con lezioni nel periodo, determinazione della fascia di ore raggiunta e scomposizione di ciascuna lezione nelle tre quote spettanti a insegnante, scuola esterna e piattaforma.
+1. Per ogni insegnante con lezioni nel periodo, determinazione della fascia di ore raggiunta — con i limiti in vigore nel mese che si sta liquidando, non con quelli odierni — e scomposizione di ciascuna lezione nelle tre quote spettanti a insegnante, scuola esterna e piattaforma.
 2. Applicazione dell'imposta di bollo a carico delle scuole esterne, quando dovuta in base al regime fiscale dell'insegnante. L'onere resta sempre in capo alla scuola che ha incassato, mai all'insegnante.
 3. Applicazione delle compensazioni assicurative, che rettificano gli importi già registrati. Avviene necessariamente prima del consolidamento, perché modifica le posizioni; si veda [Copertura assicurativa](/guides/assicurazione).
 4. Consolidamento delle posizioni per soggetto avente diritto.
