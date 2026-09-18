@@ -70,6 +70,10 @@ Quando un insegnante modifica il proprio tempo di spostamento, il sistema ricalc
 
 Al termine, gli slot prenotabili vengono rigenerati per i blocchi modificati. L'intera operazione è racchiusa in un'unica transazione: se un passaggio fallisce, nessuna modifica viene applicata.
 
+## Quando un insegnante non compare
+
+La ricerca della famiglia parte dagli slot prenotabili descritti sopra e applica una propria catena di filtri, quindi un insegnante con disponibilità dichiarate può ugualmente non comparire fra i risultati. Per ricostruire quale filtro lo esclude, e più in generale perché una certa famiglia non riesce a prenotare un certo insegnante, l'amministrazione dispone della [Diagnostica delle prenotazioni](/guides/diagnostica-prenotazioni).
+
 :::note
 Gli indicatori di prenotabilità agli estremi e il contatore delle settimane consecutive sono predisposti per la prenotazione dei percorsi periodici, ma l'applicazione web attualmente in uso non li utilizza. È opportuno verificarne lo stato di adozione prima di assumerli operativi, e altrettanto prima di considerarli codice inutilizzato.
 :::
