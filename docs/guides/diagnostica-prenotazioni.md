@@ -20,7 +20,7 @@ Chi riceve una segnalazione raramente conosce lo slot esatto che la famiglia ha 
 
 I riferimenti indicati vengono validati **solo nella forma**: un riferimento ben scritto che non esiste, che appartiene a un'altra famiglia o che punta a un utente della categoria sbagliata viene lasciato passare di proposito. Spiegare esattamente quella situazione è il compito della diagnosi, non qualcosa da prevenire rifiutando la richiesta.
 
-Nell'applicazione web lo strumento è l'ultima scheda della gestione utenti, e tutto vi si sceglie per nome da elenchi con ricerca; si veda [Applicazione web](/guides/guida-frontend).
+Nell'applicazione web lo strumento sta in fondo alla gestione utenti, tenuto in disparte dalle schede che elencano le anagrafiche, e tutto vi si sceglie per nome da elenchi con ricerca; si veda [Applicazione web](/guides/guida-frontend).
 
 ## Il verdetto
 

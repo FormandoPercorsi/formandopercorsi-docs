@@ -39,7 +39,7 @@ Oltre alle aree di famiglie e insegnanti, l'applicazione espone l'interfaccia co
 | --- | --- |
 | **Economia** | Aggiornamenti tariffari versionati con anteprima e storico, configurazione dei limiti delle fasce di ore con simulazione della distribuzione, promozioni, città di competenza e creazione delle scuole esterne. |
 | **Liquidazioni** | Le esecuzioni periodiche e ciò che hanno realmente movimentato: flussi di denaro, payout, trasferimenti, documenti emessi e ricevute in attesa di bollo. |
-| **Gestione utenti** | Insegnanti, famiglie, lezioni e disponibilità, e come ultima scheda la **diagnostica**: perché una certa famiglia non riesce a prenotare un certo insegnante, descritta in [Diagnostica delle prenotazioni](/guides/diagnostica-prenotazioni). Sta qui perché interroga le stesse anagrafiche delle altre schede, ed è l'ultima perché è lo strumento a cui si ricorre quando le altre non hanno spiegato il problema. |
+| **Gestione utenti** | Insegnanti, famiglie, lezioni e disponibilità, e come ultima scheda la **diagnostica**: perché una certa famiglia non riesce a prenotare un certo insegnante, descritta in [Diagnostica delle prenotazioni](/guides/diagnostica-prenotazioni). Sta qui perché interroga le stesse anagrafiche delle altre schede, ma è tenuta in disparte sul bordo destro perché non è una quinta scheda pari grado: le altre elencano una collezione, questa è lo strumento che le attraversa tutte, ed è quello a cui si ricorre quando le altre non hanno spiegato il problema. |
 
 Due scelte di presentazione meritano di essere esplicitate, perché rendono leggibili dati che altrimenti si prestano a essere fraintesi.
 
