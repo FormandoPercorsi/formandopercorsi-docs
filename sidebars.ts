@@ -66,6 +66,7 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Admin - Availability',
       'Admin - Band Changes',
       'Admin - Bands',
+      'Admin - Diagnostics',
       'Admin - External Schools',
       'Admin - Finance',
       'Admin - Job Runs',
@@ -140,7 +141,12 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Prenotazione delle lezioni',
-      items: ['guides/disponibilita', 'guides/ranking-insegnanti', 'guides/percorsi-formativi'],
+      items: [
+        'guides/disponibilita',
+        'guides/ranking-insegnanti',
+        'guides/percorsi-formativi',
+        'guides/diagnostica-prenotazioni',
+      ],
     },
     {
       type: 'category',
