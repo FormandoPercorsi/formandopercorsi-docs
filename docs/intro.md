@@ -24,5 +24,7 @@ Le due parti sono complementari. Le guide rimandano alle sezioni corrispondenti 
 | Comprendere la piattaforma nel suo insieme | [Panoramica della piattaforma](/guides/piattaforma) |
 | Integrare un client applicativo | [Autenticazione](/guides/autenticazione), poi l'area funzionale di interesse |
 | Comprendere i flussi economici | [Pagamenti, payout e fatturazione](/guides/pagamenti) |
+| Capire chi incassa e chi emette quale documento | [Scuole esterne, provider e incasso](/guides/scuole-esterne), [Documenti fiscali e ricevute](/guides/documenti-fiscali) |
+| Presidiare l'esercizio quotidiano della piattaforma | [Area amministrativa e controllo operativo](/guides/amministrazione) |
 | Sviluppare sul backend | [Architettura del sistema](/guides/architettura) e [Ambiente di sviluppo locale](/guides/setup-locale) |
 | Consultare il contratto di un endpoint | [API Reference](/api/formando-percorsi-api) |

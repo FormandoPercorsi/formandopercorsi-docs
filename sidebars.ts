@@ -52,11 +52,14 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Contract',
     ],
   },
-  {label: 'Insegnanti', tags: ['Teacher', 'Teacher Application']},
+  {label: 'Insegnanti', tags: ['Teacher', 'Teacher Application', 'Teacher Credit']},
   {
     label: 'Contenuti didattici',
-    tags: ['Subject', 'Topic', 'Subtopic', 'StudentExercise', 'Exercise', 'Track', 'Video'],
+    tags: ['Subject', 'Topic', 'Subtopic', 'StudentExercise', 'Exercise', 'Video'],
   },
+  // 'Track' is the event-collection endpoint, not a didactic "track": it belongs with the
+  // metric definitions that aggregate the events it collects, not with subjects and exercises.
+  {label: 'Tracking & metriche', tags: ['Track', 'Admin - Tracking Metrics', 'Metric Options']},
   {label: 'Pagamenti & Fatturazione', tags: ['Invoice', 'InvoiceLegislation', 'CreditNote']},
   {label: 'Notifiche', tags: ['Notification']},
   {label: 'Anagrafiche geografiche', tags: ['City', 'Province', 'School', 'Headquarter']},
@@ -75,9 +78,7 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Admin - Price Changes',
       'Admin - Provisioning',
       'Admin - Settlements',
-      'Admin - Tracking Metrics',
       'Admin - Users',
-      'Metric Options',
     ],
   },
 ];
@@ -145,13 +146,26 @@ const sidebars: SidebarsConfig = {
         'guides/disponibilita',
         'guides/ranking-insegnanti',
         'guides/percorsi-formativi',
+        'guides/modifiche-cancellazioni',
         'guides/diagnostica-prenotazioni',
       ],
     },
     {
       type: 'category',
       label: 'Flussi economici',
-      items: ['guides/pagamenti', 'guides/referral-crediti', 'guides/assicurazione'],
+      items: [
+        'guides/pagamenti',
+        'guides/scuole-esterne',
+        'guides/documenti-fiscali',
+        'guides/referral-crediti',
+        'guides/crediti-insegnanti',
+        'guides/assicurazione',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Amministrazione e dati',
+      items: ['guides/amministrazione', 'guides/statistiche', 'guides/tracking-metriche'],
     },
     {
       type: 'category',

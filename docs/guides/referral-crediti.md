@@ -85,6 +85,8 @@ quota variabile di piattaforma → quota della scuola esterna → quota fissa di
 
 Il compenso dell'insegnante è l'ultima voce aggredibile e, grazie al prezzo minimo garantito descritto sopra, non viene di fatto mai raggiunta. Il principio è che **l'insegnante è estraneo all'iniziativa promozionale**: il costo di acquisizione è a carico della piattaforma ed eventualmente della scuola esterna. La ripartizione effettiva è registrata per ciascuna lezione, così da restare verificabile.
 
+Esiste una configurazione, oggi disattivata, che rovescia deliberatamente questa gerarchia facendo assorbire lo sconto all'insegnante e riconoscendogli in cambio un credito di pari importo: è descritta in [Crediti degli insegnanti](/guides/crediti-insegnanti).
+
 ## Correttezza in caso di concorrenza
 
 Due meccanismi garantiscono che il credito non possa essere riconosciuto o speso più volte:

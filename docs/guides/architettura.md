@@ -63,9 +63,11 @@ Questa documentazione viene a sua volta costruita scaricando la specifica dal ba
 Due meccanismi distinti eseguono lavoro al di fuori del ciclo richiesta/risposta:
 
 - **Coda dei lavori**, persistita su base dati, per operazioni innescate da un'azione utente ma troppo onerose per essere svolte durante la richiesta (invii massivi di email, sincronizzazioni con servizi esterni).
-- **Attività pianificate**, eseguite a cadenza fissa: derivazione notturna delle disponibilità prenotabili, ricalcolo degli indicatori di ordinamento, liquidazione mensile dei compensi, promemoria delle lezioni, scadenza delle coperture assicurative, passaggio di classe annuale.
+- **Attività pianificate**, eseguite a cadenza fissa: derivazione notturna delle disponibilità prenotabili, ricalcolo degli indicatori di ordinamento, liquidazione mensile e giornaliera dei compensi, promemoria delle lezioni, scadenza delle coperture assicurative, decadenza delle richieste di modifica e delle cancellazioni dell'insegnante non risolte, passaggio di classe annuale, aggregazione delle metriche di utilizzo.
 
 Per chi integra un client la conseguenza pratica è che **alcuni dati cambiano senza che il client abbia compiuto alcuna azione**: gli slot prenotabili, l'ordinamento dei risultati di ricerca, lo stato di una fattura e il saldo dei crediti possono variare fra due chiamate successive.
+
+Ogni esecuzione di un'attività pianificata è registrata con il proprio esito e con le unità di lavoro che non è riuscita a trattare, consultabili dall'area amministrativa: si veda [Area amministrativa e controllo operativo](/guides/amministrazione).
 
 ## Organizzazione interna del servizio applicativo
 
@@ -98,14 +100,17 @@ Due convenzioni hanno effetti visibili anche dall'esterno e vale la pena conosce
 | Dominio | Contenuto | Approfondimento |
 | --- | --- | --- |
 | Disponibilità | Derivazione degli slot prenotabili, ordinamento degli insegnanti in ricerca | [Disponibilità](/guides/disponibilita), [Ordinamento dei risultati](/guides/ranking-insegnanti) |
-| Lezioni | Creazione, modifica e cancellazione di lezioni e percorsi | [Percorsi formativi](/guides/percorsi-formativi) |
+| Lezioni | Creazione, modifica e cancellazione di lezioni e percorsi | [Percorsi formativi](/guides/percorsi-formativi), [Modifiche e cancellazioni](/guides/modifiche-cancellazioni) |
 | Prezzi e pagamenti | Determinazione del prezzo, incasso, liquidazione dei compensi | [Pagamenti, payout e fatturazione](/guides/pagamenti) |
-| Fatturazione | Fatturazione elettronica, fatture esterne e ricevute | [Pagamenti, payout e fatturazione](/guides/pagamenti) |
+| Fatturazione | Fatturazione elettronica, fatture esterne e ricevute | [Documenti fiscali e ricevute](/guides/documenti-fiscali) |
+| Scuole esterne | Territori di competenza, modalità di incasso, abilitazione sui servizi esterni | [Scuole esterne, provider e incasso](/guides/scuole-esterne) |
 | Assicurazione | Coperture, sinistri e compensazione dell'insegnante | [Copertura assicurativa](/guides/assicurazione) |
-| Crediti e referral | Maturazione e utilizzo del credito famiglia | [Crediti e programma referral](/guides/referral-crediti) |
+| Crediti e referral | Maturazione e utilizzo del credito famiglia e del credito insegnante | [Crediti e programma referral](/guides/referral-crediti), [Crediti degli insegnanti](/guides/crediti-insegnanti) |
 | Notifiche | Comunicazioni in-app ed email | [Notifiche](/guides/notifiche) |
 | Anagrafiche | Scuole, città, province, sedi | [School](/api/school), [City](/api/city), [Province](/api/province), [Headquarter](/api/headquarter) |
 | Contenuti didattici | Materie, argomenti, esercizi | [Subject](/api/subject), [Topic](/api/topic), [StudentExercise](/api/student-exercise) |
 | Calendario | Sincronizzazione Google Calendar e collegamenti per le lezioni online | — |
+| Statistiche | Indicatori aggregati su lezioni, disponibilità, utenti e flussi economici | [Statistiche e indicatori](/guides/statistiche) |
+| Tracking e metriche | Raccolta degli eventi di utilizzo e loro aggregazione in metriche configurabili | [Tracking degli eventi e metriche](/guides/tracking-metriche) |
 
 La sincronizzazione con Google Calendar avviene interamente da server a server: i client non vi partecipano in alcun modo.

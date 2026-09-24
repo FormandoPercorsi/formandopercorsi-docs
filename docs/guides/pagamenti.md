@@ -24,7 +24,7 @@ Incasso sul conto dell'insegnante o della scuola esterna di competenza
         └─► bonifico bancario verso insegnante e scuola esterna
 ```
 
-Il soggetto che incassa è definito **provider** dell'ordine: è la scuola esterna di competenza per la città della famiglia, se esiste copertura su quel territorio, altrimenti l'insegnante stesso. È quindi il soggetto che *detiene materialmente* le somme fino alla liquidazione.
+Il soggetto che incassa è definito **provider** dell'ordine, ed è quindi quello che *detiene materialmente* le somme fino alla liquidazione. Di norma è la scuola esterna di competenza per la città della famiglia, se esiste copertura su quel territorio, altrimenti l'insegnante stesso; in due casi, però, l'insegnante incassa in prima persona pur esistendo una scuola di competenza, che conserva la propria quota e la fattura all'insegnante in liquidazione. Chi incassa e chi ha diritto alla quota sono perciò **due informazioni distinte**, registrate separatamente su ogni ordine: si veda [Scuole esterne, provider e incasso](/guides/scuole-esterne), dove è descritto anche il caso in cui è la piattaforma stessa ad avere la competenza su un territorio.
 
 ## Composizione del prezzo
 
@@ -79,30 +79,23 @@ L'elaborazione procede in quest'ordine:
 1. Per ogni insegnante con lezioni nel periodo, determinazione della fascia di ore raggiunta — con i limiti in vigore nel mese che si sta liquidando, non con quelli odierni — e scomposizione di ciascuna lezione nelle tre quote spettanti a insegnante, scuola esterna e piattaforma.
 2. Applicazione dell'imposta di bollo a carico delle scuole esterne, quando dovuta in base al regime fiscale dell'insegnante. L'onere resta sempre in capo alla scuola che ha incassato, mai all'insegnante.
 3. Applicazione delle compensazioni assicurative, che rettificano gli importi già registrati. Avviene necessariamente prima del consolidamento, perché modifica le posizioni; si veda [Copertura assicurativa](/guides/assicurazione).
-4. Consolidamento delle posizioni per soggetto avente diritto.
-5. Per ogni soggetto che deve un importo alla piattaforma: emissione del documento fiscale e trasferimento della somma.
-6. Per ogni insegnante avente diritto: se l'incasso era stato effettuato da una scuola esterna, emissione del documento e trasferimento dalla scuola all'insegnante; quindi un unico bonifico bancario per il totale spettante.
-7. Bonifico bancario verso ciascuna scuola esterna per l'importo di sua competenza.
+4. Applicazione della ritenuta d'acconto, quando prevista, sulle posizioni in cui un sostituto d'imposta deve un compenso a un insegnante in regime occasionale, e dell'eventuale sconto derivante dal [credito dell'insegnante](/guides/crediti-insegnanti) sui documenti che gli vengono emessi.
+5. Consolidamento delle posizioni per soggetto avente diritto.
+6. Per ogni soggetto che deve un importo alla piattaforma: emissione del documento fiscale e trasferimento della somma.
+7. Per ogni insegnante avente diritto: se l'incasso era stato effettuato da una scuola esterna, emissione del documento e trasferimento dalla scuola all'insegnante; quindi un unico bonifico bancario per il totale spettante.
+8. Bonifico bancario verso ciascuna scuola esterna per l'importo di sua competenza.
 
 Le lezioni che cambiano fascia dopo essere già state elaborate vengono ricalcolate registrando **la sola differenza**: nessun importo già trasferito viene duplicato.
 
-Ogni passaggio alimenta un rendiconto inviato all'amministrazione insieme ai documenti emessi, e consultabile anche dall'area amministrativa insieme alle somme effettivamente movimentate, lezione per lezione.
+Ogni passaggio alimenta un rendiconto inviato all'amministrazione insieme ai documenti emessi. Le posizioni registrate e le somme effettivamente movimentate, lezione per lezione, restano consultabili dall'area amministrativa: si veda [Area amministrativa e controllo operativo](/guides/amministrazione).
 
 Un errore su un singolo soggetto non interrompe l'elaborazione degli altri: è una scelta deliberata, perché una posizione problematica non deve costare il compenso a tutti gli altri. Ne consegue però che un'elaborazione può concludersi correttamente pur avendo saltato qualcuno, quindi ogni esecuzione viene registrata insieme alle posizioni che non è riuscita a trattare: l'esito complessivo va sempre letto insieme a quell'elenco.
 
 ## Documenti fiscali
 
-Il documento emesso a fronte di ciascun movimento dipende dal regime fiscale del soggetto che lo emette. I regimi ammessi e i relativi vincoli sono esposti nella sezione [InvoiceLegislation](/api/invoice-legislation).
+Ogni movimento è accompagnato dal documento che il soggetto avente diritto emette verso quello che deve pagare, e il tipo di documento dipende dal regime fiscale dell'emittente: fattura elettronica trasmessa al Sistema di Interscambio, fattura esterna fuori dal canale telematico, o ricevuta per compenso occasionale. I regimi ammessi sono esposti nella sezione [InvoiceLegislation](/api/invoice-legislation) della API Reference.
 
-| Situazione | Documento emesso |
-| --- | --- |
-| Dati fiscali completi e regime compatibile | Fattura elettronica trasmessa al Sistema di Interscambio |
-| Regime che richiede gestione manuale | Fattura esterna, al di fuori del canale telematico |
-| Prestazione occasionale | Ricevuta per compenso occasionale |
-
-Il ciclo di vita di una fattura elettronica prevede l'invio, l'accettazione da parte del Sistema di Interscambio e la consegna al destinatario. Sono possibili tre esiti non ordinari: la **quarantena**, quando il primo tentativo di trasmissione non va a buon fine e il sistema ritenta automaticamente; il **rifiuto**, per errori di contenuto o problemi tecnici; la **mancata consegna**, nel caso in cui il documento sia stato validamente emesso ma non recapitabile al destinatario. Ogni transizione genera una notifica, come descritto in [Notifiche](/guides/notifiche).
-
-Quando la posizione di un soggetto risulta negativa — come può accadere se il compenso assicurativo eccede le quote di piattaforma del mese — viene emessa una nota di credito, oppure, quando si tratta di un compenso effettivamente dovuto dalla piattaforma e non di una rettifica contabile, una fattura con le parti invertite.
+Il ciclo di vita dei documenti, gli esiti non ordinari della trasmissione telematica, il trattamento della ritenuta d'acconto e dell'imposta di bollo sulle ricevute occasionali e le rettifiche in diminuzione sono descritti in [Documenti fiscali e ricevute](/guides/documenti-fiscali).
 
 ## Sintesi
 
@@ -115,4 +108,5 @@ Quando la posizione di un soggetto risulta negativa — come può accadere se il
 ## Limiti attuali
 
 - Il credito applicato a un ordine non viene recuperato se la lezione corrispondente viene successivamente rimborsata. Si veda [Crediti e programma referral](/guides/referral-crediti).
+- Il credito maturato dagli insegnanti sulle lezioni scontate è realizzato ma disattivato: si veda [Crediti degli insegnanti](/guides/crediti-insegnanti).
 - Non è disponibile alcuna interfaccia che esponga a insegnanti e famiglie lo storico analitico dei movimenti: i documenti fiscali restano l'unica rappresentazione consultabile dei flussi economici.
