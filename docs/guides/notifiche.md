@@ -57,8 +57,11 @@ Generate in risposta agli aggiornamenti provenienti dal canale di fatturazione e
 | `invoice_rejected` | Fattura rifiutata per errori di contenuto o problemi tecnici. |
 | `invoice_not_delivered` | Fattura validamente emessa ma non recapitabile al destinatario. |
 | `invoice_quarantena` | Primo tentativo di trasmissione non riuscito; il sistema ritenterà automaticamente. |
+| `receipt_awaiting_stamp` | Ricevuta per compenso occasionale emessa predisposta: l'insegnante destinatario deve apporre la marca da bollo, datare, firmare e caricare la scansione. |
 
-Il flusso completo di fatturazione è descritto in [Pagamenti, payout e fatturazione](/guides/pagamenti).
+L'ultima notifica è rivolta al solo insegnante ed è emessa **soltanto** per una ricevuta predisposta: una ricevuta emessa automaticamente, o quella la cui marca è apposta dalla piattaforma, non ne genera alcuna, perché in quei casi l'insegnante non ha nulla da fare. La notifica decade se la ricevuta viene annullata, per esempio perché la famiglia ha spostato la lezione su un altro insegnante.
+
+Il flusso completo di fatturazione è descritto in [Pagamenti, payout e fatturazione](/guides/pagamenti); i documenti e le modalità di assolvimento del bollo in [Documenti fiscali e ricevute](/guides/documenti-fiscali).
 
 ## Altri eventi
 
