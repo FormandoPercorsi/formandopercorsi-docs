@@ -75,7 +75,15 @@ Il flusso completo di fatturazione è descritto in [Pagamenti, payout e fatturaz
 Le notifiche vengono recuperate dai client per interrogazione periodica: **non esiste alcun canale in tempo reale**. L'applicazione web interroga l'API ogni cinque minuti, con richieste aggiuntive immediatamente dopo le azioni che possono generare notifiche.
 
 :::caution Copertura parziale nei client
-L'applicazione web gestisce esplicitamente solo un sottoinsieme dei tipi elencati: prenotazione, cancellazione e modifica delle lezioni, percorsi formativi e fatturazione. Gli altri tipi vengono presentati come notifica generica, priva di testo specifico e — per quelli che richiedono una decisione — priva dell'azione corrispondente.
+L'applicazione web gestisce esplicitamente prenotazione, cancellazione e modifica delle lezioni, percorsi formativi e gli esiti della fatturazione elettronica nella barra delle notifiche, e il passaggio di classe con una finestra dedicata (si veda [Applicazione web](/guides/guida-frontend#notifiche)). Gli altri tipi vengono presentati come notifica generica, priva di testo specifico e — per quelli che richiedono una decisione — priva dell'azione corrispondente.
 
-Non sono attualmente gestiti l'annullamento di una cancellazione, il passaggio di classe, l'aggiornamento dei termini di servizio e le nuove candidature. Le relative notifiche restano recuperabili dall'API, ma nessun utente le vede tradotte in un messaggio comprensibile. Prima di affidare a una di queste notifiche una comunicazione rilevante — l'esito di una promozione, un aggiornamento contrattuale — è necessario verificare che il client di destinazione la gestisca.
+Non sono attualmente gestiti l'annullamento di una cancellazione, la ricevuta in attesa di marca da bollo, l'aggiornamento dei termini di servizio e le nuove candidature. Le relative notifiche restano recuperabili dall'API, ma nessun utente le vede tradotte in un messaggio comprensibile; per la ricevuta da bollare resta comunque l'email di istruzioni. Prima di affidare a una di queste notifiche una comunicazione rilevante — l'esito di una promozione, un aggiornamento contrattuale — è necessario verificare che il client di destinazione la gestisca.
 :::
+
+## Notifiche push
+
+L'API consente a un'applicazione di registrare e rimuovere il token di notifica push di un dispositivo (Firebase Cloud Messaging), con piattaforma e identificativo del dispositivo. La registrazione è l'unica parte realizzata: **nessuna notifica viene oggi inviata tramite push**, e i token registrati non sono utilizzati.
+
+## Email
+
+Gran parte degli eventi descritti in questa pagina è accompagnata da un'email, inviata indipendentemente dalla notifica in-app: ogni destinatario riceve la propria e il fallimento di un invio non impedisce gli altri. Le email relative a una lezione sono inviate alla famiglia, all'insegnante, allo studente quando ha un proprio indirizzo e il consenso, e — per prenotazioni e cambi di insegnante — anche al provider dell'ordine quando è una scuola esterna; le cancellazioni sono segnalate anche all'amministrazione. Esistono inoltre email senza una notifica corrispondente: conferma della registrazione e del cambio di indirizzo email, recupero della password, invito di registrazione per gli insegnanti, invito del programma referral, condivisione del calendario Google, istruzioni per le fatture esterne e le ricevute, documenti inseriti manualmente, promemoria delle lezioni e alcune segnalazioni all'amministrazione (per esempio un possibile abuso del programma referral).

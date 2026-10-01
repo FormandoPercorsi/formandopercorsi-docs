@@ -136,8 +136,8 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Accesso al sistema',
-      items: ['guides/autenticazione'],
+      label: 'Accesso e utenti',
+      items: ['guides/autenticazione', 'guides/insegnanti', 'guides/famiglie-studenti'],
     },
     {
       type: 'category',
@@ -147,6 +147,7 @@ const sidebars: SidebarsConfig = {
         'guides/ranking-insegnanti',
         'guides/percorsi-formativi',
         'guides/modifiche-cancellazioni',
+        'guides/calendario-lezioni-online',
         'guides/diagnostica-prenotazioni',
       ],
     },
@@ -155,6 +156,7 @@ const sidebars: SidebarsConfig = {
       label: 'Flussi economici',
       items: [
         'guides/pagamenti',
+        'guides/promozioni',
         'guides/scuole-esterne',
         'guides/documenti-fiscali',
         'guides/referral-crediti',
@@ -169,8 +171,8 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Comunicazioni',
-      items: ['guides/notifiche'],
+      label: 'Comunicazioni e contenuti',
+      items: ['guides/notifiche', 'guides/contenuti-didattici'],
     },
     {
       type: 'category',
