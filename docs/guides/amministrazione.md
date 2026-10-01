@@ -16,7 +16,7 @@ Due proprietà di questo registro sono indispensabili per leggerlo correttamente
 
 **Un'esecuzione interrotta non resta in corso per sempre.** Un'elaborazione che termini in modo anomalo viene chiusa come interrotta, perché una riga rimasta «in esecuzione» si leggerebbe come «sta ancora lavorando» proprio a chi sta verificando se i pagamenti sono usciti.
 
-La registrazione non può in nessun caso far fallire l'elaborazione che documenta: ogni scrittura degrada, in caso di problemi, a una riga di log.
+La registrazione non può in nessun caso far fallire l'elaborazione che documenta: ogni scrittura degrada, in caso di problemi, a una riga di log. Il calendario delle attività pianificate in ciascun ambiente, e i comandi che si eseguono a mano, sono descritti in [Attività pianificate e comandi console](/guides/attivita-pianificate).
 
 ## Che cosa ha movimentato una liquidazione
 

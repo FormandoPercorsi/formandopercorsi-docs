@@ -179,8 +179,8 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Sviluppo',
-      items: ['guides/setup-locale'],
+      label: 'Sviluppo ed esercizio',
+      items: ['guides/setup-locale', 'guides/ambienti', 'guides/rilascio-fpc', 'guides/attivita-pianificate'],
     },
   ],
   apiSidebar,

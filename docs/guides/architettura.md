@@ -39,35 +39,40 @@ L'accesso avviene esclusivamente tramite l'API REST documentata nella [API Refer
 
 ## Ambienti e rilascio
 
-Lo **stesso codice** viene distribuito su tre ambienti, ciascuno sul proprio sottodominio:
+Lo **stesso codice** viene distribuito su due ambienti, ciascuno sul proprio sottodominio:
 
-| Ambiente | Sottodominio | Branch di riferimento |
-| --- | --- | --- |
-| Sviluppo | `dev.api.formandopercorsi.com` | `develop` |
-| Pre-produzione | `preprod.api.formandopercorsi.com` | — |
-| Produzione | `api.formandopercorsi.com` | `main` |
+| Ambiente | API | Applicazione web | Branch del backend | Branch del frontend |
+| --- | --- | --- | --- | --- |
+| Sviluppo | `dev.api.formandopercorsi.com` | `dev.formandopercorsi.com` | `develop` | `develop` |
+| Produzione | `api.formandopercorsi.com` | `formandopercorsi.com` | `main` | `master` |
 
-La distinzione fra ambienti è determinata dalla configurazione (`YII_ENV`/`YII_DEBUG`), non da versioni divergenti del codice.
+Un ambiente di pre-produzione è previsto dall'infrastruttura ma non è attivo. La distinzione fra ambienti è determinata dalla configurazione — base dati, credenziali, servizi esterni, indirizzi pubblici — e non da versioni divergenti del codice: in particolare gli interruttori delle funzionalità sono parte del codice e sono identici nei due ambienti a parità di versione. La composizione di ciascun ambiente su AWS e le differenze fra i due sono descritte in [Ambienti di sviluppo e produzione](/guides/ambienti).
 
-Nessuno dei rilasci è automatico. La pubblicazione avviene in due passaggi distinti:
+Nessuno dei rilasci è automatico. La pubblicazione avviene in due passaggi distinti, entrambi eseguiti con lo strumento operativo `fpc` del repository [`FormandoPercorsi/aws`](https://github.com/FormandoPercorsi/aws):
 
-1. Dopo il push sul branch di riferimento si costruiscono e pubblicano le immagini applicative per quel branch, avviando il workflow **ECR Deployment Workflow** su GitHub Actions — manualmente dalla scheda Actions oppure con `./fpc build --component backend` dal repository [`FormandoPercorsi/aws`](https://github.com/FormandoPercorsi/aws), che avvia lo stesso workflow e ne attende il completamento.
-2. Il rilascio effettivo sui servizi in esecuzione viene avviato separatamente con lo strumento operativo `./fpc deploy` dello stesso repository. Se la release contiene nuove migrazioni del database, queste vanno eseguite prima del rilascio dei servizi. La procedura completa è documentata in quel repository, in `docs/how-to/deploy/backend.md`.
+1. **Costruzione delle immagini.** Dopo il push sul branch dell'ambiente si avvia il workflow di costruzione su GitHub Actions, che pubblica le immagini su ECR.
+2. **Rilascio sui servizi in esecuzione**, preceduto dalle migrazioni della base dati quando la release ne contiene.
 
-Poiché la specifica OpenAPI viene rigenerata dal codice sorgente a ogni costruzione dell'immagine, la [API Reference](/api/formando-percorsi-api) di ciascun ambiente rispecchia ciò che in quell'ambiente è effettivamente in esecuzione.
+I due passaggi possono essere eseguiti con un solo comando; ad esempio, per il backend in sviluppo:
 
-Questa documentazione viene a sua volta costruita scaricando la specifica dal backend **in esecuzione**: perché l'API Reference recepisca nuove annotazioni OpenAPI, l'immagine della documentazione va ricostruita e rilasciata dopo il rilascio del backend. Aggiungendo `--with-docs` al comando di deploy del backend questi passaggi avvengono contestualmente.
+```bash
+./fpc deploy --env dev --component="service:rest,service:queue" --build --migrate --force-redeploy --with-docs --yes
+```
+
+Il significato di ogni opzione, l'ordine in cui le fasi vengono eseguite e gli altri casi d'uso (frontend, sola documentazione, variabili d'ambiente, attività pianificate, comandi una tantum, accesso alla base dati) sono descritti in [Rilascio e operatività con `fpc`](/guides/rilascio-fpc).
+
+Poiché la specifica OpenAPI viene rigenerata dal codice sorgente a ogni costruzione dell'immagine, la [API Reference](/api/formando-percorsi-api) di ciascun ambiente rispecchia ciò che in quell'ambiente è effettivamente in esecuzione. Questa documentazione viene a sua volta costruita scaricando la specifica dal backend **in esecuzione**: perché l'API Reference recepisca nuove annotazioni OpenAPI, l'immagine della documentazione va ricostruita e rilasciata dopo il rilascio del backend, ciò che l'opzione `--with-docs` fa contestualmente.
 
 ## Elaborazioni asincrone
 
 Due meccanismi distinti eseguono lavoro al di fuori del ciclo richiesta/risposta:
 
 - **Coda dei lavori**, persistita su base dati, per operazioni innescate da un'azione utente ma troppo onerose per essere svolte durante la richiesta (invii massivi di email, sincronizzazioni con servizi esterni).
-- **Attività pianificate**, eseguite a cadenza fissa: derivazione notturna delle disponibilità prenotabili, ricalcolo degli indicatori di ordinamento, liquidazione mensile e giornaliera dei compensi, promemoria delle lezioni, scadenza delle coperture assicurative, decadenza delle richieste di modifica e delle cancellazioni dell'insegnante non risolte, passaggio di classe annuale, aggregazione delle metriche di utilizzo.
+- **Attività pianificate**, eseguite a cadenza fissa da task effimeri avviati da regole Amazon EventBridge: derivazione notturna delle disponibilità prenotabili, ricalcolo degli indicatori di ordinamento, liquidazione mensile e giornaliera dei compensi, promemoria delle lezioni, scadenza delle coperture assicurative, decadenza delle richieste di modifica e delle cancellazioni dell'insegnante non risolte, passaggio di classe annuale, aggregazione delle metriche di utilizzo.
 
 Per chi integra un client la conseguenza pratica è che **alcuni dati cambiano senza che il client abbia compiuto alcuna azione**: gli slot prenotabili, l'ordinamento dei risultati di ricerca, lo stato di una fattura e il saldo dei crediti possono variare fra due chiamate successive.
 
-Ogni esecuzione di un'attività pianificata è registrata con il proprio esito e con le unità di lavoro che non è riuscita a trattare, consultabili dall'area amministrativa: si veda [Area amministrativa e controllo operativo](/guides/amministrazione).
+Ogni esecuzione di un'attività pianificata è registrata con il proprio esito e con le unità di lavoro che non è riuscita a trattare, consultabili dall'area amministrativa: si veda [Area amministrativa e controllo operativo](/guides/amministrazione). Il calendario completo, con i comandi da eseguire a mano, è in [Attività pianificate e comandi console](/guides/attivita-pianificate).
 
 ## Organizzazione interna del servizio applicativo
 

@@ -27,4 +27,7 @@ Le due parti sono complementari. Le guide rimandano alle sezioni corrispondenti 
 | Capire chi incassa e chi emette quale documento | [Scuole esterne, provider e incasso](/guides/scuole-esterne), [Documenti fiscali e ricevute](/guides/documenti-fiscali) |
 | Presidiare l'esercizio quotidiano della piattaforma | [Area amministrativa e controllo operativo](/guides/amministrazione) |
 | Sviluppare sul backend | [Architettura del sistema](/guides/architettura) e [Ambiente di sviluppo locale](/guides/setup-locale) |
+| Rilasciare una modifica in sviluppo o in produzione | [Rilascio e operatività con `fpc`](/guides/rilascio-fpc) |
+| Capire come sono composti gli ambienti e in che cosa differiscono | [Ambienti di sviluppo e produzione](/guides/ambienti) |
+| Verificare che cosa gira da solo, quando, e quali comandi eseguire a mano | [Attività pianificate e comandi console](/guides/attivita-pianificate) |
 | Consultare il contratto di un endpoint | [API Reference](/api/formando-percorsi-api) |
