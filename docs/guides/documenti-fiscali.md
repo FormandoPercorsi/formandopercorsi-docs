@@ -35,6 +35,8 @@ Il PDF di fatture, note di credito e ricevute è prodotto dalla piattaforma con 
 
 Quando la piattaforma emette materialmente un documento per conto di un altro soggetto, il documento riporta il **terzo intermediario o soggetto emittente**. L'informazione è registrata una sola volta sul documento e da lì raggiunge sia il tracciato telematico sia la stampa, che non possono quindi divergere. Nelle ricevute lo stesso fatto è dichiarato in forma discorsiva nelle note in calce, e non viene ripetuto due volte sulla stessa pagina.
 
+Lo sconto derivante dal [credito della famiglia](/guides/referral-crediti) o da una [promozione](/guides/promozioni) compare come **riga dedicata con importo negativo**. Quando l'imposta di bollo di una fattura non è aggiunta al totale ma ricavata dalle righe, viene ripartita sulle sole righe positive: una riga di sconto conserva sempre esattamente il proprio importo, così che lo sconto stampato coincida con quello concesso.
+
 ## Prestazioni occasionali
 
 Un insegnante in regime occasionale non emette fattura ma **ricevuta**. Due istituti si aggiungono al documento ordinario.

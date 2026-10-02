@@ -4,7 +4,7 @@ title: Notifiche
 
 # Notifiche
 
-Il sistema comunica agli utenti gli eventi che li riguardano attraverso notifiche applicative, affiancate quando previsto da email. Ogni notifica ha un tipo che identifica univocamente l'evento, così che i client possano tradurla in un messaggio e, ove pertinente, in un'azione. Le operazioni di consultazione e aggiornamento sono documentate nella sezione [Notification](/api/notification) della API Reference.
+Il sistema comunica agli utenti gli eventi che li riguardano attraverso notifiche applicative, affiancate quando previsto da email. Ogni notifica ha un tipo che identifica univocamente l'evento, così che i client possano tradurla in un messaggio e, ove pertinente, in un'azione. Le operazioni di consultazione e aggiornamento sono documentate nella sezione [Notification](/api/notification) della API Reference. Le comunicazioni editoriali rivolte a intere categorie di utenti — novità del prodotto e guide alle pagine — non sono notifiche: sono descritte in [Novità e guide in-app](/guides/annunci-guide).
 
 ## Struttura della notifica
 

@@ -69,11 +69,15 @@ Il **motivo** con cui la lezione viene infine chiusa distingue i tre esiti — r
 
 Lo scadere della finestra è gestito da un'attività pianificata che agisce **per conto della famiglia**, con lo stesso percorso di un rimborso richiesto: non esiste una seconda implementazione del rimborso per il caso automatico.
 
+Ogni rimborso di una lezione — su cancellazione della famiglia o a risoluzione di una cancellazione dell'insegnante — **restituisce alla famiglia il credito** speso per quella lezione e storna l'eventuale credito che l'insegnante vi aveva maturato, nella stessa transazione; si vedano [Crediti e programma referral](/guides/referral-crediti#restituzione-del-credito) e [Crediti degli insegnanti](/guides/crediti-insegnanti#storno).
+
 ## Cambio di insegnante e ripartizione economica
 
 La famiglia ha pagato una volta e paga lo stesso importo chiunque tenga la lezione: importo dell'ordine, residuo da pagare e credito applicato **non vengono toccati** dallo spostamento. Ciò che cambia è la **ripartizione**, perché il listino applicabile dipende dal regime fiscale dell'insegnante e la scuola che incassa dipende dal territorio.
 
 Lo spostamento determina quindi di nuovo, per il nuovo insegnante, chi incassa e quale scuola ha diritto alla quota — con le stesse regole di una prenotazione, descritte in [Scuole esterne, provider e incasso](/guides/scuole-esterne) — e ricalcola sull'ordine i costi fissi e le quote per ciascuna fascia di ore, riportando poi la ripartizione sulle singole lezioni. La quota dell'insegnante è il residuo fra prezzo e quote altrui: un listino le cui quote eccedessero quanto la famiglia ha pagato interrompe l'operazione con un errore registrato, anziché produrre un compenso negativo.
+
+Il credito eventualmente maturato dal primo insegnante sulla lezione viene stornato all'interno dello spostamento; il nuovo insegnante lo maturerà alla liquidazione, come descritto in [Crediti degli insegnanti](/guides/crediti-insegnanti#storno).
 
 Documenti e trasferimento di denaro fra conti intervengono solo se cambia **chi incassa**; la ripartizione sull'ordine viene invece ricalcolata in ogni caso, perché due insegnanti con regimi fiscali diversi possono incassare attraverso la stessa scuola. Una ricevuta ancora priva di marca viene **annullata e non rimborsata**, per le ragioni descritte in [Documenti fiscali e ricevute](/guides/documenti-fiscali).
 
