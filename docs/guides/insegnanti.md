@@ -31,7 +31,7 @@ La candidatura è pubblica: non richiede un account. Raccoglie i dati anagrafici
 
 ### Invito e token
 
-Valutata positivamente una candidatura, l'amministrazione genera un **token di registrazione** associato all'indirizzo email del candidato e, facoltativamente, alla candidatura di provenienza. Il token viene inviato per email ed è il solo modo per creare un account insegnante: la registrazione nella categoria insegnante lo richiede sempre. Il token è **monouso** — viene marcato come utilizzato alla registrazione — e l'amministrazione può revocarlo finché non è stato usato. Con il token, la candidatura collegata è consultabile senza autenticazione, così che il modulo di registrazione possa proporre già compilati i dati e le materie indicate in candidatura.
+Valutata positivamente una candidatura, l'amministrazione genera un **token di registrazione** associato all'indirizzo email del candidato e, facoltativamente, alla candidatura di provenienza. Il token viene inviato per email ed è il solo modo per creare un account insegnante: la registrazione nella categoria insegnante lo richiede sempre. Il token è **monouso** — viene marcato come utilizzato alla registrazione —, vale **7 giorni** (l'email lo indica) e l'amministrazione può revocarlo finché non è stato usato. Un invito scaduto o revocato non impedisce di inviarne uno nuovo alla stessa persona; uno ancora valido sì. Con il token, la candidatura collegata è consultabile senza autenticazione, così che il modulo di registrazione possa proporre già compilati i dati e le materie indicate in candidatura.
 
 Nell'applicazione web gli inviti si generano dalla pagina «Generatore Token» dell'area amministrativa.
 
@@ -90,9 +90,4 @@ L'insegnante può collegare il proprio account Google, che abilita due funzioni 
 
 Il saldo e i movimenti del [credito dell'insegnante](/guides/crediti-insegnanti) sono esposti dall'API, ma l'applicazione web non ha ancora una pagina che li mostri.
 
-L'insegnante consulta inoltre i dati degli studenti e delle famiglie con cui ha lezioni, nella misura necessaria a erogarle (per esempio l'indirizzo di una lezione a domicilio): le operazioni rivolte agli insegnanti restituiscono la vista ridotta di quei soggetti, non quella completa.
-
-## Limiti attuali
-
-- Il token di registrazione prevede una scadenza di 24 ore, ma il controllo che dovrebbe applicarla confronta un valore sbagliato e non scatta mai: un token resta valido finché non viene usato o revocato. Gli inviti non usati vanno quindi revocati esplicitamente.
-- L'elenco degli studenti dell'insegnante (`GET /api/teacher/student`) filtra le lezioni su un identificativo errato e restituisce sempre un elenco vuoto; l'applicazione web non lo utilizza.
+L'insegnante dispone dell'elenco degli studenti con cui ha avuto lezioni nell'ultimo anno, e consulta i dati degli studenti e delle famiglie con cui ha lezioni, nella misura necessaria a erogarle (per esempio l'indirizzo di una lezione a domicilio): le operazioni rivolte agli insegnanti restituiscono la vista ridotta di quei soggetti, non quella completa.

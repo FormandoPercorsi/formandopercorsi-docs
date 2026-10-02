@@ -61,6 +61,8 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
   // metric definitions that aggregate the events it collects, not with subjects and exercises.
   {label: 'Tracking & metriche', tags: ['Track', 'Admin - Tracking Metrics', 'Metric Options']},
   {label: 'Pagamenti & Fatturazione', tags: ['Invoice', 'InvoiceLegislation', 'CreditNote']},
+  // Called by Stripe and ACube, never by a client: kept apart so nobody wires them into a UI.
+  {label: 'Webhook (server to server)', tags: ['Webhooks']},
   {label: 'Notifiche', tags: ['Notification']},
   {label: 'Anagrafiche geografiche', tags: ['City', 'Province', 'School', 'Headquarter']},
   {

@@ -22,7 +22,7 @@ Tre conseguenze di questo modello:
 
 | Comando | Cadenza (UTC) | Sviluppo | Produzione | Che cosa fa |
 | --- | --- | --- | --- | --- |
-| `lessons/check-expired-lessons` | ogni 15 minuti (:00, :15, :30, :45) | attiva | attiva | Per le prenotazioni in attesa di pagamento da più di mezz'ora interroga Stripe sullo stato della sessione di pagamento e, se è scaduta, annulla l'ordine e libera lo slot. Le sessioni completate sono lasciate al webhook di pagamento. |
+| `lessons/check-expired-lessons` | ogni 15 minuti (:00, :15, :30, :45) | attiva | attiva | Rete di sicurezza del webhook di pagamento: per gli ordini ancora in attesa oltre la durata della sessione (30 minuti) chiede a Stripe l'esito e applica lo stesso trattamento del webhook — conferma l'ordine pagato (lezioni pagate, documento, notifiche) o libera quello scaduto (slot, promozione, credito). Webhook e cron non elaborano mai due volte lo stesso ordine. |
 | `lesson-reminder/send-reminders` | ogni 15 minuti (:00, :15, :30, :45) | attiva | attiva | Invia il promemoria delle lezioni pagate che iniziano entro 25 minuti, alla famiglia e, se ha un proprio indirizzo e il consenso, allo studente. |
 | `lesson-deletion-by-teacher/expire-deleted-lessons` | ogni 15 minuti (:05, :20, :35, :50) | attiva | attiva | Risolve con il rimborso le lezioni cancellate dall'insegnante per le quali la famiglia non ha scelto entro la scadenza; si veda [Modifiche e cancellazioni](/guides/modifiche-cancellazioni). |
 | `lesson-modification/expire-modification-requests` | ogni 15 minuti (:10, :25, :40, :55) | attiva | attiva | Fa decadere le richieste di modifica a cui la famiglia non ha risposto prima dell'inizio della lezione. |
@@ -32,13 +32,13 @@ Tre conseguenze di questo modello:
 | `availabilities/remove-old-availabilities` | ogni giorno alle 02:00 | attiva | attiva | Rimuove le disponibilità derivate ormai passate e i gruppi di disponibilità rimasti vuoti. |
 | `auth/cleanup-tokens` | ogni giorno alle 03:00 | attiva | attiva | Elimina i refresh token revocati il cui periodo di validità di 30 giorni è trascorso. |
 | `availabilities/create-derived-for-pending-availabilities` | ogni giorno alle 05:00 | attiva | attiva | Deriva gli slot prenotabili dalle disponibilità dichiarate dagli insegnanti; si veda [Disponibilità](/guides/disponibilita). |
-| `teacher-score/recompute` | ogni giorno alle 05:30 | attiva | **disattivata** | Ricalcola gli indicatori usati per l'ordinamento in ricerca e attenua i contatori di esposizione; si veda [Ordinamento dei risultati di ricerca](/guides/ranking-insegnanti). |
+| `teacher-score/recompute` | ogni giorno alle 05:30 | attiva | in attivazione | Ricalcola gli indicatori usati per l'ordinamento in ricerca e attenua i contatori di esposizione; si veda [Ordinamento dei risultati di ricerca](/guides/ranking-insegnanti). |
 | `payments/process-daily-payouts` | ogni giorno alle 07:00 | attiva | attiva | Liquidazione giornaliera, alla fascia base; si veda [Pagamenti, payout e fatturazione](/guides/pagamenti). |
 | `payments/process-monthly-payouts` | giorno 7 di ogni mese alle 03:00 | attiva | attiva | Liquidazione mensile del mese precedente, con ricalcolo delle fasce. |
 | `school-year/rollover` | 1° settembre alle 04:00 | attiva | attiva | Passaggio di classe annuale; chi conclude un ciclo perde scuola e anno, e la famiglia deve riselezionarli prima di poter prenotare. |
 
 :::note
-In produzione il ricalcolo notturno del ranking è pianificato ma la regola è disattivata. L'ordinamento algoritmico resta attivo e degrada correttamente al punteggio iniziale, quindi nessun insegnante sparisce dai risultati, ma in produzione l'ordinamento non beneficia degli indicatori precalcolati né dell'attenuazione dell'esposizione finché la regola non viene abilitata.
+In produzione la regola del ricalcolo notturno del ranking viene abilitata insieme alla promozione su `main` del codice che lo contiene: l'immagine di produzione attuale non ha ancora il comando, e una regola attiva prima fallirebbe ogni notte. Alla prima attivazione il comando va lanciato una volta a mano (prima con `--dryRun=1`), così che gli indicatori siano disponibili senza attendere la notte. Fino ad allora l'ordinamento degrada correttamente al punteggio iniziale e nessun insegnante sparisce dai risultati.
 :::
 
 Le attività legate alla **copertura assicurativa** (`insurance/expire`, `insurance/expire-unpaid`, `insurance/report-pending-compensations`) non sono pianificate in nessun ambiente, coerentemente con la funzionalità, che è disattivata (si veda [Interruttori funzionali](#interruttori-funzionali)). Vanno aggiunte alle regole EventBridge contestualmente alla sua attivazione, con le cadenze indicate in [Copertura assicurativa](/guides/assicurazione).
@@ -70,6 +70,8 @@ I comandi seguenti non sono pianificati. Vanno eseguiti con `./fpc run` (o, in l
 
 I limiti delle fasce di ore non hanno un comando console: si modificano solo dall'area amministrativa.
 
+Le **numerazioni dei documenti** non richiedono alcun intervento a inizio anno: sono distinte per anno e la prima emissione dell'anno nuovo apre da sola la serie che riparte da 1. Il vecchio comando che le azzerava è stato rimosso, perché azzerava anche le numerazioni dell'anno in corso producendo numeri duplicati.
+
 ### Recuperi una tantum
 
 Comandi scritti per riallineare dati storici dopo l'introduzione di una nuova colonna o di un nuovo comportamento. Sono idempotenti — una seconda esecuzione non modifica nulla — e vanno eseguiti una volta per ambiente, dopo le migrazioni che li rendono necessari.
@@ -89,7 +91,6 @@ Comandi scritti per riallineare dati storici dopo l'introduzione di una nuova co
 | `policy-update/notify-users` | Invia a **tutti** gli utenti la notifica e l'email di aggiornamento dei termini. Va eseguito una sola volta per ogni aggiornamento, e mai in sviluppo con una base dati contenente indirizzi reali. |
 | `invoices/force-update-all-business-registry-configurations` | Riscrive su ACube la configurazione anagrafica di tutti gli insegnanti attivi. |
 | `stripe-users-management/update-all-teacher-and-external-schools-accounts` | Migrazione una tantum degli account Stripe connessi di insegnanti e scuole esterne verso la configurazione corrente; sposta saldi. Non va rieseguita. |
-| `invoices/reset-invoice-sequences` | Riporta a 1 **tutte** le numerazioni dei documenti, comprese quelle dell'anno in corso. Le numerazioni sono già distinte per anno e ripartono da sole a gennaio: eseguire questo comando produrrebbe numeri di documento duplicati. **Non va eseguito.** |
 | `insurance/claim-replacement-report <da> <a> [--teacherId=] [--email=1]` | Analisi di quanta parte degli slot liberati dai sinistri è stata ri-prenotata; di sola lettura, ma rilevante solo con l'assicurazione attiva. |
 
 ## Interruttori funzionali

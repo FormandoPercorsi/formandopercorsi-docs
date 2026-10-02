@@ -21,7 +21,7 @@ La piattaforma è in esecuzione in due ambienti, **sviluppo** e **produzione**, 
 | **Fatturazione elettronica** | ACube **sandbox** | ACube **production** (invio reale allo SDI) |
 | **Accesso Google** | client OAuth dedicato allo sviluppo | client OAuth dedicato alla produzione |
 | **Mittente email** | «Formando PerCorsi Dev» | «Formando PerCorsi» |
-| **Ricalcolo notturno del ranking** | attivo | pianificato ma **disattivato** |
+| **Ricalcolo notturno del ranking** | attivo | attivato con la promozione su `main` che lo introduce |
 
 La documentazione (`https://docs.formandopercorsi.com`) è un servizio unico, indipendente dall'ambiente: un'unica immagine, costruita dal branch `master` di questo sito, che contiene sia la API Reference di produzione sia quella di sviluppo.
 
@@ -106,7 +106,7 @@ L'elenco delle variabili del frontend e il loro significato sono in [Applicazion
 
 Ogni ambiente ha le proprie chiavi e il proprio endpoint webhook. Il webhook di pagamento, `POST /api/payment/webhook/checkout`, riceve gli eventi di completamento e di scadenza delle sessioni di pagamento (`checkout.session.completed`, `checkout.session.expired`) e ne verifica la firma con il segreto dell'endpoint. È previsto un secondo segreto, per un endpoint registrato a livello di account connessi, usato quando la verifica con il primo fallisce; nelle definizioni attuali è valorizzato solo il primo.
 
-Il webhook è l'**unico** canale da cui la piattaforma apprende che un pagamento è andato a buon fine: se non viene recapitato o la firma non è valida, la prenotazione resta in attesa di pagamento anche se la famiglia ha pagato. L'attività pianificata che ogni quindici minuti interroga Stripe sulle prenotazioni in sospeso da più di mezz'ora rimedia solo al caso opposto, liberando gli slot delle sessioni scadute (si veda [Attività pianificate e comandi console](/guides/attivita-pianificate)). Dopo ogni modifica alle chiavi o all'endpoint, in particolare in un ambiente nuovo, va quindi verificato che il webhook risulti consegnato con successo nella dashboard di Stripe.
+Se il webhook non viene recapitato o la sua firma non è valida, l'esito della sessione viene comunque recuperato dall'attività pianificata che ogni quindici minuti interroga Stripe sugli ordini ancora in attesa oltre la durata della sessione, e applica lo stesso trattamento: un webhook perso ritarda la conferma della prenotazione di al più un quarto d'ora, ma non la perde (si veda [Attività pianificate e comandi console](/guides/attivita-pianificate)). Un webhook mal configurato resta comunque da correggere: dopo ogni modifica alle chiavi o all'endpoint va verificato nella dashboard di Stripe che le consegne risultino riuscite.
 
 ### ACube e SDI
 
@@ -116,7 +116,7 @@ In sviluppo i documenti sono emessi verso la **sandbox** di ACube e non raggiung
 L'host da cui la sandbox pubblica la propria chiave pubblica restituisce in realtà la chiave di **produzione**. Poiché nelle definizioni attuali dei task `ACUBE_PUBLIC_KEY` non è valorizzata, in sviluppo la verifica delle firme dei webhook ACube ricade su quell'host e può fallire. Per ricevere correttamente i webhook della sandbox occorre valorizzare `ACUBE_PUBLIC_KEY` con la chiave della sandbox. Analogamente, `ACUBE_ENVIRONMENT` deve sempre corrispondere ad `ACUBE_ENDPOINT`: l'host di autenticazione è condiviso e un valore errato autentica in silenzio contro l'ambiente sbagliato.
 :::
 
-I webhook di Stripe e ACube sono chiamate da server a server e non compaiono nella API Reference.
+I webhook di Stripe e ACube sono chiamate da server a server, documentate nella API Reference sotto **Webhook** come contratto da rispettare nella configurazione di quei servizi, non come operazioni per i client.
 
 ### Google
 

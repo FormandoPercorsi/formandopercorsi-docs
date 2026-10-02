@@ -65,8 +65,6 @@ Un insegnante entra automaticamente fra i preferiti della famiglia quando la fam
 
 ## Eliminazione
 
-Il genitore può eliminare il proprio account. L'eliminazione è **logica**: l'utente passa allo stato eliminato e non può più accedere, mentre ordini, lezioni e documenti restano, perché sono dati economici e fiscali da conservare.
+Il genitore può eliminare il proprio account e, singolarmente, uno degli studenti della famiglia. L'eliminazione è **logica**: l'utente passa allo stato eliminato e non può più accedere né essere usato per prenotare, mentre ordini, lezioni e documenti restano, perché sono dati economici e fiscali da conservare.
 
-## Limiti attuali
-
-- L'eliminazione di uno studente (`DELETE /api/family/student/{id}`) è instradata ma non implementata: risponde senza effettuare alcuna operazione.
+L'eliminazione di uno studente è rifiutata finché ha lezioni future ancora attive — prenotate, pagate, gratuite, in attesa di risposta a una modifica, o cancellate dall'insegnante e non ancora risolte: vanno prima cancellate, così che nessuna lezione resti nel calendario di un insegnante per una famiglia che non la vede più. L'applicazione web non espone ancora questa funzione.
