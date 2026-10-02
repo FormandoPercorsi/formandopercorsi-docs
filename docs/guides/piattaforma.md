@@ -64,6 +64,7 @@ Ciascuna fase è documentata in dettaglio:
 | Crediti maturati dagli insegnanti | [Crediti degli insegnanti](/guides/crediti-insegnanti) | [API Reference](/api/formando-percorsi-api) |
 | Territori, incasso e abilitazioni delle scuole esterne | [Scuole esterne, provider e incasso](/guides/scuole-esterne) | [API Reference](/api/formando-percorsi-api) |
 | Comunicazioni agli utenti | [Notifiche](/guides/notifiche) | [Notification](/api/notification) |
+| Novità del prodotto e guide alle pagine | [Novità e guide in-app](/guides/annunci-guide) | [API Reference](/api/formando-percorsi-api) |
 | Indicatori aggregati e reportistica | [Statistiche e indicatori](/guides/statistiche) | [Admin - Finance](/api/admin-finance) |
 | Eventi di utilizzo e metriche | [Tracking degli eventi e metriche](/guides/tracking-metriche) | [API Reference](/api/formando-percorsi-api) |
 | Argomenti, esercizi e video | [Contenuti didattici](/guides/contenuti-didattici) | [Topic](/api/topic), [Subtopic](/api/subtopic) |

@@ -63,7 +63,7 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
   {label: 'Pagamenti & Fatturazione', tags: ['Invoice', 'InvoiceLegislation', 'CreditNote']},
   // Called by Stripe and ACube, never by a client: kept apart so nobody wires them into a UI.
   {label: 'Webhook (server to server)', tags: ['Webhooks']},
-  {label: 'Notifiche', tags: ['Notification']},
+  {label: 'Notifiche & annunci', tags: ['Notification', 'Announcements']},
   {label: 'Anagrafiche geografiche', tags: ['City', 'Province', 'School', 'Headquarter']},
   {
     label: 'Amministrazione',
@@ -71,9 +71,11 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Admin - Availability',
       'Admin - Band Changes',
       'Admin - Bands',
+      'Admin - Credits',
       'Admin - Diagnostics',
       'Admin - External Schools',
       'Admin - Finance',
+      'Admin - Incentives',
       'Admin - Job Runs',
       'Admin - Lessons',
       'Admin - Monitoring',
@@ -174,7 +176,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Comunicazioni e contenuti',
-      items: ['guides/notifiche', 'guides/contenuti-didattici'],
+      items: ['guides/notifiche', 'guides/annunci-guide', 'guides/contenuti-didattici'],
     },
     {
       type: 'category',

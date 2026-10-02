@@ -54,6 +54,14 @@ Le **[promozioni](/guides/promozioni)** si amministrano da operazioni distinte d
 - il **codice deve restare univoco fra le promozioni vive**, dato che la prenotazione risolve una promozione a partire dal codice; una promozione disattivata libera il proprio codice;
 - l'essere **utilizzabile è una condizione derivata** da date e utilizzi residui, non uno stato registrato: nessuna elaborazione marca una promozione come scaduta al passare della sua data finale.
 
+## Crediti di famiglie e insegnanti
+
+Il credito di una famiglia e quello di un insegnante si consultano per intero — saldo, storico e, per l'insegnante, credito in maturazione — e si **accreditano o rettificano** da operazioni dedicate. Ogni rettifica ha un importo con segno e una motivazione obbligatoria, che il destinatario legge nel proprio storico; l'amministratore che l'ha scritta è registrato. Una rettifica negativa non può portare il saldo sotto zero. Le regole sono descritte in [Crediti e programma referral](/guides/referral-crediti#rettifiche-dellamministrazione) e in [Crediti degli insegnanti](/guides/crediti-insegnanti#rettifiche-dellamministrazione); l'andamento complessivo dei programmi si legge nei [prospetti di incentivo](/guides/statistiche#programmi-di-incentivo).
+
+## Novità e guide
+
+Il catalogo delle novità e delle guide mostrate agli utenti si amministra con elenco, dettaglio, creazione, modifica ed eliminazione logica; è descritto in [Novità e guide in-app](/guides/annunci-guide).
+
 ## Diagnostica e abilitazioni
 
 Due strumenti completano l'area:
@@ -68,3 +76,4 @@ Due strumenti completano l'area:
 - I due arretrati di bollo sono code distinte perché sono dovuti da soggetti distinti.
 - Listini e limiti delle fasce si modificano programmando una nuova versione, non riscrivendo quella in vigore.
 - Una promozione si disattiva, non si elimina.
+- Il credito si corregge con una rettifica motivata e visibile al destinatario, mai modificando i movimenti esistenti.

@@ -34,7 +34,7 @@ Tre conseguenze di questo modello:
 | `availabilities/create-derived-for-pending-availabilities` | ogni giorno alle 05:00 | attiva | attiva | Deriva gli slot prenotabili dalle disponibilità dichiarate dagli insegnanti; si veda [Disponibilità](/guides/disponibilita). |
 | `teacher-score/recompute` | ogni giorno alle 05:30 | attiva | in attivazione | Ricalcola gli indicatori usati per l'ordinamento in ricerca e attenua i contatori di esposizione; si veda [Ordinamento dei risultati di ricerca](/guides/ranking-insegnanti). |
 | `payments/process-daily-payouts` | ogni giorno alle 07:00 | attiva | attiva | Liquidazione giornaliera, alla fascia base; si veda [Pagamenti, payout e fatturazione](/guides/pagamenti). |
-| `payments/process-monthly-payouts` | giorno 7 di ogni mese alle 03:00 | attiva | attiva | Liquidazione mensile del mese precedente, con ricalcolo delle fasce. |
+| `payments/process-monthly-payouts` | giorno 7 di ogni mese alle 03:00 | attiva | attiva | Liquidazione mensile del mese precedente, con ricalcolo delle fasce e, se attivo, maturazione dell'indennizzo sulle lezioni gratuite. |
 | `school-year/rollover` | 1° settembre alle 04:00 | attiva | attiva | Passaggio di classe annuale; chi conclude un ciclo perde scuola e anno, e la famiglia deve riselezionarli prima di poter prenotare. |
 
 :::note
@@ -101,7 +101,8 @@ Il comportamento di diversi comandi dipende da interruttori definiti nei paramet
 | --- | --- | --- |
 | Copertura assicurativa | spento | La copertura non è proposta alla prenotazione; le attività di scadenza non sono pianificate. Si veda [Copertura assicurativa](/guides/assicurazione). |
 | Credito degli insegnanti | spento | La liquidazione assorbe lo sconto della famiglia con la ripartizione precedente e non matura credito per l'insegnante. Si veda [Crediti degli insegnanti](/guides/crediti-insegnanti). |
-| Programma referral | acceso | Si veda [Crediti e programma referral](/guides/referral-crediti). |
+| Indennizzo sulle lezioni gratuite | spento | Efficace solo con il credito degli insegnanti acceso; l'importo orario vale zero finché non viene fissato. Si veda [Crediti degli insegnanti](/guides/crediti-insegnanti#indennizzo-sulle-lezioni-gratuite). |
+| Programma referral | acceso | Spento, non vengono più riconosciuti crediti di benvenuto né alla famiglia invitante; la restituzione del credito sulle lezioni rimborsate resta attiva. Si veda [Crediti e programma referral](/guides/referral-crediti). |
 | Ordinamento algoritmico | acceso | Pesi e saturazioni sono anch'essi parametri; cambiarli richiede un rilascio **e** un ricalcolo, perché i pesi della parte precalcolata sono incorporati nel punteggio memorizzato. |
 | PDF dei documenti generati internamente | acceso | Spento, i PDF tornano a essere quelli di ACube. Si veda [Documenti fiscali e ricevute](/guides/documenti-fiscali). |
 | Ricevute occasionali: insegnante sempre provider | acceso | Spento, torna il giro in cui la scuola esterna incassa anche per l'insegnante occasionale. |
