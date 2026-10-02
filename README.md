@@ -90,6 +90,13 @@ npm run build     # genera i file in build/
 npm run serve     # serve la build localmente per un ultimo controllo
 ```
 
-Il `Dockerfile`/`nginx.conf`/`docker-compose.yml` e i workflow in `.github/workflows/` sono invariati rispetto alla versione precedente: build Node → serve statico con nginx, deploy via SSH+Docker Compose sul server OVH (workflow manuale) o push immagine su ECR/DockerHub.
+Il `Dockerfile` esegue la build Node e serve il risultato statico con nginx (`nginx.conf`). In esercizio il sito gira come servizio ECS `formandopercorsi-docs` dietro `docs.formandopercorsi.com`, con un'unica immagine (`formandopercorsi-docs:latest`) costruita dal branch `master` dal workflow `ecr-deploy.yml` e comune ai due ambienti. Si pubblica con lo strumento `fpc` del repository [`FormandoPercorsi/aws`](https://github.com/FormandoPercorsi/aws):
+
+```bash
+./fpc build  --component docs           # avvia ecr-deploy.yml su master e ne attende la conclusione
+./fpc deploy --env docs --force-redeploy
+```
+
+oppure, dopo un rilascio del backend che cambia le annotazioni OpenAPI, aggiungendo `--with-docs` al comando di rilascio del backend, che ricostruisce la documentazione solo quando il nuovo backend è in servizio. La procedura è descritta nella guida «Rilascio e operatività con fpc» (`docs/guides/rilascio-fpc.md`). I workflow `deploy.yml` (deploy via SSH sul vecchio server OVH) e `docker-build.yml` (push su Docker Hub) sono residui della versione precedente e non fanno parte del percorso di pubblicazione.
 
 Ovunque giri `npm run build` (locale o nel workflow di deploy) deve poter raggiungere in uscita `api.formandopercorsi.com` e `dev.api.formandopercorsi.com` — normale per un server con accesso a Internet, nessuna configurazione aggiuntiva richiesta. Se quella rete è ristretta (capita in alcuni ambienti sandbox/CI), `npm run build` fallisce esplicitamente sul fetch dello spec: non esiste un fallback silenzioso.

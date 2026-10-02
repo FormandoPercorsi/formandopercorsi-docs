@@ -8,10 +8,10 @@ Ogni famiglia dispone di un collegamento di invito personale. Quando una famigli
 
 Il credito viene applicato in fase di prenotazione riducendo l'importo dovuto fino a un minimo garantito, ed è riportato in fattura come riga di sconto distinta. Gli endpoint sono raggruppati nella sezione [Family Referral](/api/family-referral) della API Reference.
 
-Il programma può essere disattivato integralmente da configurazione, senza necessità di un rilascio.
+Il programma può essere disattivato integralmente con un interruttore nei parametri dell'applicazione, che come tutti gli interruttori funzionali richiede un rilascio del backend (si veda [Attività pianificate e comandi console](/guides/attivita-pianificate#interruttori-funzionali)).
 
-:::caution Stato di adozione
-Le funzionalità sono complete lato server, ma l'applicazione web non espone al momento alcuna interfaccia per il collegamento di invito, il saldo o lo storico dei movimenti, né un campo per il codice di invito in fase di registrazione. Il programma non è quindi ancora visibile agli utenti finali.
+:::note Stato di adozione
+L'applicazione web espone il programma nella home della famiglia: collegamento di invito da copiare o condividere, invio dell'invito per email, saldo del credito, inviti in attesa e inviti andati a buon fine. Il codice contenuto in un collegamento di invito viene memorizzato dal browser alla prima visita di qualunque pagina e trasmesso automaticamente alla registrazione, quindi non esiste un campo da compilare a mano. Non è ancora presentato lo storico analitico dei movimenti di credito.
 :::
 
 ## Operazioni disponibili
@@ -107,7 +107,7 @@ In caso positivo il credito **viene comunque riconosciuto**: si tratta di un ind
 | Credito alla famiglia invitante | 3,00 € | Riconosciuto a chi ha inviato l'invito. |
 | Credito alla famiglia invitata | 1,00 € | Riconosciuto a chi si registra tramite invito. |
 | Termine per il primo pagamento | 14 giorni | Calcolato dalla registrazione della famiglia invitata. |
-| Prezzo orario minimo garantito | 14,00 €/ora | Soglia sotto la quale il credito non viene applicato. |
+| Prezzo orario minimo garantito | 15,50 €/ora | Soglia sotto la quale il credito — e lo sconto di una [promozione](/guides/promozioni) — non viene applicato. |
 
 ## Limiti attuali
 

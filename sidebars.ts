@@ -61,6 +61,8 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
   // metric definitions that aggregate the events it collects, not with subjects and exercises.
   {label: 'Tracking & metriche', tags: ['Track', 'Admin - Tracking Metrics', 'Metric Options']},
   {label: 'Pagamenti & Fatturazione', tags: ['Invoice', 'InvoiceLegislation', 'CreditNote']},
+  // Called by Stripe and ACube, never by a client: kept apart so nobody wires them into a UI.
+  {label: 'Webhook (server to server)', tags: ['Webhooks']},
   {label: 'Notifiche', tags: ['Notification']},
   {label: 'Anagrafiche geografiche', tags: ['City', 'Province', 'School', 'Headquarter']},
   {
@@ -136,8 +138,8 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Accesso al sistema',
-      items: ['guides/autenticazione'],
+      label: 'Accesso e utenti',
+      items: ['guides/autenticazione', 'guides/insegnanti', 'guides/famiglie-studenti'],
     },
     {
       type: 'category',
@@ -147,6 +149,7 @@ const sidebars: SidebarsConfig = {
         'guides/ranking-insegnanti',
         'guides/percorsi-formativi',
         'guides/modifiche-cancellazioni',
+        'guides/calendario-lezioni-online',
         'guides/diagnostica-prenotazioni',
       ],
     },
@@ -155,6 +158,7 @@ const sidebars: SidebarsConfig = {
       label: 'Flussi economici',
       items: [
         'guides/pagamenti',
+        'guides/promozioni',
         'guides/scuole-esterne',
         'guides/documenti-fiscali',
         'guides/referral-crediti',
@@ -169,8 +173,8 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Comunicazioni',
-      items: ['guides/notifiche'],
+      label: 'Comunicazioni e contenuti',
+      items: ['guides/notifiche', 'guides/contenuti-didattici'],
     },
     {
       type: 'category',
@@ -179,8 +183,8 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Sviluppo',
-      items: ['guides/setup-locale'],
+      label: 'Sviluppo ed esercizio',
+      items: ['guides/setup-locale', 'guides/ambienti', 'guides/rilascio-fpc', 'guides/attivita-pianificate'],
     },
   ],
   apiSidebar,

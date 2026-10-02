@@ -31,15 +31,35 @@ Il client utilizza un'unica istanza del client HTTP, con un'intercettazione in u
 
 Le tre categorie di utenza corrispondono ad altrettante aree dell'applicazione, con rotte separate. Un controllo di autorizzazione protegge ogni pagina: reindirizza alla schermata di accesso chi non è autenticato e impedisce l'accesso alle aree non pertinenti alla propria categoria.
 
+| Area | Pagine | Approfondimento |
+| --- | --- | --- |
+| **Pubblica** | Home e prezzi, chi siamo, «Lavora con noi» con il modulo di candidatura per gli insegnanti, informative su privacy e cookie, accesso, recupero della password, registrazione della famiglia e conferma, registrazione dell'insegnante tramite invito. | [Insegnanti](/guides/insegnanti), [Famiglie e studenti](/guides/famiglie-studenti) |
+| **Famiglia** | Home con lezioni, calendario, prenotazione e programma di invito; percorsi formativi; documenti; profilo; esercizi; esito del pagamento; conferma del passaggio di classe. | [Famiglie e studenti](/guides/famiglie-studenti) |
+| **Insegnante** | Home con disponibilità e lezioni; profilo con materie, sede e raggi, account Google; area amministrativa con documenti e pagamenti; esercizi. | [Insegnanti](/guides/insegnanti) |
+| **Amministrazione** | Si veda la sezione seguente. | [Area amministrativa e controllo operativo](/guides/amministrazione) |
+
 ## Area amministrativa
 
-Oltre alle aree di famiglie e insegnanti, l'applicazione espone l'interfaccia con cui l'amministrazione governa le configurazioni e verifica cosa è successo. Le pagine seguono l'evoluzione degli endpoint amministrativi e sono quindi la parte del client che cambia più spesso.
+Oltre alle aree di famiglie e insegnanti, l'applicazione espone l'interfaccia con cui l'amministrazione governa le configurazioni e verifica cosa è successo. Le pagine seguono l'evoluzione degli endpoint amministrativi e sono quindi la parte del client che cambia più spesso; per questo vanno distinte quelle già presenti sui branch distribuiti da quelle ancora in integrazione.
+
+**Pagine presenti su `develop` e `master`:**
 
 | Pagina | Cosa permette di fare |
 | --- | --- |
-| **Economia** | Aggiornamenti tariffari versionati con anteprima e storico, configurazione dei limiti delle fasce di ore con simulazione della distribuzione, promozioni, città di competenza e creazione delle scuole esterne. |
+| **Home** | Andamento nel tempo delle ore dichiarate, effettive, utili e prenotate, filtrabile per periodo, insegnante e materia, e consultazione delle [metriche di utilizzo](/guides/tracking-metriche). |
+| **Gestione utenti** | Insegnanti, famiglie, lezioni (con il loro stato) e disponibilità effettive. |
+| **Catalogo** | Gestione dei [contenuti didattici](/guides/contenuti-didattici): argomenti, sottoargomenti, esercizi con editor Markdown e formule, immagini e video. |
+| **Generatore Token** | Inviti nominativi per la registrazione degli insegnanti; si veda [Insegnanti](/guides/insegnanti#invito-e-token). |
+
+**Pagine in integrazione** sul branch `feat/introduzione-nuove-funzionalita-admin` del repository frontend, non ancora riportato su `develop` e quindi non distribuito in alcun ambiente:
+
+| Pagina | Cosa permette di fare |
+| --- | --- |
+| **Economia** | Aggiornamenti tariffari versionati con anteprima e storico, configurazione dei limiti delle fasce di ore con simulazione della distribuzione, [promozioni](/guides/promozioni), città di competenza e creazione delle scuole esterne. |
 | **Liquidazioni** | Le esecuzioni periodiche e ciò che hanno realmente movimentato: flussi di denaro, payout, trasferimenti, documenti emessi e ricevute in attesa di bollo. |
-| **Gestione utenti** | Insegnanti, famiglie, lezioni e disponibilità, e come ultima scheda la **diagnostica**: perché una certa famiglia non riesce a prenotare un certo insegnante, descritta in [Diagnostica delle prenotazioni](/guides/diagnostica-prenotazioni). Sta qui perché interroga le stesse anagrafiche delle altre schede, ed è l'ultima perché è lo strumento a cui si ricorre quando le altre non hanno spiegato il problema. |
+| **Diagnostica** (in Gestione utenti) | Perché una certa famiglia non riesce a prenotare un certo insegnante, descritta in [Diagnostica delle prenotazioni](/guides/diagnostica-prenotazioni). Sta in Gestione utenti perché interroga le stesse anagrafiche delle altre schede, ed è l'ultima scheda perché è lo strumento a cui si ricorre quando le altre non hanno spiegato il problema. |
+
+Finché queste pagine non sono distribuite, le relative operazioni sono raggiungibili solo tramite API o, dove esiste, da riga di comando (si veda [Attività pianificate e comandi console](/guides/attivita-pianificate)). Le scelte di presentazione descritte di seguito si riferiscono a queste pagine.
 
 Due scelte di presentazione meritano di essere esplicitate, perché rendono leggibili dati che altrimenti si prestano a essere fraintesi.
 
@@ -62,7 +82,7 @@ Il modello dati è descritto in [Disponibilità](/guides/disponibilita) e [Perco
 - **Gestione dell'indirizzo per le lezioni a domicilio.** Senza un indirizzo esplicitamente selezionato la piattaforma ricade sull'indirizzo predefinito della famiglia, e la verifica del raggio di copertura può fallire. Il client anticipa quindi la selezione o creazione dell'indirizzo, esposta in [Family Addresses](/api/family-addresses).
 - **Soglia di 48 ore** per cancellazione e modifica, replicata nel client in due punti indipendenti. Corrisponde al parametro descritto in [Copertura assicurativa](/guides/assicurazione).
 - **Codice promozionale applicato automaticamente** quando la piattaforma espone una promozione compatibile fra quelle disponibili in [Promotion](/api/promotion).
-- **Assenza del campo di invito** nel modulo di registrazione, coerentemente con lo stato di adozione descritto in [Crediti e programma referral](/guides/referral-crediti).
+- **Codice di invito acquisito dall'indirizzo**: il parametro `ref` di un collegamento di invito viene memorizzato nel browser alla prima visita e inviato automaticamente con la registrazione della famiglia, senza un campo da compilare; si veda [Crediti e programma referral](/guides/referral-crediti).
 - **Assenza di indicatori di ordinamento** nella presentazione degli insegnanti, che sono mostrati nella sequenza restituita dall'API; si veda [Ordinamento dei risultati di ricerca](/guides/ranking-insegnanti).
 
 ## Pagamenti e fatture
@@ -75,11 +95,14 @@ Il flusso completo è descritto in [Pagamenti, payout e fatturazione](/guides/pa
 
 Le notifiche sono recuperate per interrogazione periodica ogni cinque minuti, con richieste aggiuntive dopo le azioni che possono generarne. Non è impiegato alcun canale in tempo reale. I tipi non gestiti sono elencati in [Notifiche](/guides/notifiche).
 
+Le notifiche del **passaggio di classe** non sono mostrate nella barra delle notifiche ma da una finestra dedicata, aperta su qualunque pagina della famiglia finché ce n'è una da gestire: per uno studente promosso chiede di confermare l'anno, per uno che ha concluso il ciclo di scegliere la nuova scuola. Chi chiude la finestra senza rispondere non la vede riproposta, ma lo studente resta bloccato in prenotazione finché la conferma non avviene.
+
 ## Integrazioni
 
 - **Accesso tramite Google**, con trasmissione del token rilasciato da Google e della categoria utente.
 - **Mappe Google** per la selezione degli indirizzi.
-- **Nessuna integrazione diretta con il calendario**: la sincronizzazione degli impegni degli insegnanti avviene interamente da server a server.
+- **Nessuna integrazione diretta con il calendario**: la sincronizzazione degli impegni degli insegnanti avviene interamente da server a server; il client si limita a collegare l'account Google dell'insegnante e ad attivare condivisione del calendario e collegamenti Meet, come descritto in [Calendario e lezioni online](/guides/calendario-lezioni-online).
+- **Collegamento alla lezione online** inseribile a mano dall'insegnante nel dettaglio della lezione e mostrato alla famiglia.
 
 ## Duplicazioni da mantenere allineate
 

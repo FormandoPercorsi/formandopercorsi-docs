@@ -16,7 +16,7 @@ Due proprietà di questo registro sono indispensabili per leggerlo correttamente
 
 **Un'esecuzione interrotta non resta in corso per sempre.** Un'elaborazione che termini in modo anomalo viene chiusa come interrotta, perché una riga rimasta «in esecuzione» si leggerebbe come «sta ancora lavorando» proprio a chi sta verificando se i pagamenti sono usciti.
 
-La registrazione non può in nessun caso far fallire l'elaborazione che documenta: ogni scrittura degrada, in caso di problemi, a una riga di log.
+La registrazione non può in nessun caso far fallire l'elaborazione che documenta: ogni scrittura degrada, in caso di problemi, a una riga di log. Il calendario delle attività pianificate in ciascun ambiente, e i comandi che si eseguono a mano, sono descritti in [Attività pianificate e comandi console](/guides/attivita-pianificate).
 
 ## Che cosa ha movimentato una liquidazione
 
@@ -48,7 +48,7 @@ Una terza consultazione riguarda l'**ordinamento in ricerca**: restituisce gli i
 
 Due configurazioni incidono direttamente su quanto ciascun soggetto percepisce e sono per questo **versionate**, con decorrenza, storico e possibilità di ritiro: i **listini** per durata, città e regime fiscale, e i **limiti delle fasce di ore**. Entrambe si amministrano con le stesse operazioni — anteprima senza scrittura, programmazione, elenco con lo stato derivato dalla decorrenza, dettaglio, ritiro di una variazione non ancora in vigore o già in vigore, e consultazione di ciò che è in vigore a una data — ed entrambe rifiutano una correzione «in sovrascrittura»: correggere una variazione programmata significa ritirarla, e il ritiro lascia traccia. Le regole e le ragioni di questa impostazione sono descritte in [Pagamenti, payout e fatturazione](/guides/pagamenti); per i listini è inoltre disponibile un'operazione che elenca le entità tariffate e le città che già dispongono di un listino proprio, necessaria per costruire un'interfaccia dato che una tariffa è identificata da soli riferimenti numerici.
 
-Le **promozioni** si amministrano da operazioni distinte da quelle rivolte alle famiglie: l'operazione disponibile a una famiglia non è un elenco, ma restituisce solo ciò che quella famiglia può attivare. Tre regole governano il ciclo di vita di una promozione:
+Le **[promozioni](/guides/promozioni)** si amministrano da operazioni distinte da quelle rivolte alle famiglie: l'operazione disponibile a una famiglia non è un elenco, ma restituisce solo ciò che quella famiglia può attivare. Tre regole governano il ciclo di vita di una promozione:
 
 - non viene mai **eliminata definitivamente**, perché gli utilizzi già concessi sono l'unica traccia di ciò che è stato scontato: la si disattiva;
 - il **codice deve restare univoco fra le promozioni vive**, dato che la prenotazione risolve una promozione a partire dal codice; una promozione disattivata libera il proprio codice;

@@ -64,6 +64,8 @@ Due criteri meritano una spiegazione, perché il loro comportamento non è immed
 
 **Le ore più lontane nel tempo pesano meno.** Senza decadimento, un insegnante con molta disponibilità fra tre mesi e nessuna nell'immediato scavalcherebbe chi è disponibile subito, in contrasto con l'esigenza di chi sta prenotando.
 
+**Il carico penalizza solo chi non ha più margine.** La quota di tempo già prenotato è moltiplicata per la parte di ore utili che manca alla saturazione: finché un insegnante ha ancora tempo utile libero oltre la soglia, la penalità di carico è nulla. Applicata senza questa attenuazione, la penalità collocava gli insegnanti a tempo pieno — che raggiungono la saturazione come tutti gli altri, ma vendono una quota alta del proprio tempo — sotto insegnanti occasionali con il calendario vuoto.
+
 ### Sovraqualifica e scarsità
 
 Il criterio persegue due obiettivi insieme: valorizzare i profili più preparati sulle richieste impegnative ed evitare di impiegarli su richieste elementari quando sono necessari altrove. La difficoltà di una richiesta è espressa come livello ordinale ricavato da grado scolastico e anno di corso, dalla scuola primaria all'università; la penalizzazione cresce con la distanza fra il livello abitualmente coperto dall'insegnante e quello richiesto.
@@ -75,6 +77,8 @@ La penalizzazione è però attenuata dalla scarsità: quando per quella combinaz
 Ogni pagina di risultati incrementa un contatore di esposizione per i profili mostrati. Il contatore viene però attenuato **solo durante l'elaborazione notturna**, mai durante la navigazione.
 
 La scelta è deliberata: se la penalizzazione da esposizione variasse in tempo reale, l'ordinamento cambierebbe fra una pagina e la successiva, con il risultato di mostrare due volte alcuni insegnanti e di ometterne altri. Congelandola nell'arco della giornata si ottiene una rotazione effettiva — chi è stato molto esposto oggi scende domani — mantenendo un ordinamento stabile durante la consultazione.
+
+La soglia oltre cui l'esposizione è considerata satura **cresce con il volume di ore offerto**: un insegnante che dichiara molto più tempo utile della soglia di saturazione può essere mostrato proporzionalmente più spesso prima di essere penalizzato. Una quota fissa per insegnante equiparava la visibilità di chi lavora a tempo pieno a quella di chi offre poche ore, limitando proprio la possibilità del primo di riempire il proprio calendario. Per questo calcolo si usano le ore **dichiarate**, non quelle ancora libere: una misura residua restringerebbe la soglia proprio mentre l'insegnante si riempie. Gli insegnanti sotto la soglia di saturazione ruotano come prima.
 
 ## Comportamento in caso di dati mancanti
 

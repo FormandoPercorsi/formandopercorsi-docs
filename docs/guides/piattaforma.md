@@ -12,9 +12,9 @@ Questa pagina descrive i soggetti coinvolti, il ciclo di vita di una lezione e l
 
 | Soggetto | Ruolo |
 | --- | --- |
-| **Famiglia** | Unità di riferimento per la prenotazione e il pagamento. È composta da un genitore di riferimento (*paterfamilias*), eventuali altri tutori e uno o più studenti. Endpoint: [Family](/api/family), [Family Students](/api/family-students). |
+| **Famiglia** | Unità di riferimento per la prenotazione e il pagamento. È composta da un genitore di riferimento (*paterfamilias*), eventuali altri tutori e uno o più studenti. Si veda [Famiglie e studenti](/guides/famiglie-studenti); endpoint: [Family](/api/family), [Family Students](/api/family-students). |
 | **Studente** | Destinatario della lezione. È associato a una scuola e a un anno di corso, da cui dipendono le materie prenotabili. Endpoint: [Family Student Subjects](/api/family-student-subjects). |
-| **Insegnante** | Dichiara le proprie disponibilità, le materie e i livelli scolastici che può coprire, ed eroga le lezioni. Endpoint: [Teacher](/api/teacher). |
+| **Insegnante** | Entra in piattaforma su invito dopo una candidatura, dichiara le proprie disponibilità, le materie e i livelli scolastici che può coprire, ed eroga le lezioni. Si veda [Insegnanti, dalla candidatura al profilo](/guides/insegnanti); endpoint: [Teacher](/api/teacher). |
 | **Scuola esterna di competenza** | Partner locale che presidia una determinata area geografica e ha diritto a una quota sugli ordini delle famiglie che vi risiedono. Di norma è anche il soggetto che incassa il pagamento e che successivamente gira all'insegnante la quota dovuta, ma non sempre: si veda [Scuole esterne, provider e incasso](/guides/scuole-esterne). La piattaforma stessa può presidiare un territorio nella medesima veste. |
 | **Amministrazione** | Gestisce anagrafiche, candidature degli insegnanti, configurazione dei prezzi, delle fasce di ore e delle promozioni, territori delle scuole esterne, verifica dei pagamenti e reportistica. Endpoint: [Admin - Users](/api/admin-users), [Admin - Lessons](/api/admin-lessons), [Admin - Availability](/api/admin-availability), [Admin - Finance](/api/admin-finance); le aree più recenti — aggiornamenti tariffari, configurazione delle fasce di ore, liquidazioni, esecuzioni dei job, creazione e provisioning delle scuole esterne, monitoraggio, metriche di tracking e diagnostica delle prenotazioni — compaiono sotto Amministrazione nella [API Reference](/api/formando-percorsi-api) via via che raggiungono ciascun ambiente. Il quadro d'insieme è in [Area amministrativa e controllo operativo](/guides/amministrazione). |
 
@@ -49,10 +49,14 @@ Ciascuna fase è documentata in dettaglio:
 | Fase | Guida | Riferimento API |
 | --- | --- | --- |
 | Accesso al sistema | [Autenticazione](/guides/autenticazione) | [Auth](/api/auth) |
+| Ingresso e profilo degli insegnanti | [Insegnanti, dalla candidatura al profilo](/guides/insegnanti) | [Teacher](/api/teacher), [Teacher Application](/api/teacher-application) |
+| Studenti, indirizzi e preferiti della famiglia | [Famiglie e studenti](/guides/famiglie-studenti) | [Family](/api/family), [Family Addresses](/api/family-addresses) |
 | Dichiarazione e derivazione delle disponibilità | [Disponibilità](/guides/disponibilita) | [Availability](/api/availability), [Availability Group](/api/availability-group) |
 | Ricerca e ordinamento degli insegnanti | [Ordinamento dei risultati di ricerca](/guides/ranking-insegnanti) | [Availability](/api/availability) |
 | Prenotazione di più lezioni in un'unica soluzione | [Percorsi formativi](/guides/percorsi-formativi) | [Lesson](/api/lesson) |
 | Prezzo, incasso, ripartizione e fatturazione | [Pagamenti, payout e fatturazione](/guides/pagamenti) | [Lesson](/api/lesson), [InvoiceLegislation](/api/invoice-legislation) |
+| Codici promozionali | [Promozioni](/guides/promozioni) | [Promotion](/api/promotion) |
+| Calendario dell'insegnante e collegamenti alle lezioni online | [Calendario e lezioni online](/guides/calendario-lezioni-online) | [Auth](/api/auth), [Lesson](/api/lesson) |
 | Modifica o cancellazione di una lezione già pagata | [Modifiche e cancellazioni delle lezioni](/guides/modifiche-cancellazioni) | [Lesson](/api/lesson) |
 | Documenti emessi a fronte dei movimenti | [Documenti fiscali e ricevute](/guides/documenti-fiscali) | [InvoiceLegislation](/api/invoice-legislation) |
 | Copertura assicurativa e sinistri | [Copertura assicurativa](/guides/assicurazione) | [Lesson](/api/lesson) |
@@ -62,6 +66,7 @@ Ciascuna fase è documentata in dettaglio:
 | Comunicazioni agli utenti | [Notifiche](/guides/notifiche) | [Notification](/api/notification) |
 | Indicatori aggregati e reportistica | [Statistiche e indicatori](/guides/statistiche) | [Admin - Finance](/api/admin-finance) |
 | Eventi di utilizzo e metriche | [Tracking degli eventi e metriche](/guides/tracking-metriche) | [API Reference](/api/formando-percorsi-api) |
+| Argomenti, esercizi e video | [Contenuti didattici](/guides/contenuti-didattici) | [Topic](/api/topic), [Subtopic](/api/subtopic) |
 
 ## Componenti del sistema
 
@@ -73,7 +78,7 @@ Ciascuna fase è documentata in dettaglio:
 
 Il **passaggio di classe annuale** merita una menzione a parte perché ha un effetto visibile alle famiglie: allo studente che ha concluso il proprio ciclo di studi vengono azzerati scuola e anno di corso, e finché la famiglia non ne seleziona una nuova quello studente non può prenotare lezioni. Le lezioni già in calendario restano invece modificabili con lo stesso insegnante, come descritto in [Modifiche e cancellazioni delle lezioni](/guides/modifiche-cancellazioni).
 
-**Integrazioni esterne.** Incassi e trasferimenti su Stripe, fatturazione elettronica tramite Acube, sincronizzazione calendario e generazione dei collegamenti per le lezioni online tramite Google, invio di messaggi tramite email e WhatsApp.
+**Integrazioni esterne.** Incassi e trasferimenti su Stripe, fatturazione elettronica tramite Acube, sincronizzazione calendario e generazione dei collegamenti per le lezioni online tramite Google, invio di messaggi tramite email e WhatsApp (quest'ultimo oggi disattivato). Il loro comportamento in ciascun ambiente è descritto in [Ambienti di sviluppo e produzione](/guides/ambienti).
 
 ## Glossario
 
@@ -89,4 +94,6 @@ Il **passaggio di classe annuale** merita una menzione a parte perché ha un eff
 | **Ricevuta predisposta** | Ricevuta per compenso occasionale emessa senza data e senza marca da bollo: diventa un documento valido solo dopo che l'insegnante ha apposto la marca, datato, firmato e caricato la scansione. |
 | **Sinistro** | Evento che attiva la copertura assicurativa acquistata su un ordine, tipicamente una cancellazione a ridosso della lezione. |
 | **Credito famiglia** | Importo maturato dalla famiglia, spendibile in automatico sulle prenotazioni successive. |
+| **Promozione** | Codice che azzera o riduce il prezzo di una lezione singola, entro condizioni di validità e vincoli sulla lezione. |
+| **Token di registrazione** | Invito nominativo e monouso con cui un candidato selezionato crea il proprio account insegnante. |
 | **Credito insegnante** | Importo maturato dall'insegnante sulle lezioni scontate dal credito di una famiglia, speso come sconto sui documenti che gli vengono emessi in liquidazione. |
