@@ -4,7 +4,7 @@ title: Contenuti didattici
 
 # Contenuti didattici
 
-Oltre alla prenotazione delle lezioni, la piattaforma gestisce un catalogo di contenuti didattici — argomenti, esercizi con soluzione, video — e tiene traccia dell'avanzamento degli studenti sugli esercizi. Questa pagina descrive come il catalogo è organizzato, chi può vederne che cosa e come viene alimentato. Gli endpoint sono nelle sezioni [Subject](/api/subject), [Topic](/api/topic), [Subtopic](/api/subtopic), [Exercise](/api/exercise), [Video](/api/video) e [StudentExercise](/api/student-exercise) della API Reference.
+Oltre alla prenotazione delle lezioni, la piattaforma gestisce un catalogo di contenuti didattici — argomenti, esercizi con soluzione, video — e tiene traccia dell'avanzamento degli studenti sugli esercizi. Questa pagina descrive come il catalogo è organizzato, chi può vederne che cosa e come viene alimentato. Gli endpoint sono nelle sezioni [Subject](/api/subject), [Topic](/api/topic), [Subtopic](/api/subtopic) e [StudentExercise](/api/student-exercise) della API Reference; quelli degli esercizi e dei video sono nelle sezioni Exercise e Video, che la API Reference di produzione non espone ancora e che si trovano in quella di sviluppo.
 
 :::note Stato di adozione
 Il catalogo è completo lato server e gestibile dall'area amministrativa dell'applicazione web («Catalogo»). Le pagine «Esercizi» delle aree famiglia e insegnante sono invece ancora predisposte e non mostrano i contenuti: oggi il catalogo non è esposto agli utenti finali dall'applicazione web.
