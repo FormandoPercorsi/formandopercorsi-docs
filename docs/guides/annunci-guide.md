@@ -18,7 +18,7 @@ Novità e guide condividono la stessa struttura e si distinguono per il **tipo**
 
 | Campo | Contenuto |
 | --- | --- |
-| Chiave | Identificativo leggibile e univoco (lettere minuscole, cifre, punto, trattino e trattino basso), pensato per essere referenziato dal client. Resta occupata anche dopo l'eliminazione dell'elemento. |
+| Chiave | Identificativo leggibile e univoco (lettere minuscole, cifre, punto, trattino e trattino basso), pensato per essere referenziato dal client. È univoca solo fra gli elementi non eliminati: eliminare un elemento la rende di nuovo disponibile. |
 | Tipo | `news` per una novità, `guide` per una guida. |
 | Pagina | La pagina del client a cui la guida appartiene; assente per un elemento globale. |
 | Pubblico | Elenco dei ruoli destinatari fra `admin`, `teacher`, `student`, `family` ed `external_school`; un elenco vuoto significa tutti. |
@@ -38,7 +38,7 @@ Il client segnala la presa visione di un elemento con un'operazione dedicata. L'
 
 ## Gestione da parte dell'amministrazione
 
-L'amministrazione dispone di elenco paginato (filtrabile per tipo, stato e pagina, con la possibilità di includere gli elementi eliminati), dettaglio, creazione, modifica parziale ed eliminazione. L'eliminazione è **logica**: l'elemento sparisce dagli utenti ma resta consultabile dall'amministrazione, e la sua chiave non può essere riutilizzata. Lo stato `draft` consente di preparare un elemento senza pubblicarlo.
+L'amministrazione dispone di elenco paginato (filtrabile per tipo, stato e pagina, con la possibilità di includere gli elementi eliminati), dettaglio, creazione, modifica parziale ed eliminazione. L'eliminazione è **logica**: l'elemento sparisce dagli utenti ma resta consultabile dall'amministrazione, e la sua chiave torna libera per un nuovo elemento. Lo stato «visto» è legato all'elemento e non alla chiave, quindi un elemento che riusa la chiave di uno eliminato risulta non ancora visto da tutti. Lo stato `draft` consente di preparare un elemento senza pubblicarlo.
 
 ## Sintesi
 

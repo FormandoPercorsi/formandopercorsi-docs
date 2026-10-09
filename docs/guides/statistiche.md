@@ -38,6 +38,13 @@ Le misure descrivono il volume erogato e ciò che lo ha disturbato: minuti e num
 
 Le misure ricostruiscono quanto tempo gli insegnanti offrono e quanto ne viene effettivamente venduto: ore **dichiarate**, ore **effettivamente libere** dopo aver sottratto lezioni e spostamenti, **quota di occupazione** e ore **utili**, ossia quelle collocate nella fascia pomeridiana di maggiore domanda, con un minimo giornaliero. La definizione delle ore utili è **unica** ed è la stessa usata dall'[ordinamento dei risultati di ricerca](/guides/ranking-insegnanti): non esistono due nozioni di ora utile che possano divergere. I concetti di disponibilità dichiarata, tempo effettivamente libero e slot prenotabile sono descritti in [Disponibilità](/guides/disponibilita).
 
+Le ore dichiarate, le ore libere e la quota di occupazione accettano due restrizioni facoltative:
+
+- una **fascia oraria** (inizio e fine, al quarto d'ora, da indicare insieme; la fine può essere `24:00`): ogni disponibilità conta solo i minuti della propria sovrapposizione con la fascia, nella propria giornata, così che uno slot 13:00–15:00 conti 60 minuti nella fascia 14:00–19:00. Il calcolo della sovrapposizione è lo stesso usato per le ore utili;
+- la **prenotabilità** (`all`, `bookable`, `unbookable`): conta solo le disponibilità che possono, o non possono, ospitare la lezione più breve che la ricerca è in grado di collocare. La prenotabilità è valutata sulla durata **intera** della disponibilità, non sulla parte che cade nella fascia: uno slot libero 13:00–14:30 può ospitare una lezione 13:30–14:30, e i suoi 30 minuti dentro la fascia 14–19 sono quindi prenotabili. La soglia ignora i tempi di spostamento e di preavviso, che la ricerca reale applica per luogo.
+
+La **quota di occupazione** rispetta la fascia oraria ma **ignora la prenotabilità**, perché il rapporto fra prenotato e totale ha senso solo sull'insieme delle disponibilità. Le **ore utili** mantengono la loro definizione fissa: il prospetto dedicato rifiuta le tre restrizioni con un errore, e nel prospetto combinato sono calcolate senza di esse.
+
 ## Utenti
 
 Famiglie registrate e insegnanti registrati nel periodo; famiglie e insegnanti **attivi**, ossia con almeno una lezione nei trenta giorni precedenti l'inizio del periodo; famiglie cancellate, usate come **approssimazione dell'abbandono**. Quest'ultima misura va letta per quello che è: registra la cancellazione dell'account, non l'interruzione dell'utilizzo.
