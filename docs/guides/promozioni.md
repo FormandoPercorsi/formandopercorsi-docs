@@ -59,7 +59,7 @@ Alla prenotazione il codice viene **verificato di nuovo lato server**, con tutte
 
 Lo sconto di una promozione di tipo **sconto** non riduce le quote di piattaforma e di scuola esterna registrate sull'ordine, che restano a listino: viene assorbito in fase di liquidazione, insieme all'eventuale credito della famiglia e con la stessa gerarchia (si veda [Crediti e programma referral](/guides/referral-crediti#ripartizione-del-credito-sui-compensi)). Lo sconto della promozione viene assorbito per primo, il credito su ciò che resta. La quota assorbita da ciascun soggetto è registrata per singola lezione, distintamente da quella del credito.
 
-Quando è attivo il [credito degli insegnanti](/guides/crediti-insegnanti) la gerarchia si rovescia anche per le promozioni: l'insegnante assorbe lo sconto, entro il limite del proprio compenso sulla lezione, e matura un credito di pari importo, distinto per origine da quello generato dal credito delle famiglie ma confluito nello stesso saldo.
+Quando è attivo il [credito degli insegnanti](/guides/crediti-insegnanti) e la lezione è incassata dall'insegnante, la gerarchia si rovescia anche per le promozioni: l'insegnante assorbe lo sconto, entro il limite del proprio compenso sulla lezione, e matura un credito di pari importo, distinto per origine da quello generato dal credito delle famiglie ma confluito nello stesso saldo.
 
 ## Amministrazione
 

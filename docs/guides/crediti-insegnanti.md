@@ -7,21 +7,23 @@ title: Crediti degli insegnanti
 Il credito dell'insegnante è il lato simmetrico del [credito della famiglia](/guides/referral-crediti): quando una lezione viene erogata a un prezzo ridotto dal credito di una famiglia o da una [promozione](/guides/promozioni) di sconto, l'insegnante che l'ha erogata **matura a sua volta un credito**, che spende come sconto automatico sulle fatture che la piattaforma e la scuola esterna di competenza emettono *nei suoi confronti* in liquidazione. Lo stesso saldo può essere alimentato da un indennizzo sulle lezioni gratuite e da rettifiche dell'amministrazione.
 
 :::caution Stato di adozione
-La funzionalità è completa lato server ma **disattivata per impostazione predefinita**: a interruttore spento la ripartizione e la liquidazione si comportano esattamente come prima, e nessun movimento viene registrato. Sposta denaro fra piattaforma e insegnanti, e viene quindi attivata dopo una verifica su un ambiente non di produzione, non contestualmente al rilascio.
+La funzionalità è **accesa** sul branch `develop` e raggiunge la produzione con il rilascio successivo. Resta governata da un interruttore che fa da vero meccanismo di ritorno: a interruttore spento la ripartizione e la liquidazione si comportano esattamente come prima, e nessun movimento viene registrato. L'indennizzo sulle lezioni gratuite ha un interruttore proprio ed è ancora spento.
 :::
 
 ## Perché esiste, e cosa cambia nella ripartizione
 
 Senza questa funzionalità lo sconto concesso alla famiglia viene assorbito in cascata dalle quote di piattaforma e di scuola esterna, e l'insegnante non ne sopporta di norma alcuna parte — è il comportamento descritto in [Crediti e programma referral](/guides/referral-crediti). Riconoscere all'insegnante un credito pari all'intero sconto, lasciando in vigore quella cascata, significherebbe che la piattaforma paga la promozione due volte.
 
-L'ordine di assorbimento viene quindi **invertito**, e questa inversione è il cuore della funzionalità:
+L'ordine di assorbimento viene quindi **invertito**, e questa inversione è il cuore della funzionalità — ma **solo quando è l'insegnante a incassare**, ossia quando è lui il provider dell'ordine:
 
 ```
-a interruttore spento   quota variabile di piattaforma → scuola esterna → quota fissa → insegnante
-a interruttore acceso   insegnante (fino a capienza della sua quota) → quota variabile → scuola esterna → quota fissa
+interruttore spento, oppure incassa la scuola   quota variabile di piattaforma → scuola esterna → quota fissa → insegnante
+interruttore acceso e incassa l'insegnante      insegnante (fino a capienza della sua quota) → quota variabile → scuola esterna → quota fissa
 ```
 
-Con l'interruttore acceso, le quote di piattaforma e di scuola restano al **valore di listino** e lo sconto è assorbito dall'insegnante, che matura **esattamente quanto ha assorbito**. Importo maturato e importo assorbito sono lo stesso numero per costruzione: se divergessero, qualcuno sarebbe compensato due volte.
+Con l'interruttore acceso e l'insegnante come provider, le quote di piattaforma e di scuola restano al **valore di listino** e lo sconto è assorbito dall'insegnante, che matura **esattamente quanto ha assorbito**. Importo maturato e importo assorbito sono lo stesso numero per costruzione: se divergessero, qualcuno sarebbe compensato due volte.
+
+Quando invece **incassa la scuola esterna**, il denaro arriva sul suo conto già ridotto dallo sconto, e l'insegnante le fattura la propria quota, che **non viene mai intaccata**: lo sconto segue la cascata ordinaria e l'insegnante non matura nulla. Nessuno emette fatture a quell'insegnante, quindi un credito maturato non avrebbe dove essere speso, e spenderlo un giorno verso la piattaforma le trasferirebbe un costo della scuola. La stessa condizione vale per la stima del credito in maturazione.
 
 L'assorbimento è **limitato alla quota dell'insegnante**: oltre quella capienza torna in funzione la cascata precedente, perché un insegnante non può finanziare più di quanto guadagni sulla lezione. Una quota che risultasse comunque negativa è considerata un esito impossibile e interrompe la liquidazione di quell'insegnante con un errore registrato, anziché produrre un compenso negativo.
 
@@ -35,7 +37,7 @@ Il credito matura da tre sorgenti, che confluiscono nello stesso saldo e restano
 | Promozione di sconto | Quanto l'insegnante ha assorbito dello sconto della promozione. |
 | Indennizzo sulle lezioni gratuite | Un importo orario per ogni lezione resa gratuita da una promozione, descritto più avanti. |
 
-Per le prime due sorgenti la maturazione avviene **alla liquidazione della lezione**, non alla prenotazione e non al momento del bonifico. Alla prenotazione la ripartizione non esiste ancora e la lezione può ancora essere cancellata, spostata o rimborsata: maturare in quel momento richiederebbe un apparato di storno per eventi che la liquidazione filtra già da sé. Il bonifico, all'opposto, è aggregato per insegnante e non conosce più le singole lezioni, mentre la lezione è il grano naturale del fatto «su questa lezione l'insegnante ha assorbito un importo».
+Le prime due sorgenti maturano solo sulle lezioni incassate dall'insegnante, per la ragione appena descritta. Per queste la maturazione avviene **alla liquidazione della lezione**, non alla prenotazione e non al momento del bonifico. Alla prenotazione la ripartizione non esiste ancora e la lezione può ancora essere cancellata, spostata o rimborsata: maturare in quel momento richiederebbe un apparato di storno per eventi che la liquidazione filtra già da sé. Il bonifico, all'opposto, è aggregato per insegnante e non conosce più le singole lezioni, mentre la lezione è il grano naturale del fatto «su questa lezione l'insegnante ha assorbito un importo».
 
 La registrazione avviene nella stessa transazione che porta la lezione a liquidata: è **stato della liquidazione**, non contabilità di servizio, e se non può essere scritta la lezione non deve risultare liquidata. Un'unica maturazione per lezione è garantita da un vincolo di unicità, cosicché rieseguire la liquidazione di un mese già chiuso resti l'operazione a vuoto che deve essere.
 
@@ -64,9 +66,11 @@ Sono scontabili soltanto le posizioni in cui l'insegnante è il **soggetto che p
 
 - la posizione deve prevedere l'emissione di un documento *verso* l'insegnante, e il beneficiario deve essere la piattaforma o la scuola esterna di competenza;
 - un documento scontato non è mai una ricevuta occasionale: le ricevute occasionali nascono dalle posizioni opposte, quelle in cui l'insegnante è il soggetto che incassa;
-- un insegnante che **non** è provider non riceve alcuna fattura dalla piattaforma né dalla scuola, e il suo credito **resta a saldo** finché non diventa spendibile. È una conseguenza accettata, non una dimenticanza: diventa spendibile quando quell'insegnante inizia a incassare in prima persona, nei casi descritti in [Scuole esterne, provider e incasso](/guides/scuole-esterne).
+- un insegnante che **non** è provider non riceve alcuna fattura dalla piattaforma né dalla scuola. Sulle sue lezioni non matura credito, ma il saldo che può avere da altre sorgenti — indennizzo, rettifiche dell'amministrazione — **resta a saldo** finché non diventa spendibile, cioè finché quell'insegnante non inizia a incassare in prima persona, nei casi descritti in [Scuole esterne, provider e incasso](/guides/scuole-esterne).
 
 Quando in un mese esistono due documenti verso lo stesso insegnante — quello della piattaforma e quello della scuola — l'ordine di utilizzo è deterministico: **prima la piattaforma, poi le scuole**. La piattaforma è la posizione che esiste sempre, mentre quella della scuola dipende dal territorio, e la stabilità dell'ordine garantisce che due esecuzioni sullo stesso stato producano la stessa allocazione.
+
+**Il risparmio arriva all'insegnante con il bonifico.** L'insegnante-provider ha incassato sul proprio conto il prezzo già scontato, e lo sconto in fattura riduce del pari ciò che trasferisce alla piattaforma e alla scuola: quell'importo resta quindi sul suo saldo Stripe e viene **aggiunto al suo bonifico** mensile, anche quando la sua quota nell'esecuzione è nulla. Non è un accredito del credito sul bonifico, che ne cambierebbe la natura fiscale: è denaro suo, già sul suo conto, che altrimenti resterebbe fermo — e senza questo passaggio l'insegnante assorbirebbe lo sconto senza mai ricevere il risparmio. Lo sconto pianificato entra nel bonifico anche se l'emissione del documento scontato fallisce: in quel caso la posizione risulta fallita con l'importo dello sconto valorizzato, e la sistemazione manuale deve emettere il documento **con** lo sconto e registrarne l'utilizzo.
 
 Lo sconto **non può eccedere il documento**: ciò che avanza non viene speso e resta sul saldo per il mese successivo. Non è mai una quota per lezione, e non viene quindi ripartito sulle lezioni della posizione: la ripartizione per lezione descrive l'economia della lezione, mentre lo sconto è un fatto della relazione fra l'insegnante e chi gli fattura. Sul documento compare come **riga dedicata con importo negativo**, quindi visibile al destinatario.
 
@@ -92,5 +96,6 @@ Il credito complessivamente maturato e non ancora speso — che è una passivit�
 
 ## Limiti attuali
 
-- **L'interruttore è spento**, quindi in produzione la ripartizione resta quella descritta in [Crediti e programma referral](/guides/referral-crediti) e nessun credito viene maturato. È spento anche l'indennizzo sulle lezioni gratuite, il cui importo orario non è ancora stato fissato.
-- **Un insegnante che non incassa in prima persona non può spendere il saldo**, come descritto sopra.
+- **Fino al rilascio in produzione** della versione che lo accende, in produzione la ripartizione resta quella descritta in [Crediti e programma referral](/guides/referral-crediti) e nessun credito viene maturato.
+- **L'indennizzo sulle lezioni gratuite è spento**, e il suo importo orario non è ancora stato fissato.
+- **Un insegnante che non incassa in prima persona non matura credito sulle proprie lezioni** e non può spendere il saldo che abbia da altre sorgenti, come descritto sopra.

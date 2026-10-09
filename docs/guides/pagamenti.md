@@ -108,5 +108,5 @@ Il ciclo di vita dei documenti, gli esiti non ordinari della trasmissione telema
 ## Limiti attuali
 
 - Il credito che una famiglia invitata ha fatto riconoscere alla famiglia invitante non viene annullato se la lezione corrispondente viene successivamente rimborsata; il credito *speso* sulla lezione rimborsata, invece, torna alla famiglia. Si veda [Crediti e programma referral](/guides/referral-crediti).
-- Il credito maturato dagli insegnanti sulle lezioni scontate è realizzato ma disattivato: si veda [Crediti degli insegnanti](/guides/crediti-insegnanti).
+- Il credito maturato dagli insegnanti sulle lezioni scontate è acceso sul branch `develop` e matura solo sulle lezioni incassate dall'insegnante; l'indennizzo sulle lezioni gratuite è ancora spento: si veda [Crediti degli insegnanti](/guides/crediti-insegnanti).
 - Non è disponibile alcuna interfaccia che esponga a insegnanti e famiglie lo storico analitico dei movimenti: i documenti fiscali restano l'unica rappresentazione consultabile dei flussi economici.

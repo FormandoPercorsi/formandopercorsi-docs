@@ -100,7 +100,7 @@ Il comportamento di diversi comandi dipende da interruttori definiti nei paramet
 | Interruttore | Stato | Effetto |
 | --- | --- | --- |
 | Copertura assicurativa | spento | La copertura non è proposta alla prenotazione; le attività di scadenza non sono pianificate. Si veda [Copertura assicurativa](/guides/assicurazione). |
-| Credito degli insegnanti | spento | La liquidazione assorbe lo sconto della famiglia con la ripartizione precedente e non matura credito per l'insegnante. Si veda [Crediti degli insegnanti](/guides/crediti-insegnanti). |
+| Credito degli insegnanti | acceso | Sulle lezioni incassate dall'insegnante la liquidazione gli fa assorbire lo sconto della famiglia o della promozione e gli matura un credito di pari importo; quando incassa la scuola la ripartizione resta quella precedente. Spento, nessuna maturazione. Si veda [Crediti degli insegnanti](/guides/crediti-insegnanti). |
 | Indennizzo sulle lezioni gratuite | spento | Efficace solo con il credito degli insegnanti acceso; l'importo orario vale zero finché non viene fissato. Si veda [Crediti degli insegnanti](/guides/crediti-insegnanti#indennizzo-sulle-lezioni-gratuite). |
 | Programma referral | acceso | Spento, non vengono più riconosciuti crediti di benvenuto né alla famiglia invitante; la restituzione del credito sulle lezioni rimborsate resta attiva. Si veda [Crediti e programma referral](/guides/referral-crediti). |
 | Ordinamento algoritmico | acceso | Pesi e saturazioni sono anch'essi parametri; cambiarli richiede un rilascio **e** un ricalcolo, perché i pesi della parte precalcolata sono incorporati nel punteggio memorizzato. |
