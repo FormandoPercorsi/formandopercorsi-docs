@@ -91,6 +91,18 @@ Il pagamento avviene tramite reindirizzamento completo del browser verso la pagi
 
 Il flusso completo è descritto in [Pagamenti, payout e fatturazione](/guides/pagamenti).
 
+## Condizioni contrattuali
+
+Le condizioni generali di contratto di famiglie e insegnanti sono versionate, e finché l'utente non ha accettato la versione in vigore il server rifiuta con `403` ogni richiesta di scrittura. Il client non deve dedurre nulla dal campo `terms_and_conditions` dell'accesso: la fonte è `GET /api/contract/status`. Il comportamento richiesto è:
+
+- dopo l'accesso, e al rientro in un'applicazione con sessione già aperta, interrogare lo stato; se `must_accept` è vero **bloccare l'interfaccia** con la schermata di accettazione, che mostra il testo e chiede l'approvazione specifica, una per una, di ciascuna clausola di `specific_approval_clauses`, poi invia `POST /api/contract/accept`;
+- se è presente `upcoming` e non ancora accettata, **avvisare** l'utente della decorrenza e proporre il confronto con la versione precedente (PDF di confronto) e l'accettazione anticipata;
+- l'elenco delle clausole da approvare e il testo **non vanno codificati nel client**: cambiano a ogni versione;
+- sostituire con questo flusso il vecchio `POST /api/auth/accept-terms` e la casella della registrazione, che non bastano più a sbloccare un utente quando è in vigore una versione successiva alla 2.0;
+- un `403` il cui messaggio riguarda i termini va trattato come segnale di rileggere lo stato, non come errore generico.
+
+Il quadro completo è in [Condizioni generali di contratto](/guides/condizioni-contrattuali).
+
 ## Notifiche
 
 Le notifiche sono recuperate per interrogazione periodica ogni cinque minuti, con richieste aggiuntive dopo le azioni che possono generarne. Non è impiegato alcun canale in tempo reale. I tipi non gestiti sono elencati in [Notifiche](/guides/notifiche).
