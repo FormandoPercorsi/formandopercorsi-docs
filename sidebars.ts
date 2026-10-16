@@ -141,7 +141,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Accesso e utenti',
-      items: ['guides/autenticazione', 'guides/insegnanti', 'guides/famiglie-studenti'],
+      items: ['guides/autenticazione', 'guides/condizioni-contrattuali', 'guides/insegnanti', 'guides/famiglie-studenti'],
     },
     {
       type: 'category',

@@ -51,7 +51,7 @@ I comandi seguenti non sono pianificati. Vanno eseguiti con `./fpc run` (o, in l
 
 | Comando | Uso |
 | --- | --- |
-| `payments/process-monthly-payouts [YYYY-MM]` | Riesegue la liquidazione mensile di un mese determinato. Rieseguirla su un mese già liquidato è un'operazione prevista e non produce movimenti duplicati: vengono registrate solo le differenze di fascia. |
+| `payments/process-monthly-payouts [YYYY-MM]` | Riesegue la liquidazione mensile di un mese determinato. Rieseguirla su un mese già liquidato è un'operazione prevista e non produce movimenti duplicati: vengono registrate solo le differenze di fascia. Il mese deve essere nel formato `YYYY-MM` e **concluso**: il mese in corso o futuro, o un formato diverso, termina con errore dati senza elaborare nulla. |
 | `payments/process-daily-payouts` | Riesegue la liquidazione giornaliera. |
 | `tracking-aggregate/date <YYYY-MM-DD>` | Ricalcola le metriche di una data, tipicamente per recuperare un intervallo non elaborato. |
 | `teacher-score/recompute [--dryRun=1]` | Ricalcolo completo del ranking; in prova riporta le variazioni più rilevanti. |
@@ -88,7 +88,7 @@ Comandi scritti per riallineare dati storici dopo l'introduzione di una nuova co
 
 | Comando | Cautela |
 | --- | --- |
-| `policy-update/notify-users` | Invia a **tutti** gli utenti la notifica e l'email di aggiornamento dei termini. Va eseguito una sola volta per ogni aggiornamento, e mai in sviluppo con una base dati contenente indirizzi reali. |
+| `policy-update/notify-users` | Invia a **tutti** gli utenti la notifica e l'email di aggiornamento dei termini. Va eseguito una sola volta per ogni aggiornamento, e mai in sviluppo con una base dati contenente indirizzi reali. Non registra alcuna accettazione e non pubblica alcuna versione: si veda [Condizioni generali di contratto](/guides/condizioni-contrattuali). |
 | `invoices/force-update-all-business-registry-configurations` | Riscrive su ACube la configurazione anagrafica di tutti gli insegnanti attivi. |
 | `stripe-users-management/update-all-teacher-and-external-schools-accounts` | Migrazione una tantum degli account Stripe connessi di insegnanti e scuole esterne verso la configurazione corrente; sposta saldi. Non va rieseguita. |
 | `insurance/claim-replacement-report <da> <a> [--teacherId=] [--email=1]` | Analisi di quanta parte degli slot liberati dai sinistri è stata ri-prenotata; di sola lettura, ma rilevante solo con l'assicurazione attiva. |
