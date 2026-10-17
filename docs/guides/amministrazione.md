@@ -62,6 +62,10 @@ Il credito di una famiglia e quello di un insegnante si consultano per intero �
 
 Il catalogo delle novità e delle guide mostrate agli utenti si amministra con elenco, dettaglio, creazione, modifica ed eliminazione logica; è descritto in [Novità e guide in-app](/guides/annunci-guide).
 
+## Cancellazione di un ordine
+
+L'amministrazione può cancellare e rimborsare un intero ordine già pagato ma non erogato, percorsi formativi compresi, con anteprima degli impedimenti e degli importi e con esecuzione riprendibile in caso di interruzione. Il procedimento è descritto in [Modifiche e cancellazioni delle lezioni](/guides/modifiche-cancellazioni#la-cancellazione-dellintero-ordine-da-parte-dellamministrazione).
+
 ## Diagnostica e abilitazioni
 
 Due strumenti completano l'area:

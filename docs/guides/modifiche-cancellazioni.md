@@ -71,6 +71,10 @@ Lo scadere della finestra è gestito da un'attività pianificata che agisce **pe
 
 Ogni rimborso di una lezione — su cancellazione della famiglia o a risoluzione di una cancellazione dell'insegnante — **restituisce alla famiglia il credito** speso per quella lezione e storna l'eventuale credito che l'insegnante vi aveva maturato, nella stessa transazione; si vedano [Crediti e programma referral](/guides/referral-crediti#restituzione-del-credito) e [Crediti degli insegnanti](/guides/crediti-insegnanti#storno).
 
+## La modifica della famiglia con lo stesso insegnante
+
+La modifica che la famiglia chiede con lo stesso insegnante è applicata subito e **non attende alcuna risposta**: la richiesta che la accompagna è quindi registrata come già **accettata**. In precedenza restava in attesa, e l'operazione di rifiuto della famiglia poteva ancora agire su di essa, facendo rivivere la lezione originaria dopo che era già stata sostituita. Una correzione dei dati ha chiuso come accettate le richieste di questo tipo rimaste in attesa; nessuna richiesta davvero in attesa di risposta è stata toccata.
+
 ## Cambio di insegnante e ripartizione economica
 
 La famiglia ha pagato una volta e paga lo stesso importo chiunque tenga la lezione: importo dell'ordine, residuo da pagare e credito applicato **non vengono toccati** dallo spostamento. Ciò che cambia è la **ripartizione**, perché il listino applicabile dipende dal regime fiscale dell'insegnante e la scuola che incassa dipende dal territorio.
@@ -80,6 +84,45 @@ Lo spostamento determina quindi di nuovo, per il nuovo insegnante, chi incassa e
 Il credito eventualmente maturato dal primo insegnante sulla lezione viene stornato all'interno dello spostamento; il nuovo insegnante lo maturerà alla liquidazione, come descritto in [Crediti degli insegnanti](/guides/crediti-insegnanti#storno).
 
 Documenti e trasferimento di denaro fra conti intervengono solo se cambia **chi incassa**; la ripartizione sull'ordine viene invece ricalcolata in ogni caso, perché due insegnanti con regimi fiscali diversi possono incassare attraverso la stessa scuola. Una ricevuta ancora priva di marca viene **annullata e non rimborsata**, per le ragioni descritte in [Documenti fiscali e ricevute](/guides/documenti-fiscali).
+
+## La cancellazione dell'intero ordine da parte dell'amministrazione
+
+Quando un ordine già pagato non verrà erogato — un errore di prenotazione, un caso eccezionale concordato con la famiglia — l'amministrazione può **cancellare l'ordine nel suo insieme** e rimborsarlo. È l'unico percorso che lo consente, e vale anche per i **percorsi formativi**: la cancellazione della singola lezione è rifiutata sia per gli amministratori sia per i percorsi, e ripeterla lezione per lezione rimborserebbe ogni volta l'intero pagamento ed emetterebbe una nota di credito sull'intero ordine per ciascuna lezione.
+
+Le operazioni sono nella sezione [Admin - Lesson orders](/api/admin-lesson-orders) della API Reference, con un'anteprima di sola lettura (`GET /api/admin/lesson-orders/{id}/cancellation`) e l'esecuzione (`POST` sullo stesso percorso). Lo stesso servizio è raggiungibile da console:
+
+```shell
+php yii lesson-order/cancel <orderId> [--reason="..."] [--refundInsurance=1] [--releasePromotion=1] [--allowPast=1] [--actorId=<id>] [--dryRun=1] [--interactive=0]
+php yii lesson-order/cancellation-status <orderId>
+```
+
+Le opzioni sono il **motivo** (testo libero, conservato sulla cancellazione), il **rimborso del premio assicurativo**, il **rilascio della promozione** e il permesso di cancellare un ordine le cui lezioni sono **già iniziate**. Da console il comando mostra l'anteprima e chiede conferma, salvo `--interactive=0`.
+
+**L'anteprima precede sempre l'esecuzione.** Restituisce lezioni coinvolte, importi (quanto ha pagato la carta, premio, rimborso totale, credito della famiglia da restituire), avvertenze e **impedimenti**, ciascuno con un codice stabile. Esiti possibili: `eligible`, `blocked`, `in_progress` (una esecuzione precedente si è fermata a metà), `completed` e `already_completed`. Un ordine non cancellabile risponde `400` con gli impedimenti. Sono tali:
+
+| Codice | Causa |
+| --- | --- |
+| `lesson_settled`, `settlement_link_exists` | Una lezione è già stata liquidata o compresa in una liquidazione |
+| `lesson_awaiting_payment` | Una lezione è ancora in attesa di pagamento |
+| `lesson_already_started` | Una lezione è iniziata o passata (superabile con `allow_past`) |
+| `previous_refund_exists`, `stripe_already_refunded`, `stripe_refund_exceeds_refundable` | Esiste già un rimborso, registrato qui o su Stripe |
+| `stripe_unavailable`, `missing_stripe_session`, `missing_provider_stripe_account` | Il pagamento non è verificabile o rimborsabile |
+| `document_provider_mismatch` | Il documento della famiglia è stato emesso da un fornitore diverso da quello attuale (cambio di fornitore): va stornato a mano |
+| `no_cancellable_lesson`, `unsupported_order_type` | Nulla da cancellare, o tipo di ordine non gestito |
+
+Le avvertenze non fermano l'operazione: il credito *referral* scattato dall'ordine **non viene stornato**, un sinistro assicurativo già aperto resta valido, il premio non viene rimborsato se non richiesto, e l'ordine comprende lezioni passate.
+
+**L'esecuzione non è transazionale, è riprendibile.** Fatture elettroniche e rimborsi sulla carta non si annullano: per questo esiste un solo record di cancellazione per ordine, che è anche il registro dell'avanzamento. I passi, nell'ordine, sono:
+
+1. in **un'unica transazione**, sulle righe bloccate: le lezioni passano a `deleted` con motivo `admin_cancelled` (una lezione già cancellata dall'insegnante e in attesa di scelta della famiglia passa invece a `teacher_cancelled_refunded`), si restituiscono la disponibilità, il credito della famiglia e le maturazioni dell'insegnante, si libera la promozione se richiesto e si fa scadere l'assicurazione;
+2. la **nota di credito** della famiglia; una ricevuta ancora in attesa di marca da bollo è invece **annullata**, perché non è mai stata un documento valido (si veda [Documenti fiscali e ricevute](/guides/documenti-fiscali));
+3. l'eventuale nota di credito del premio assicurativo;
+4. il **rimborso sulla carta**, per l'importo registrato al passo 1: quanto pagato per le lezioni, più il premio solo se richiesto;
+5. la chiusura: registrazione del rimborso e dell'ordine come `cancelled`, quindi l'invio delle email a famiglia (con la nota di credito allegata), insegnante e scuola di competenza.
+
+Ogni esito irreversibile è registrato **subito dopo** averlo ottenuto, e una nuova esecuzione salta ciò che è già fatto: se un passo fallisce, ripetere la richiesta riprende da lì (`500`, con l'errore registrato). Una seconda richiesta con **opzioni diverse** da quelle della cancellazione in corso è rifiutata con `409`, come lo è quella che trova l'ordine in uso da un'altra esecuzione; una cancellazione già conclusa risponde `already_completed` senza cambiare nulla. Prima del documento e del rimborso viene riverificato che le lezioni non siano state liquidate nel frattempo.
+
+Tre scelte da conoscere. L'ordine diventa `cancelled` e **mai** `deleted`, che continua a significare «mai pagato». Il premio assicurativo è **trattenuto** per impostazione predefinita, e la promozione resta **consumata** salvo richiesta. Il rimborso è sempre un importo esplicito e non può essere completato da un rimborso estraneo già presente sullo stesso pagamento.
 
 ## Effetti comuni
 

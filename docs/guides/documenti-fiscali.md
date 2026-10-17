@@ -39,6 +39,8 @@ Quando la piattaforma emette materialmente un documento per conto di un altro so
 
 Lo sconto derivante dal [credito della famiglia](/guides/referral-crediti) o da una [promozione](/guides/promozioni) compare come **riga dedicata con importo negativo**. Quando l'imposta di bollo di una fattura non è aggiunta al totale ma ricavata dalle righe, viene ripartita sulle sole righe positive: una riga di sconto conserva sempre esattamente il proprio importo, così che lo sconto stampato coincida con quello concesso.
 
+La [cancellazione di un intero ordine](/guides/modifiche-cancellazioni#la-cancellazione-dellintero-ordine-da-parte-dellamministrazione) storna il documento già emesso alla famiglia con una **nota di credito** (o ricevuta di rimborso), distinta da quella eventuale del premio assicurativo. Una ricevuta ancora **in attesa di marca da bollo** non viene stornata ma annullata, e la relativa notifica all'insegnante è chiusa, perché non è mai stata un documento valido.
+
 ## Prestazioni occasionali
 
 Un insegnante in regime occasionale non emette fattura ma **ricevuta**. Due istituti si aggiungono al documento ordinario.

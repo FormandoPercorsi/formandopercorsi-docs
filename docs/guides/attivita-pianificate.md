@@ -84,6 +84,15 @@ Comandi scritti per riallineare dati storici dopo l'introduzione di una nuova co
 | `google-calendar-backfill/run` | Crea i calendari Google mancanti degli insegnanti e accoda la sincronizzazione delle lezioni degli ultimi due mesi e future. |
 | `google-calendar-backfill/hide-existing` | Nasconde i calendari degli insegnanti dall'elenco dell'account di servizio. |
 
+### Cancellare un ordine
+
+| Comando | Uso |
+| --- | --- |
+| `lesson-order/cancel <orderId> [opzioni]` | Cancella un ordine intero già pagato e non erogato, emette la nota di credito e rimborsa la carta. Opzioni: `--reason`, `--refundInsurance=1`, `--releasePromotion=1`, `--allowPast=1`, `--actorId`, `--dryRun=1`, `--interactive=0`. Mostra l'anteprima e chiede conferma. Se una esecuzione si è fermata a metà, rilanciarlo con le stesse opzioni la riprende. Codici di uscita: `0` completato, nulla da fare, rifiutato o prova; `65` impedimento o ordine inesistente; `64` `--actorId` non valido; `75` ordine in uso da un'altra esecuzione, o opzioni diverse da quelle registrate; `70` un passo è fallito. |
+| `lesson-order/cancellation-status <orderId>` | Sola lettura: anteprima, oppure stato di avanzamento di una cancellazione già avviata. |
+
+La procedura completa è in [Modifiche e cancellazioni delle lezioni](/guides/modifiche-cancellazioni#la-cancellazione-dellintero-ordine-da-parte-dellamministrazione).
+
 ### Comandi da usare con particolare cautela
 
 | Comando | Cautela |
