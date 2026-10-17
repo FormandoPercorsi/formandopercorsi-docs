@@ -94,6 +94,10 @@ L'amministrazione può consultare il ledger completo di un insegnante, credito i
 
 Il credito complessivamente maturato e non ancora speso — che è una passività — è consultabile, con il dettaglio dei saldi positivi e negativi, nel [prospetto statistico dei crediti](/guides/statistiche#programmi-di-incentivo).
 
+## Insegnante gestito da una scuola
+
+L'insegnante che una scuola esterna gestisce in prima persona (si veda [Scuole esterne](/guides/scuole-esterne#il-gestore-che-insegna)) **non matura credito**: nessuno emette documenti verso di lui, quindi non avrebbe dove spenderlo. Le maturazioni sono saltate, il credito in maturazione è vuoto e le rettifiche amministrative sono rifiutate.
+
 ## Limiti attuali
 
 - **Fino al rilascio in produzione** della versione che lo accende, in produzione la ripartizione resta quella descritta in [Crediti e programma referral](/guides/referral-crediti) e nessun credito viene maturato.

@@ -12,7 +12,8 @@ Il contratto completo degli endpoint è nella sezione [Auth](/api/auth) della AP
 
 | Operazione | Metodo e percorso | Descrizione |
 | --- | --- | --- |
-| Accesso | `POST /api/auth/signin` | Autenticazione con email, password e categoria utente (`family`, `teacher`, `admin`). |
+| Accesso | `POST /api/auth/signin` | Autenticazione con email, password e categoria utente (`family`, `teacher`, `admin`, `external_school`). |
+| Cambio di profilo | `POST /api/auth/switch-profile` | Passa a un altro profilo raggiungibile con le stesse credenziali, senza richiedere di nuovo la password. |
 | Rinnovo | `POST /api/auth/refresh-token` | Emette un nuovo token JWT a partire dal refresh token. |
 | Uscita | `DELETE /api/auth/refresh-token` | Invalida il refresh token lato server. |
 
@@ -52,6 +53,18 @@ async function refresh(refreshtoken) {
   return (await response.json()).token;
 }
 ```
+
+## Profili con le stesse credenziali
+
+Una stessa email e una stessa password possono aprire **più profili**: il caso è quello di una scuola esterna il cui responsabile insegna egli stesso, descritto in [Scuole esterne](/guides/scuole-esterne#il-gestore-che-insegna). Il comportamento è questo:
+
+- all'accesso la **categoria** richiesta decide quale profilo si apre: con le credenziali della scuola, `external_school` apre la scuola e `teacher` apre l'insegnante da essa gestito. Prima una scuola esterna ricadeva, per la categoria, in quella della famiglia;
+- la risposta riporta, accanto alla categoria, `profiles`: l'elenco delle categorie raggiungibili con quelle credenziali, per esempio `["external_school", "teacher"]`;
+- `POST /api/auth/switch-profile` con `{"category": "teacher"}` apre una **nuova sessione** (token e refresh token) sull'altro profilo, senza password, e risponde con lo stesso corpo dell'accesso. Risponde `400` se la categoria è già quella in uso, `403` se con quelle credenziali non è raggiungibile alcun profilo attivo di quella categoria. Il cambio è registrato nel registro di audit;
+- la password è sempre quella del titolare delle credenziali, qualunque profilo sia aperto: il cambio della password agisce su di essa, e una sessione aperta con credenziali altrui termina con esse;
+- il cambio di profilo resta consentito anche quando il profilo corrente deve ancora accettare le condizioni: uscire da un profilo bloccato non può essere impedito. Si veda [Condizioni generali di contratto](/guides/condizioni-contrattuali).
+
+Il client che conosce solo tre categorie deve essere esteso: una scuola esterna che accede riceve ora `external_school`.
 
 ## Gestione del rinnovo lato client
 

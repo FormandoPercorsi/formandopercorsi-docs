@@ -96,7 +96,7 @@ Ogni accettazione è una riga che **non viene mai modificata**: contiene utente,
 
 Finché `must_accept` è vero, **ogni richiesta di scrittura** (`POST`, `PUT`, `PATCH`, `DELETE`) è rifiutata con `403` e il messaggio `You must accept terms and conditions to use this feature.`. Le letture non sono mai bloccate. Restano consentite, perché l'utente possa uscire dal blocco o orientarsi:
 
-- tutta l'area di accesso: accesso, rinnovo del token, uscita, registrazione, reimpostazione della password, conferme;
+- tutta l'area di accesso: accesso, rinnovo del token, uscita, registrazione, reimpostazione della password, conferme e **cambio di profilo** (uscire da un profilo bloccato non può essere impedito);
 - `GET /api/contract/status` e `POST /api/contract/accept`;
 - la ricerca di insegnanti, e l'elenco, il dettaglio e la ricerca delle lezioni;
 - l'elenco, il dettaglio e la lettura delle notifiche;
