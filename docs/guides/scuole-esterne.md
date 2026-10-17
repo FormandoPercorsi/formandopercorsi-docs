@@ -51,6 +51,23 @@ Un'indisponibilità di un servizio esterno non impedisce quindi la creazione, e 
 
 Due dati non sono modificabili dall'esterno: l'identificativo del conto di incasso, che si disallineerebbe da quanto il servizio di pagamento conosce davvero e che si muove solo attraverso l'operazione di abilitazione; e il contrassegno che indica la scuola coincidente con la piattaforma, che non è esposto affatto. La modalità di incasso «insegnante», per la stessa ragione, non è ammessa su quella scuola: la sua intera funzione è incassare.
 
+## Il gestore che insegna
+
+Il responsabile di una scuola esterna può insegnare egli stesso. Il caso è modellato con un **secondo utente**, un insegnante *gestito dalla scuola*, e non con un secondo ruolo sull'utente della scuola: ogni percorso economico ricava il soggetto da un identificativo controllando prima se sia un insegnante, e un solo identificativo con due ruoli faceva incassare, fatturare e pagare gli ordini della scuola come se fossero dell'insegnante, pagando due volte lo stesso utente, una per ciascun driver di bonifico.
+
+Due legami distinti, con due scopi:
+
+- **L'identità fiscale è quella della scuola.** L'insegnante gestito non ha partita IVA, codice fiscale, IBAN, regime fiscale, conto di incasso, anagrafica presso l'intermediario di fatturazione né sequenza di numerazione: li prende dalla scuola. Ogni insegnante gestito è legato a **una sola scuola**, e una scuola ne ha **uno solo**; la scuola coincidente con la piattaforma non può averlo. Nel flusso economico l'insegnante gestito **non è mai una parte**: dove le regole renderebbero l'insegnante il provider, lo è la scuola, e come titolare o beneficiario di una posizione nel registro un identificativo è sempre ricondotto al soggetto legale che rappresenta, con un'unica definizione. Nei comuni della scuola la quota dell'insegnante confluisce così nella posizione che la scuola trattiene per sé: nessuna fattura a sé stessa, nessun trasferimento a sé stessa, un solo bonifico. Altrove l'insegnante si comporta come uno qualunque. La fascia di ore resta calcolata sull'insegnante.
+- **Le credenziali sono quelle della scuola.** L'insegnante gestito non ha password propria: accede con l'email e la password della scuola. La sua email è una copia mantenuta allineata, e non è mai trovata da una ricerca per email né riceve un ripristino della password. Si veda [Autenticazione](/guides/autenticazione#profili-con-le-stesse-credenziali).
+
+L'insegnante gestito **non matura credito insegnante**: nessuno emette documenti verso di lui, quindi un credito non potrebbe mai essere speso. Le maturazioni sono saltate, il credito in maturazione è vuoto e le rettifiche amministrative sono rifiutate; si veda [Crediti degli insegnanti](/guides/crediti-insegnanti). Non può modificare i dati fiscali e di pagamento, che appartengono alla scuola e sono rifiutati con un errore, e la sincronizzazione con i servizi esterni è saltata.
+
+Il profilo si crea dall'amministrazione con `POST /api/admin/external-schools/{id}/teacher-profile` (corpo facoltativo: nome, cognome, telefono, data di nascita), che risponde `201` con l'identificativo dell'insegnante e la scuola aggiornata, dove compare `operated_teacher_user_id`. Risponde `400` se la scuola non ha un utente attivo, è la scuola della piattaforma o ha già il profilo. Il profilo parte **senza avere accettato le condizioni**: deve accettare in proprio quelle degli insegnanti, come descritto in [Condizioni generali di contratto](/guides/condizioni-contrattuali). Nel profilo dell'insegnante compare `operating_external_school` (identificativo e denominazione della scuola).
+
+I **dipendenti** di una scuola restano insegnanti ordinari con la propria posizione fiscale: questo meccanismo è per l'unica persona che *è* la scuola.
+
+L'email di una scuola può ora essere ripresentata invariata in una modifica: l'unicità la confronta con gli altri utenti e non con la scuola stessa né con la copia dell'insegnante gestito.
+
 ## Superficie amministrativa
 
 Elenco e dettaglio delle scuole esterne, creazione, modifica, assegnazione e revoca dei comuni di competenza, e riabilitazione sui servizi esterni sono operazioni riservate all'amministrazione e raggruppate nella [API Reference](/api/formando-percorsi-api) sotto Amministrazione, nelle categorie dedicate alle scuole esterne e all'abilitazione sui servizi esterni. Restano disponibili anche le corrispondenti procedure da riga di comando, che eseguono le stesse scritture.

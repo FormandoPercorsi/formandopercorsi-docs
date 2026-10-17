@@ -35,6 +35,8 @@ Valutata positivamente una candidatura, l'amministrazione genera un **token di r
 
 Nell'applicazione web gli inviti si generano dalla pagina «Generatore Token» dell'area amministrativa.
 
+L'emissione dell'invito è **riservata agli amministratori**: in precedenza il controllo non era applicato a questa operazione, e qualunque utente autenticato poteva generare, e ricevere in risposta, un invito per insegnanti.
+
 ### Registrazione
 
 La registrazione crea in un'unica transazione l'utente, il profilo dell'insegnante — anagrafica, indirizzo di residenza e di fatturazione, regime fiscale, codice destinatario, IBAN, tempo di spostamento — le materie insegnate e le **numerazioni dei documenti** dell'insegnante, una per i documenti emessi automaticamente dalla piattaforma e una per quelli inseriti a mano. Il regime fiscale determina il tipo di documento che l'insegnante emette (fattura elettronica, fattura esterna o ricevuta per compenso occasionale) ed è quindi un dato con conseguenze economiche dirette, descritte in [Documenti fiscali e ricevute](/guides/documenti-fiscali) e in [Scuole esterne, provider e incasso](/guides/scuole-esterne). L'accettazione delle condizioni generali è richiesta alla registrazione; il loro testo è esposto dalla sezione [Contract](/api/contract), distintamente per famiglie e insegnanti.

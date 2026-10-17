@@ -29,6 +29,8 @@ Il client utilizza un'unica istanza del client HTTP, con un'intercettazione in u
 
 ## Ruoli e navigazione
 
+Le categorie restituite all'accesso sono quattro: `family`, `teacher`, `admin` ed `external_school`. Con le stesse credenziali possono essere raggiungibili più profili (campo `profiles`), fra i quali si passa con `POST /api/auth/switch-profile`: si veda [Autenticazione](/guides/autenticazione#profili-con-le-stesse-credenziali).
+
 Le tre categorie di utenza corrispondono ad altrettante aree dell'applicazione, con rotte separate. Un controllo di autorizzazione protegge ogni pagina: reindirizza alla schermata di accesso chi non è autenticato e impedisce l'accesso alle aree non pertinenti alla propria categoria.
 
 | Area | Pagine | Approfondimento |
