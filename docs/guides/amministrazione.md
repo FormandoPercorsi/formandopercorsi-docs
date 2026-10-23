@@ -66,6 +66,10 @@ Il catalogo delle novità e delle guide mostrate agli utenti si amministra con e
 
 L'amministrazione può cancellare e rimborsare un intero ordine già pagato ma non erogato, percorsi formativi compresi, con anteprima degli impedimenti e degli importi e con esecuzione riprendibile in caso di interruzione. Il procedimento è descritto in [Modifiche e cancellazioni delle lezioni](/guides/modifiche-cancellazioni#la-cancellazione-dellintero-ordine-da-parte-dellamministrazione).
 
+## Sedi gestite dalle scuole esterne
+
+L'amministrazione assegna a ciascuna sede la scuola esterna che la gestisce, o la libera, e consulta l'agenda e l'occupazione di qualunque sede: lezioni in calendario, svolte e cancellate, picco di lezioni contemporanee rispetto ai posti disponibili. La scuola consulta le stesse informazioni per le sole sedi che gestisce. Il funzionamento è descritto in [Scuole esterne, provider e incasso](/guides/scuole-esterne#sedi-gestite-da-una-scuola).
+
 ## Diagnostica e abilitazioni
 
 Due strumenti completano l'area:

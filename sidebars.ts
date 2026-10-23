@@ -52,7 +52,10 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Contract',
     ],
   },
-  {label: 'Insegnanti', tags: ['Teacher', 'Teacher Application', 'Teacher Credit']},
+  {
+    label: 'Insegnanti',
+    tags: ['Teacher', 'Teacher Application', 'Teacher Credit', 'Teacher Stripe Onboarding', 'Teacher Expected Hours'],
+  },
   {
     label: 'Contenuti didattici',
     tags: ['Subject', 'Topic', 'Subtopic', 'StudentExercise', 'Exercise', 'Video'],
@@ -65,6 +68,9 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
   {label: 'Webhook (server to server)', tags: ['Webhooks']},
   {label: 'Notifiche & annunci', tags: ['Notification', 'Announcements']},
   {label: 'Anagrafiche geografiche', tags: ['City', 'Province', 'School', 'Headquarter']},
+  // What an external school reads about its own competence; 'Headquarter activity' also holds the
+  // admin twins (assignment, any headquarter's agenda), kept together since they share the schemas.
+  {label: 'Scuole esterne', tags: ['Headquarter activity', 'School - Statistics']},
   {
     label: 'Amministrazione',
     tags: [
@@ -77,9 +83,11 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Admin - Finance',
       'Admin - Incentives',
       'Admin - Job Runs',
+      'Admin - Lesson orders',
       'Admin - Lessons',
       'Admin - Monitoring',
       'Admin - Price Changes',
+      'Admin - Products',
       'Admin - Provisioning',
       'Admin - Settlements',
       'Admin - Users',

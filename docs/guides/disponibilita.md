@@ -70,6 +70,22 @@ Quando un insegnante modifica il proprio tempo di spostamento, il sistema ricalc
 
 Al termine, gli slot prenotabili vengono rigenerati per i blocchi modificati. L'intera operazione è racchiusa in un'unica transazione: se un passaggio fallisce, nessuna modifica viene applicata.
 
+## Ore settimanali attese
+
+Per decidere quando aprire più disponibilità, l'insegnante può consultare, settimana per settimana, quante ore ha già prenotate e quante può aspettarsene in totale (`GET /api/teacher/expected-hours?weeks=`, riservato all'insegnante e per ora presente solo sul branch `develop`). La risposta parte dalla settimana in corso e copre da 1 a 26 settimane (12 per impostazione predefinita); ogni settimana va da lunedì a domenica, nel fuso `Europe/Rome`.
+
+| Campo | Significato |
+| --- | --- |
+| `booked_hours` | Ore di lezione già nel calendario dell'insegnante in quella settimana, compresi i giorni già trascorsi. |
+| `expected_hours` | **Stima** delle ore complessive della settimana, prenotate comprese; mai inferiore a `booked_hours`. |
+| `demand_index` | Domanda attesa del mercato in quella settimana rispetto alla settimana media dell'ultimo anno: 1 è la media, 1,5 una settimana più intensa del 50%. |
+
+La risposta riporta anche il **mercato** da cui è stata letta la stagionalità (`scope`) e su quanti anni di storico si basa la stima (`years_of_history`, da 0 a 2; 0 significa nessuna stima).
+
+La stima è volutamente semplice, di tipo stagionale: una settimana è attesa come la stessa settimana di 52 settimane prima (e di 104, se disponibile, in media), scalata per la crescita del mercato nelle ultime 12 settimane rispetto alle stesse settimane di allora, e poi per il peso dell'insegnante sul mercato in quelle 12 settimane. Il **mercato** è il più ristretto, fra tre, che abbia almeno 100 ore di lezioni nell'ultimo anno: le materie dell'insegnante acquistate da famiglie della sua provincia, le stesse materie ovunque, l'intera piattaforma.
+
+I valori nulli sono deliberati e vanno mostrati come «stima non disponibile», non come zero: senza un anno di storico, o con un periodo recente vuoto, non c'è stima (un periodo vuoto significa assenza di dati, non un mercato azzerato); un insegnante senza lezioni nelle ultime 12 settimane riceve l'indice di domanda ma non le ore attese. Le ore sono quelle **di calendario**, non la durata tariffata della lezione: la misura riguarda il tempo occupato, non le fasce di ore.
+
 ## Quando un insegnante non compare
 
 La ricerca della famiglia parte dagli slot prenotabili descritti sopra e applica una propria catena di filtri, quindi un insegnante con disponibilità dichiarate può ugualmente non comparire fra i risultati. Per ricostruire quale filtro lo esclude, e più in generale perché una certa famiglia non riesce a prenotare un certo insegnante, l'amministrazione dispone della [Diagnostica delle prenotazioni](/guides/diagnostica-prenotazioni).

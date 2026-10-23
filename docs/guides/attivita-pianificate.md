@@ -23,7 +23,7 @@ Tre conseguenze di questo modello:
 | Comando | Cadenza (UTC) | Sviluppo | Produzione | Che cosa fa |
 | --- | --- | --- | --- | --- |
 | `lessons/check-expired-lessons` | ogni 15 minuti (:00, :15, :30, :45) | attiva | attiva | Rete di sicurezza del webhook di pagamento: per gli ordini ancora in attesa oltre la durata della sessione (30 minuti) chiede a Stripe l'esito e applica lo stesso trattamento del webhook — conferma l'ordine pagato (lezioni pagate, documento, notifiche) o libera quello scaduto (slot, promozione, credito). Webhook e cron non elaborano mai due volte lo stesso ordine. |
-| `lesson-reminder/send-reminders` | ogni 15 minuti (:00, :15, :30, :45) | attiva | attiva | Invia il promemoria delle lezioni pagate che iniziano entro 25 minuti, alla famiglia e, se ha un proprio indirizzo e il consenso, allo studente. |
+| `lesson-reminder/send-reminders` | ogni 15 minuti (:00, :15, :30, :45) | attiva | attiva | Invia il promemoria delle lezioni pagate che iniziano entro 25 minuti, alla famiglia e, se ha un proprio indirizzo e il consenso, allo studente. Se la lezione è l'ultima di un percorso formativo, invia anche al genitore l'[invito al rinnovo](/guides/percorsi-formativi#invito-al-rinnovo); un errore nell'invito non blocca il promemoria. |
 | `lesson-deletion-by-teacher/expire-deleted-lessons` | ogni 15 minuti (:05, :20, :35, :50) | attiva | attiva | Risolve con il rimborso le lezioni cancellate dall'insegnante per le quali la famiglia non ha scelto entro la scadenza; si veda [Modifiche e cancellazioni](/guides/modifiche-cancellazioni). |
 | `lesson-modification/expire-modification-requests` | ogni 15 minuti (:10, :25, :40, :55) | attiva | attiva | Fa decadere le richieste di modifica a cui la famiglia non ha risposto prima dell'inizio della lezione. |
 | `tracking-aggregate/hourly` | ogni ora al minuto 1 | attiva | attiva | Calcola le metriche orarie di utilizzo; si veda [Tracking degli eventi e metriche](/guides/tracking-metriche). |
@@ -83,6 +83,7 @@ Comandi scritti per riallineare dati storici dopo l'introduzione di una nuova co
 | `invoice-line-backfill/run [--dryRun=1] [--limit=N] [--pauseMs=200]` | Rilegge da ACube il contenuto dei documenti già emessi (righe, dati per il PDF, emissione per conto terzi). Procede a ritmo controllato, può essere spezzato in lotti con `--limit` e si ferma dopo cinque documenti consecutivi a cui ACube non risponde, con codice di uscita 69: i restanti vengono ripresi all'esecuzione successiva. |
 | `google-calendar-backfill/run` | Crea i calendari Google mancanti degli insegnanti e accoda la sincronizzazione delle lezioni degli ultimi due mesi e future. |
 | `google-calendar-backfill/hide-existing` | Nasconde i calendari degli insegnanti dall'elenco dell'account di servizio. |
+| `headquarter/backfill-managing-school [--dryRun=1]` | Propone come [sede gestita](/guides/scuole-esterne#sedi-gestite-da-una-scuola) da ciascuna scuola esterna la sede che la scuola usa come propria base, scrivendo solo i casi non ambigui: salta la scuola della piattaforma, una sede mancante o eliminata, una sede che è la base di più scuole e una già gestita da un'altra scuola. Una seconda esecuzione riporta le proprie righe come già assegnate. La migrazione lascia la colonna vuota di proposito, quindi l'esito va rivisto prima di eseguirlo su `prod`. |
 
 ### Cancellare un ordine
 

@@ -4,7 +4,7 @@ title: Statistiche e indicatori
 
 # Statistiche e indicatori
 
-L'area amministrativa dispone di un insieme di interrogazioni aggregate su lezioni, disponibilità, utenti e flussi economici. Tutte condividono la stessa forma di richiesta e la stessa struttura di risposta, e tutte sono di sola lettura. Sono raggruppate nella [API Reference](/api/formando-percorsi-api) sotto Amministrazione: [Admin - Lessons](/api/admin-lessons), [Admin - Availability](/api/admin-availability), [Admin - Users](/api/admin-users), [Admin - Finance](/api/admin-finance), oltre alla categoria dedicata alla distribuzione delle fasce di ore e a quella dei programmi di incentivo, quest'ultima per ora presente solo nell'ambiente di sviluppo.
+L'area amministrativa dispone di un insieme di interrogazioni aggregate su lezioni, disponibilità, utenti e flussi economici. Tutte condividono la stessa forma di richiesta e la stessa struttura di risposta, e tutte sono di sola lettura. Sono raggruppate nella [API Reference](/api/formando-percorsi-api) sotto Amministrazione: [Admin - Lessons](/api/admin-lessons), [Admin - Availability](/api/admin-availability), [Admin - Users](/api/admin-users), [Admin - Finance](/api/admin-finance), oltre alla categoria dedicata alla distribuzione delle fasce di ore e a quelle dei programmi di incentivo e dei prodotti acquistati, queste ultime per ora presenti solo nell'ambiente di sviluppo. Le scuole esterne dispongono di una versione ristretta alla propria competenza.
 
 ## Forma comune della richiesta
 
@@ -76,6 +76,43 @@ Tre scelte di calcolo hanno conseguenze visibili su ciò che si legge.
 
 **Il periodo è determinato dalla data dell'ordine**, deliberatamente, così che un intervallo confronti il denaro incassato con i costi di quello stesso incasso; soltanto la fascia viene dal mese della lezione. Va inoltre tenuto presente che le misure economiche contano le ore in modo diverso dalla liquidazione — per orario di fine e durata effettiva anziché per durata tariffata — perché è ciò che serve a misurare un ricavo; le due definizioni non sono sovrapponibili e non vanno unificate.
 
+## Prodotti acquistati
+
+Tre prospetti, nella categoria Admin - Products (per ora presente solo nell'ambiente di sviluppo), descrivono **come vengono acquistate le ore**: lezioni singole per durata contro percorsi formativi per tipo, e come le famiglie passano dall'uno all'altro.
+
+| Prospetto | Contenuto |
+| --- | --- |
+| **Mix** (`products/mix/search`) | Per ogni durata di lezione singola e ogni tipo di percorso: acquisti, ore acquistate, importo pagato, importo a listino, ricavo, prezzo medio orario pagato e a listino, quota delle ore sul totale e quota delle ore acquistate come percorso. Totali sull'intervallo e serie per periodo, con granularità a scelta; un filtro facoltativo limita a un solo tipo di prodotto. |
+| **Transizioni** (`products/transitions/search`) | Confronta due finestre di uguale durata (da 7 a 365 giorni, 90 per impostazione predefinita) attorno a un **perno** — una data, oppure la decorrenza di un aggiornamento tariffario — e classifica ogni famiglia, in ciascuna finestra, come *nessun acquisto*, *solo singole*, *solo percorsi* o *entrambi*. Restituisce la matrice dei passaggi con le famiglie e gli acquisti di ciascuna cella. |
+| **Conversione** (`products/conversion/search`) | Raggruppa per mese del **primo acquisto** le famiglie che hanno iniziato con una lezione singola e riporta quante hanno acquistato un percorso entro 30, 60 e 90 giorni. |
+
+Le definizioni sono comuni ai tre prospetti.
+
+**Un acquisto è un ordine incassato**, alla data dell'ordine, come nelle misure economiche. Un ordine cancellato dall'amministrazione scompare; il rimborso di una singola lezione lascia l'acquisto e riduce solo il ricavo. L'ordine separato che nasce quando una lezione di un percorso cambia insegnante è **ricondotto al percorso**: altrimenti un cambio di insegnante risulterebbe come una lezione singola acquistata in quella data.
+
+**Le ore sono misurate all'acquisto** — quantità per durata della lezione, oppure ore del tipo di percorso — e non sommando le lezioni, che spostamenti e cancellazioni alterano. Ne consegue che modificare il numero di ore di un tipo di percorso ne riscrive lo storico. Gli importi sono aggregati per acquisto, così che il numero di lezioni non li moltiplichi: l'**importo pagato** è al netto di credito e promozione, l'**importo a listino** li comprende, il **ricavo** è quello delle misure economiche e scende al rimborso delle lezioni.
+
+**Le transizioni sono stagionali per natura.** Una finestra che arriva a oggi accorcia entrambe alla stessa durata, e la risposta lo segnala (`truncated`): i numeri sono provvisori. Con `compare_previous_year` si ottiene la stessa matrice un anno prima, perché l'anno scolastico rende fuorviante un semplice prima/dopo che attraversi l'estate. Un aggiornamento tariffario ritirato non è mai entrato in vigore ed è rifiutato come perno.
+
+**La conversione conta solo chi è osservabile.** Il tasso a 30, 60 o 90 giorni considera solo le famiglie il cui primo acquisto ha almeno quell'età; le altre sono riportate a parte come non ancora osservabili, e un denominatore vuoto produce un tasso nullo.
+
+Ogni prospetto accetta **solo i propri parametri**: filtri per materia, scuola e territorio, raggruppamento, esportazione e i parametri degli altri due sono rifiutati con `400`, mai ignorati. Transizioni e conversione accettano solo la granularità mensile. Il filtro per scuola di competenza è accettato da tutti e segue la scuola registrata sull'**ordine dell'acquisto**: una famiglia è profilata solo sui propri acquisti in quella competenza.
+
+Il precedente conteggio degli acquisti per tipo di prodotto fra le misure economiche (`finance/products/search`) è **deprecato** a favore del mix: conta ancora come nuovo acquisto l'ordine separato da un cambio di insegnante e non distingue le lezioni singole per durata. Resta disponibile finché l'applicazione amministrativa non sarà passata al nuovo prospetto, poi sarà rimosso.
+
+## Statistiche di una scuola esterna
+
+Una scuola esterna consulta, sotto `/api/school/statistics/…` (categoria School - Statistics, per ora presente solo nell'ambiente di sviluppo), gli stessi prospetti dell'amministrazione **ristretti alla propria competenza**:
+
+| Prospetto | Contenuto |
+| --- | --- |
+| Lezioni | Completate, cancellate, modificate e prenotate, con le stesse righe del prospetto amministrativo. |
+| Flussi economici | **Solo due misure**, per scelta: il ricavo e la quota di competenza spettante alla scuola. Costi e margine della piattaforma, commissioni di pagamento e di emissione e fasce non sono mai calcolati per una scuola. |
+| Utenti | Famiglie nuove, attive e cancellate, sotto la scuola competente oggi per la loro città di fatturazione; insegnanti attivi, sotto la scuola delle lezioni che li hanno resi attivi, quindi un insegnante che ha lavorato anche per altre scuole è contato da ciascuna. Gli insegnanti registrati non sono disponibili: un insegnante non ha una scuola di competenza propria. |
+| Prodotti | Mix, transizioni e conversione, come descritti sopra. |
+
+Il filtro per scuola di competenza è **imposto** al chiamante. Può essere omesso o ripetere il proprio identificativo; qualunque altro valore — un'altra scuola, «tutte», «nessuna», un elenco — e il raggruppamento per scuola di competenza sono rifiutati con `400`, non sostituiti in silenzio. Un prospetto che non può essere ristretto a una scuola è rifiutato allo stesso modo. Un utente che non è una scuola esterna attiva riceve `403`.
+
 ## Distribuzione delle fasce di ore
 
 È il prospetto che supporta la **scelta** dei limiti delle fasce, descritto in [Pagamenti, payout e fatturazione](/guides/pagamenti). Mese per mese mette a confronto tre letture: la distribuzione degli insegnanti ottenuta con i limiti in vigore in quel mese, quella con cui le lezioni sono state realmente liquidate e, se la richiesta propone un diverso insieme di limiti, quella che si otterrebbe con essi, con il relativo scostamento. Una lezione ancora non liquidata è riportata come tale e non conteggiata nella fascia più bassa; le prime due letture possono legittimamente divergere per un insegnante prossimo a un confine, e rendere visibile quella divergenza è lo scopo di tenerle distinte.
@@ -105,5 +142,5 @@ Questi prospetti accettano il filtro per scuola di competenza, ma **rifiutano co
 ## Limiti attuali
 
 - Le statistiche sono **calcolate al momento della richiesta**: un intervallo ampio con granularità fine è un'interrogazione onerosa e non esiste alcuna precomputazione.
-- Non sono esposte né a insegnanti né a famiglie: sono interamente riservate all'amministrazione.
+- Non sono esposte né a insegnanti né a famiglie: sono riservate all'amministrazione e, per la sola propria competenza, alle [scuole esterne](#statistiche-di-una-scuola-esterna).
 - Le misure economiche descrivono **aggregati di periodo**. Ciò che una liquidazione ha effettivamente movimentato si consulta altrove, come descritto in [Area amministrativa e controllo operativo](/guides/amministrazione).

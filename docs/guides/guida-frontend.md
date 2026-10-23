@@ -93,6 +93,16 @@ Il pagamento avviene tramite reindirizzamento completo del browser verso la pagi
 
 Il flusso completo è descritto in [Pagamenti, payout e fatturazione](/guides/pagamenti).
 
+### Verifica dell'account Stripe dell'insegnante
+
+Gli endpoint sono sul branch `develop` del backend; il frontend deve ancora realizzare la parte che segue. Il quadro completo, con risposte ed errori, è in [Insegnanti](/guides/insegnanti#verifica-dellaccount-stripe).
+
+- **Dove.** All'apertura dell'area insegnante (home o profilo) chiamare `GET /api/teacher/stripe/status`. Con `onboarding_required` vero mostrare un avviso persistente con il pulsante «Completa la verifica»; con `charges_enabled` falso conviene un tono d'urgenza, perché le famiglie potrebbero non riuscire a pagare. Un `400` sullo stato equivale a verifica necessaria, salvo per il profilo dell'insegnante gestito da una scuola, a cui l'avviso non va mostrato.
+- **Avvio.** Al clic chiamare `POST /api/teacher/stripe/onboarding-link` e reindirizzare **subito** il browser all'`url`: il collegamento è monouso e scade in pochi minuti, quindi non va generato al caricamento della pagina, salvato o inviato per email.
+- **`/teacher/stripe/return`** (pagina da creare). Stripe vi rimanda l'insegnante sia a verifica conclusa sia quando esce a metà: rileggere lo stato e mostrare «Account verificato» (nessuna informazione mancante, pagamenti abilitati), «Verifica in corso» con un pulsante per aggiornare (nessuna informazione mancante, pagamenti non ancora abilitati), oppure «Mancano ancora delle informazioni» con il pulsante per riprendere.
+- **`/teacher/stripe/refresh`** (pagina da creare). Vi arriva chi apre un collegamento scaduto o già usato: chiedere un nuovo collegamento e reindirizzare, mostrando solo un caricamento.
+- I due percorsi sono costruiti dal backend sull'indirizzo del frontend: cambiarli richiede una modifica al backend. Un `403` sul collegamento con il messaggio sui termini va gestito dal flusso di accettazione delle [condizioni contrattuali](#condizioni-contrattuali), che ha la precedenza.
+
 ## Condizioni contrattuali
 
 Le condizioni generali di contratto di famiglie e insegnanti sono versionate, e finché l'utente non ha accettato la versione in vigore il server rifiuta con `403` ogni richiesta di scrittura. Il client non deve dedurre nulla dal campo `terms_and_conditions` dell'accesso: la fonte è `GET /api/contract/status`. Il comportamento richiesto è:

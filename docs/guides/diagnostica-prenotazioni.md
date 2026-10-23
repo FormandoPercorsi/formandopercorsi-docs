@@ -47,7 +47,7 @@ A questi si aggiunge, quando calcolabile, l'analisi delle **disponibilità** des
 | Stadio | Cosa verifica |
 | --- | --- |
 | **Studente** | Che lo studente esista e sia tale; che abbia una scuola, un anno di corso e delle materie; che appartenga al gruppo famiglia indicato; che il profilo del genitore sia completo. |
-| **Insegnante** | Che l'insegnante esista, sia tale, sia attivo, abbia un profilo completo, Stripe configurato e la possibilità di emettere documenti; che copra la scuola e la classe dello studente e la materia richiesta. |
+| **Insegnante** | Che l'insegnante esista, sia tale, sia attivo, abbia un profilo completo, Stripe configurato e la possibilità di emettere documenti; che copra la scuola e la classe dello studente e la materia richiesta. «Stripe configurato» verifica solo che l'account esista: un account sospeso perché l'identità non è verificata supera il controllo e fallisce comunque al checkout. Il suo stato reale si legge con la [verifica dell'account Stripe](/guides/insegnanti#verifica-dellaccount-stripe). |
 | **Materia** | Che la materia esista e rientri fra quelle dello studente. |
 | **Modalità** | Che l'insegnante possa erogare nella modalità chiesta: online, a domicilio sull'indirizzo che verrebbe usato, oppure presso la sede indicata. |
 | **Slot** | Che l'insegnante abbia una disponibilità che copre l'orario chiesto e che non ci sia una lezione sovrapposta. |
