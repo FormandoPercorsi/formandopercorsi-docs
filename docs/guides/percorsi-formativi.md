@@ -58,6 +58,17 @@ La conferma del percorso restituisce il collegamento a una sessione di pagamento
 
 L'asimmetria sulla cancellazione è rilevante per chi realizza un client: una lezione appartenente a un percorso non può essere annullata, ma solo spostata. Le implicazioni sulla copertura assicurativa sono descritte in [Copertura assicurativa](/guides/assicurazione).
 
+## Invito al rinnovo
+
+Quando sta per iniziare l'**ultima lezione** di un percorso, insieme al promemoria della lezione il genitore riceve un'email che lo invita a prenotare un nuovo percorso. È un invito e non una comunicazione sulla lezione, quindi è inviato solo a chi ha dato il consenso alle comunicazioni via email. Viaggia sulla stessa finestra del promemoria (si veda [Attività pianificate e comandi console](/guides/attivita-pianificate)), che scatta una sola volta per lezione, e non ha bisogno di un proprio contrassegno di invio.
+
+Due regole stabiliscono quale sia l'ultima lezione:
+
+- **un percorso comprende tutti gli ordini nati dallo stesso pagamento**: un cambio di insegnante sposta la lezione su un ordine separato, che resta parte del percorso;
+- una lezione è l'ultima solo se non resta in essere **nessuna lezione successiva**, né del percorso né dello **stesso studente nella stessa materia** — pagata, in attesa di una modifica, gratuita, da pagare in seguito, o cancellata dall'insegnante senza che la famiglia abbia ancora scelto. Una famiglia che ha già prenotato come proseguire non riceve l'invito.
+
+Il percorso non è considerato concluso in base alle lezioni effettivamente svolte: la decisione è presa al promemoria dell'ultima lezione ancora in calendario.
+
 :::note
 Gli indicatori di prenotabilità agli estremi e il contatore delle settimane consecutive descritti in [Disponibilità](/guides/disponibilita) non risultano attualmente utilizzati dall'applicazione web. È opportuno verificare lo stato di adozione della prenotazione periodica prima di considerarla pienamente operativa.
 :::

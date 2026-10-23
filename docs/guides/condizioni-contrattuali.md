@@ -17,6 +17,8 @@ Le operazioni sono raggruppate nella sezione [Contract](/api/contract) della API
 | Studente | — | Agisce sotto l'accettazione della propria famiglia. |
 | Amministratore, scuola esterna | — | Regolati da accordi separati: lo stato restituisce `contract: null` e `must_accept: false`. |
 
+Un **amministratore è esente anche quando lo stesso account ha un profilo di genitore o di insegnante** (come l'utente amministratore dei dati di prova): il ruolo di amministratore è controllato per primo. In precedenza un account del genere doveva accettare le CGC di quel profilo e, finché non lo faceva, restava bloccato alle scritture anche nelle operazioni amministrative.
+
 ## Versioni e decorrenza
 
 I testi risiedono nel repository del backend, uno per versione, in `uploads/contracts/cgc/<tipo>/<lingua>/<versione>.json`. Oggi la sola lingua è `ita`. Una versione pubblicata **non viene mai modificata**: una correzione è una nuova versione.
@@ -29,7 +31,7 @@ La versione in vigore **non è dichiarata, è derivata**: è la più alta fra qu
 | `current` | In vigore oggi. |
 | `upcoming` | Pubblicata ma con decorrenza futura: è il **periodo di preavviso**, che per gli insegnanti è di 15 giorni ai sensi del Regolamento UE 2019/1150. Può già essere accettata. |
 
-Attualmente la versione in vigore è la **2.0** (dal 5 dicembre 2025) e la **3.0**, pubblicata il 15 ottobre 2026 per entrambe le categorie, decorre dal **1° dicembre 2026**.
+La **3.0**, pubblicata il 15 ottobre 2026 per entrambe le categorie, è in vigore dal **20 ottobre 2026** sul branch `develop`: la decorrenza, inizialmente fissata al 1° dicembre 2026, è stata anticipata prima che la versione arrivasse in produzione. Fino ad allora la versione in vigore era la **2.0** (dal 5 dicembre 2025). Da quella data ogni famiglia e ogni insegnante che non abbia accettato esplicitamente la 3.0 è bloccato alle scritture, come descritto [più sotto](#che-cosa-succede-a-chi-non-ha-accettato). L'esempio di stato riportato più avanti mostra la situazione durante il preavviso.
 
 ### Testo di una versione
 
@@ -110,7 +112,7 @@ La conseguenza pratica da tenere presente: **pubblicare una versione con decorre
 
 Prima del versionamento l'accettazione era un solo flag sull'utente, `terms_and_conditions`, impostato dalla casella della registrazione o da `POST /api/auth/accept-terms`. Quel flag vale oggi come accettazione della **versione 2.0, e di nessuna successiva** (versione configurata in `contracts.legacyAcceptedVersion`). Ne discende che:
 
-- chi aveva accettato prima non è bloccato finché la 2.0 è in vigore, e dovrà accettare esplicitamente la 3.0 dal 1° dicembre 2026;
+- chi aveva accettato prima non è bloccato finché la 2.0 è in vigore, e deve accettare esplicitamente la 3.0 da quando è in vigore (20 ottobre 2026 su `develop`);
 - **`POST /api/auth/accept-terms` e la casella della registrazione non bastano più** a sbloccare un utente quando è in vigore una versione successiva alla 2.0: impostano il flag e nient'altro. Il client deve passare da `POST /api/contract/accept`, che oltre a registrare l'accettazione imposta anche il flag;
 - il campo `terms_and_conditions` restituito all'accesso continua a dire «ha mai accettato qualcosa», **non** «ha accettato la versione in vigore». Per decidere se mostrare la schermata di accettazione si usa `must_accept`.
 
@@ -149,6 +151,8 @@ php yii contract/export <teacher|family> --out=@app/docs/contracts
 `contract/export` produce il PDF di ogni versione pubblicata e il confronto di ciascuna con la precedente; le copie committate in `docs/contracts/` vanno rigenerate a ogni nuova versione.
 
 I PDF sono prodotti con lo stesso motore dei [documenti fiscali](/guides/documenti-fiscali), con modelli propri per il contratto e per il confronto.
+
+La suite di test del backend **non legge i testi pubblicati**: usa un catalogo congelato che contiene la sola 2.0, la versione che il vecchio flag rappresenta, così che gli utenti di prova restino in regola. Con i testi reali, ogni nuova versione giunta alla decorrenza bloccava gli utenti di prova alle scritture e faceva fallire intere suite con `403`. Pubblicare una versione non richiede quindi di toccare i dati di test, e il catalogo congelato non va aggiornato per «tenerlo al passo»; un solo test verifica che i testi pubblicati siano leggibili.
 
 ## Per chi sviluppa un client
 

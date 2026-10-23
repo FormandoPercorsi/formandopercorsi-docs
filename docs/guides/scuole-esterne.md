@@ -68,9 +68,36 @@ I **dipendenti** di una scuola restano insegnanti ordinari con la propria posizi
 
 L'email di una scuola può ora essere ripresentata invariata in una modifica: l'unicità la confronta con gli altri utenti e non con la scuola stessa né con la copia dell'insegnante gestito.
 
+## Sedi gestite da una scuola
+
+Una scuola esterna può **gestire** una o più sedi, nel senso di seguirne l'operatività: chi vi insegna, quando, e quanto la sede è occupata. Ogni sede ha al più una scuola che la gestisce, mentre una scuola può gestirne un numero qualsiasi. È un legame diverso dalla **sede di base** della scuola, quella da cui si misura il raggio delle lezioni a domicilio: la base di una scuola non è necessariamente una sede che la scuola gestisce.
+
+L'assegnazione è amministrativa (`PUT /api/admin/headquarters/{id}/managing-school`). Il corpo deve contenere `external_school_id`: un identificativo assegna la sede, `null` esplicito la libera; un corpo senza il campo è rifiutato anziché letto come revoca, così che un client difettoso non tolga la gestione per errore. Le sedi espongono ora `managed_by_external_school_id`.
+
+Due consultazioni, per una sede e un intervallo di date (dalla data odierna e per 7 giorni se non indicato, al massimo 92 giorni):
+
+| Consultazione | Contenuto |
+| --- | --- |
+| **Agenda** | Le lezioni tenute in sede, in ordine di inizio, con insegnante, studente, materia, durata, tipo di ordine e uno stato sintetico: programmata, svolta o cancellata. Con `include_cancelled` compaiono anche le lezioni prenotate e poi cancellate o spostate altrove, con il motivo della cancellazione. Riporta **solo i nomi**: nessun recapito di insegnanti o studenti viene esposto. |
+| **Attività** | Per giorno o per settimana ISO (`group_by=day\|week`), con i periodi vuoti riportati a zero: lezioni e ore prenotate e svolte, lezioni cancellate, studenti e insegnanti distinti, **picco di lezioni contemporanee** e, se la sede ha un numero di posti, il **tasso di occupazione al picco**. Un totale sull'intero intervallo — in cui conteggi distinti e picco non sono la somma dei periodi — e le lezioni dei prossimi 7 giorni, qualunque sia l'intervallo richiesto. |
+
+Tre definizioni determinano i numeri:
+
+- una lezione appartiene a una sede se si svolge **in sede** e quella è la sede indicata sulla lezione;
+- una lezione **occupa un posto** se è pagata, in modifica, liquidata o gratuita; mai un checkout non pagato o una proposta di modifica non accettata. Una cancellazione conta solo se la lezione aveva davvero occupato il posto: non una sessione di pagamento scaduta, né una modifica rifiutata o decaduta;
+- il **picco** considera gli intervalli semiaperti, quindi due lezioni una dopo l'altra non si sovrappongono, e conta anche una lezione iniziata nel periodo precedente e ancora in corso; il tasso di occupazione è il picco diviso per il numero di posti della sede.
+
+L'amministrazione consulta agenda e attività di qualunque sede (`/api/admin/headquarters/{id}/agenda` e `/activity`). La scuola esterna elenca le **proprie** sedi (`GET /api/school/headquarters`) e ne consulta agenda e attività sotto `/api/school/headquarters/{id}/…`; una sede che non gestisce risponde `404` e non `403`, così da non rivelarne l'esistenza.
+
+La colonna nasce **vuota**: la base di una scuola non è necessariamente una sede che gestisce, e gestirla significa vederne l'agenda con i nomi. Il comando una tantum `headquarter/backfill-managing-school` propone come gestita la base di ciascuna scuola, scrivendo solo i casi non ambigui: si veda [Attività pianificate e comandi console](/guides/attivita-pianificate#recuperi-una-tantum).
+
+## Statistiche della propria competenza
+
+Una scuola esterna consulta le statistiche dell'amministrazione **ristrette alla propria competenza**: lezioni, famiglie e insegnanti attivi, i prospetti sui prodotti e, per il denaro, solo ricavo e propria quota di competenza. Costi della piattaforma, margine, commissioni e fasce non le sono mai calcolati. Le regole sono descritte in [Statistiche e indicatori](/guides/statistiche#statistiche-di-una-scuola-esterna).
+
 ## Superficie amministrativa
 
-Elenco e dettaglio delle scuole esterne, creazione, modifica, assegnazione e revoca dei comuni di competenza, e riabilitazione sui servizi esterni sono operazioni riservate all'amministrazione e raggruppate nella [API Reference](/api/formando-percorsi-api) sotto Amministrazione, nelle categorie dedicate alle scuole esterne e all'abilitazione sui servizi esterni. Restano disponibili anche le corrispondenti procedure da riga di comando, che eseguono le stesse scritture.
+Elenco e dettaglio delle scuole esterne, creazione, modifica, assegnazione e revoca dei comuni di competenza, assegnazione delle sedi gestite e riabilitazione sui servizi esterni sono operazioni riservate all'amministrazione e raggruppate nella [API Reference](/api/formando-percorsi-api) sotto Amministrazione, nelle categorie dedicate alle scuole esterne e all'abilitazione sui servizi esterni. Restano disponibili anche le corrispondenti procedure da riga di comando, che eseguono le stesse scritture.
 
 Gli effetti economici di ciascuna configurazione sono descritti in [Pagamenti, payout e fatturazione](/guides/pagamenti); i documenti che ne derivano in [Documenti fiscali e ricevute](/guides/documenti-fiscali).
 
@@ -81,3 +108,5 @@ Gli effetti economici di ciascuna configurazione sono descritti in [Pagamenti, p
 - La piattaforma può essere essa stessa scuola di competenza, e in tal caso non emette documenti né dispone bonifici verso se stessa.
 - Un comune appartiene a una sola scuola esterna: un'assegnazione in conflitto viene rifiutata.
 - Creazione e abilitazione sui servizi esterni sono separate: la prima è atomica, la seconda ritentabile.
+- Una scuola può gestire delle sedi, di cui consulta agenda e occupazione; è un legame distinto dalla sua sede di base.
+- Una scuola legge le statistiche della sola propria competenza, senza i costi della piattaforma.

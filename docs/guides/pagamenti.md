@@ -58,6 +58,8 @@ La sessione di pagamento viene creata sul conto del provider dell'ordine, non su
 - **Premio assicurativo.** Quando l'ordine comprende una copertura, il premio è impostato come commissione di piattaforma sul pagamento: viene quindi accreditato alla piattaforma **nello stesso istante del pagamento**, senza attendere la liquidazione periodica.
 - **Rimborsi.** Un rimborso viene sempre eseguito sul conto su cui era avvenuto l'addebito originario — quello dell'insegnante o della scuola esterna — e mai su quello della piattaforma.
 
+Incassare sul conto del provider presuppone che quel conto **possa** incassare. L'account Stripe di un insegnante nasce senza verifica dell'identità e resta sospeso finché l'insegnante non la completa sulle pagine di Stripe: se l'insegnante è il provider il pagamento della famiglia fallisce, altrimenti si bloccano il trasferimento e il bonifico a suo favore. La procedura è descritta in [Verifica dell'account Stripe](/guides/insegnanti#verifica-dellaccount-stripe).
+
 Le operazioni di prenotazione e pagamento sono raggruppate nella sezione [Lesson](/api/lesson) della API Reference; le fatture emesse e ricevute sono consultabili dagli endpoint di fatturazione, con accesso al documento in formato PDF e XML.
 
 ## Liquidazione periodica
@@ -115,4 +117,5 @@ Il ciclo di vita dei documenti, gli esiti non ordinari della trasmissione telema
 
 - Il credito che una famiglia invitata ha fatto riconoscere alla famiglia invitante non viene annullato se la lezione corrispondente viene successivamente rimborsata; il credito *speso* sulla lezione rimborsata, invece, torna alla famiglia. Si veda [Crediti e programma referral](/guides/referral-crediti).
 - Il credito maturato dagli insegnanti sulle lezioni scontate è acceso sul branch `develop` e matura solo sulle lezioni incassate dall'insegnante; l'indennizzo sulle lezioni gratuite è ancora spento: si veda [Crediti degli insegnanti](/guides/crediti-insegnanti).
+- La prenotazione **non controlla lo stato reale dell'account Stripe** dell'insegnante, ma solo che esista: una famiglia può prenotare un insegnante che incassa in prima persona con l'account sospeso, e il problema emerge al checkout. La verifica dell'account, esposta dal branch `develop`, è per ora l'unica protezione; si veda [Insegnanti](/guides/insegnanti#verifica-dellaccount-stripe).
 - Non è disponibile alcuna interfaccia che esponga a insegnanti e famiglie lo storico analitico dei movimenti: i documenti fiscali restano l'unica rappresentazione consultabile dei flussi economici.
