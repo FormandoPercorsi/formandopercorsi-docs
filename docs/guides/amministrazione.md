@@ -42,6 +42,8 @@ Un bonifico, infine, è **aggregato** per soggetto: liquida in un'unica disposiz
 
 Due arretrati di natura fiscale sono consultabili come code, ordinate dalla più vecchia e con il numero di giorni di attesa: le **ricevute predisposte in attesa della marca dell'insegnante** e quelle **in attesa dell'adempimento della piattaforma**, queste ultime chiudibili dalla stessa area registrando l'avvenuta spedizione dell'originale, con scansione facoltativa. Sono tenute separate perché sono dovute da soggetti diversi, e unirle nasconderebbe di chi sia il problema; entrambe escludono le ricevute annullate, che non attendono nessuno. Il significato dei due stati è descritto in [Documenti fiscali e ricevute](/guides/documenti-fiscali).
 
+Le due code mostrano ciò che è ancora aperto. Una ricevuta chiusa ne esce, ma resta consultabile: l'amministrazione dispone di un **archivio di tutti i documenti fiscali**, filtrabile per tipo, stato, modalità di bollo, emittente, destinatario e date, e può aprire dettaglio, PDF e XML di qualunque documento — per le ricevute con marca fisica, la scansione conservata o, a richiesta, il modello da stampare. La consultazione è di sola lettura e le regole di accesso sono in [Consultazione dei documenti](/guides/documenti-fiscali#consultazione-dei-documenti).
+
 Una terza consultazione riguarda l'**ordinamento in ricerca**: restituisce gli indicatori di un insegnante così come l'elaborazione notturna li ha lasciati, per poter rispondere a chi chiede perché compare in una certa posizione. La componente del punteggio che dipende dalla singola ricerca è valutata al momento e non è quindi presente; una tabella vuota significa punteggio iniziale, mai un insegnante escluso. Il criterio complessivo è descritto in [Ordinamento dei risultati di ricerca](/guides/ranking-insegnanti).
 
 ## Configurazione economica
@@ -82,6 +84,7 @@ Due strumenti completano l'area:
 - Ogni elaborazione pianificata lascia una registrazione; l'esito positivo va letto insieme al numero delle unità di lavoro non trattate.
 - La consultazione delle liquidazioni è di sola lettura: la riesecuzione resta un'operazione da riga di comando.
 - I due arretrati di bollo sono code distinte perché sono dovuti da soggetti distinti.
+- Le code mostrano solo gli adempimenti aperti; per controllare le ricevute già completate esiste l'archivio dei documenti fiscali, di sola lettura.
 - Listini e limiti delle fasce si modificano programmando una nuova versione, non riscrivendo quella in vigore.
 - Una promozione si disattiva, non si elimina.
 - Il credito si corregge con una rettifica motivata e visibile al destinatario, mai modificando i movimenti esistenti.

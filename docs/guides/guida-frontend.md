@@ -53,6 +53,14 @@ Oltre alle aree di famiglie e insegnanti, l'applicazione espone l'interfaccia co
 | **Catalogo** | Gestione dei [contenuti didattici](/guides/contenuti-didattici): argomenti, sottoargomenti, esercizi con editor Markdown e formule, immagini e video. |
 | **Generatore Token** | Inviti nominativi per la registrazione degli insegnanti; si veda [Insegnanti](/guides/insegnanti#invito-e-token). |
 
+**Pagina presente su `develop` ma non ancora su `master`:**
+
+| Pagina | Cosa permette di fare |
+| --- | --- |
+| **Ricevute** | Le due [code di adempimento](/guides/amministrazione#code-di-adempimento) delle ricevute con marca da bollo fisica, in due schede: quelle **attese dall'insegnante** e quelle **attese dalla piattaforma**, con filtro per giorni di attesa e paginazione. Dalla seconda si scarica il PDF da stampare e si registra la spedizione dell'originale, con scansione facoltativa. Mostra solo gli adempimenti aperti: una ricevuta completata ne esce. |
+
+Per le ricevute già completate l'amministrazione dispone dell'[archivio dei documenti fiscali](/guides/documenti-fiscali#consultazione-dei-documenti), ma l'interfaccia non ha ancora una pagina che lo usi: oggi è raggiungibile solo tramite API. Allo stesso modo, il client scarica ancora ogni PDF di documento come PDF, mentre per una ricevuta con marca fisica il documento restituito di default è la scansione, che può essere un'immagine; la versione *template* non ha ancora un comando dedicato.
+
 **Pagine in integrazione** sul branch `feat/introduzione-nuove-funzionalita-admin` del repository frontend, non ancora riportato su `develop` e quindi non distribuito in alcun ambiente:
 
 | Pagina | Cosa permette di fare |

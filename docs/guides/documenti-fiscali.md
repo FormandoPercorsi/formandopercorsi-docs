@@ -6,7 +6,7 @@ title: Documenti fiscali e ricevute
 
 Ogni movimento economico determinato dalla [liquidazione periodica](/guides/pagamenti) è accompagnato dal documento che il soggetto avente diritto emette verso il soggetto che deve pagare. Il tipo di documento, il canale con cui viene trasmesso e gli adempimenti che ne derivano dipendono dal **regime fiscale** del soggetto emittente. Questa pagina descrive i documenti previsti, il loro ciclo di vita e il trattamento particolare riservato alle prestazioni occasionali.
 
-I regimi ammessi e i relativi vincoli sono esposti nella sezione [InvoiceLegislation](/api/invoice-legislation) della API Reference, che ne restituisce anche le etichette da mostrare all'utente. La consultazione dei documenti emessi e ricevuti, con accesso al PDF e all'XML, avviene dagli endpoint di fatturazione.
+I regimi ammessi e i relativi vincoli sono esposti nella sezione [InvoiceLegislation](/api/invoice-legislation) della API Reference, che ne restituisce anche le etichette da mostrare all'utente. La consultazione dei documenti emessi e ricevuti, con accesso al PDF e all'XML, avviene dagli endpoint di fatturazione; l'accesso ai singoli documenti e l'archivio riservato all'amministrazione sono descritti in [Consultazione dei documenti](#consultazione-dei-documenti).
 
 ## Tipologie di documento
 
@@ -18,6 +18,12 @@ I regimi ammessi e i relativi vincoli sono esposti nella sezione [InvoiceLegisla
 | Rettifica in diminuzione | Nota di credito, o ricevuta di rimborso se il documento originario era una ricevuta | Lo stesso canale del documento rettificato |
 
 Quando la posizione di un soggetto risulta negativa — come può accadere se il compenso assicurativo eccede le quote di piattaforma del mese — viene emessa una nota di credito, oppure, quando si tratta di un compenso effettivamente dovuto dalla piattaforma e non di una rettifica contabile, una fattura con le parti invertite.
+
+## Consultazione dei documenti
+
+Chi consulta un documento — dettaglio, PDF o XML — deve esserne l'**emittente o il destinatario**, oppure il documento deve riportare il suo codice fiscale o la sua partita IVA. In ogni altro caso la risposta è «non trovato», non «vietato», così che l'esistenza di un documento altrui non venga rivelata. Un dato fiscale mancante non equivale a un criterio: un utente senza partita IVA non ottiene l'accesso ai documenti che non ne riportano una.
+
+L'**amministrazione legge qualunque documento**, in sola lettura: la piattaforma emette materialmente per conto di terzi e deve poter rispondere di ciò che emette, verificare un documento dopo un cambio di provider o una nota di credito e dare riscontro a chi chiede dove sia una ricevuta. Per cercare il documento esiste un **archivio** (sezione Admin - Invoices della API Reference), ordinato dal più recente, filtrabile per tipo di documento, stato, modalità di bollo, emittente, destinatario e intervallo di date. I documenti annullati sono esclusi, salvo richiesta esplicita. Dettaglio, PDF e XML sono gli stessi endpoint di fatturazione usati da tutti, e non esiste quindi una seconda copia riservata all'amministrazione.
 
 ## Ciclo di vita della fattura elettronica
 
@@ -32,6 +38,8 @@ Ogni transizione genera una notifica, come descritto in [Notifiche](/guides/noti
 ## Rappresentazione a stampa
 
 Il PDF di fatture, note di credito e ricevute è prodotto dalla piattaforma con un **unico modello**, così che ogni tipo di documento abbia la stessa forma: cambiano soltanto la dizione del documento e la presenza dello spazio per la marca da bollo e della riga per la sottoscrizione. All'intermediario di fatturazione resta la trasmissione telematica; il documento che il prodotto mostra è quello generato internamente. La generazione locale è disattivabile da configurazione, con ritorno al PDF prodotto dall'intermediario; fanno eccezione i documenti che **non hanno un corrispettivo presso l'intermediario** — le ricevute e le fatture esterne — il cui PDF è sempre generato internamente, perché non ne esiste un altro.
+
+Per una ricevuta con **marca da bollo fisica** il PDF richiesto di default è la **scansione** caricata (o conservata dalla piattaforma), perché è la scansione a portare marca, data e firma e a costituire il documento valido; la ricevuta generata, una volta confermata, non riporta più lo spazio per la marca. La scansione può essere un'immagine oltre che un PDF, e il tipo di contenuto della risposta lo indica. Quando non c'è scansione — bollo virtuale, copia non caricata — si riceve il PDF generato. Per riavere la ricevuta **così come era stata emessa**, con lo spazio per la marca e la riga per la firma, da stampare e timbrare di nuovo, si richiede esplicitamente la versione *template*: è priva di data se la marca spettava all'insegnante, datata se spettava alla piattaforma, e per un documento che non ha mai previsto una marca fisica la richiesta è rifiutata.
 
 Il PDF può essere sempre rigenerato dal documento emesso, e per questo la sua assenza non invalida né blocca nulla di ciò che il documento registra: dopo l'emissione, liquidazione, posta e ricevute proseguono anche quando il PDF non è producibile, e soltanto lo scaricamento su richiesta espone l'errore. Lo stesso motore produce anche i PDF delle [condizioni generali di contratto](/guides/condizioni-contrattuali).
 
@@ -87,4 +95,6 @@ Se la famiglia sposta la lezione su un altro insegnante mentre una ricevuta è a
 - PDF e tracciato telematico derivano dallo stesso dato: non possono dichiarare cose diverse.
 - Sulle ricevute occasionali la ritenuta d'acconto si applica solo verso committenti sostituti d'imposta; l'imposta di bollo è dovuta oltre soglia verso qualunque committente e non è mai addebitata al committente.
 - Una ricevuta predisposta non è ancora un documento valido: lo diventa con la marca, la data, la firma e il caricamento della scansione.
+- Un documento è visibile a chi lo emette o lo riceve e, in sola lettura, all'amministrazione, che dispone anche di un archivio filtrabile; per gli altri è «non trovato».
+- Il PDF di una ricevuta con marca fisica è, se esiste, la scansione; la versione *template* restituisce sempre la ricevuta da stampare e timbrare.
 - F24 e Certificazione Unica non sono automatizzati.
