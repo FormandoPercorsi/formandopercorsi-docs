@@ -51,7 +51,8 @@ I comandi seguenti non sono pianificati. Vanno eseguiti con `./fpc run` (o, in l
 
 | Comando | Uso |
 | --- | --- |
-| `payments/process-monthly-payouts [YYYY-MM]` | Riesegue la liquidazione mensile di un mese determinato. Rieseguirla su un mese già liquidato è un'operazione prevista e non produce movimenti duplicati: vengono registrate solo le differenze di fascia. Il mese deve essere nel formato `YYYY-MM` e **concluso**: il mese in corso o futuro, o un formato diverso, termina con errore dati senza elaborare nulla. |
+| `payments/process-monthly-payouts [YYYY-MM]` | Riesegue la liquidazione mensile di un mese determinato. Rieseguirla su un mese già liquidato è un'operazione prevista e non produce movimenti duplicati: vengono registrate solo le differenze di fascia. Il mese deve essere nel formato `YYYY-MM` e **concluso**: il mese in corso o futuro, o un formato diverso, termina con errore dati senza elaborare nulla. Con `--currentMonth=1` è ammesso anche il mese in corso (solo lezioni già concluse) e con `--competenceOnly=1` si liquidano solo le lezioni con scuola di competenza; vedi [Liquidazione parziale](/guides/pagamenti#liquidazione-parziale). |
+| `payments/preview-monthly-payouts [YYYY-MM]` | Anteprima in sola lettura della precedente, con le stesse opzioni: per insegnante ore, fascia e lezioni che verrebbero liquidate. |
 | `payments/process-daily-payouts` | Riesegue la liquidazione giornaliera. |
 | `tracking-aggregate/date <YYYY-MM-DD>` | Ricalcola le metriche di una data, tipicamente per recuperare un intervallo non elaborato. |
 | `teacher-score/recompute [--dryRun=1]` | Ricalcolo completo del ranking; in prova riporta le variazioni più rilevanti. |

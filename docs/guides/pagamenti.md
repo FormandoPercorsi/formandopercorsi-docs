@@ -76,6 +76,22 @@ php yii payments/process-monthly-payouts [YYYY-MM]   # mensile, elabora il mese 
 php yii payments/process-daily-payouts               # giornaliero, elabora gli ordini scaduti
 ```
 
+### Liquidazione parziale
+
+Per chiudere in anticipo una parte di un mese — ad esempio le sole lezioni di una scuola esterna che smette di essere competente — la liquidazione mensile accetta due opzioni, solo da riga di comando (nessuna superficie HTTP: una richiesta ripetuta pagherebbe due volte):
+
+```shell
+php yii payments/preview-monthly-payouts [YYYY-MM] [--currentMonth=1] [--competenceOnly=1]   # sola lettura
+php yii payments/process-monthly-payouts [YYYY-MM] [--currentMonth=1] [--competenceOnly=1]
+```
+
+- `--competenceOnly=1` liquida solo le lezioni degli ordini che hanno una scuola di competenza. Restringe le lezioni **liquidate**, non le ore su cui si calcola la fascia: la fascia appartiene a tutto il mese dell'insegnante, quindi viene sempre calcolata sulle sue ore complessive, altrimenti scenderebbe di fascia e si pagherebbe il valore sbagliato;
+- `--currentMonth=1` ammette il mese in corso (senza indicarlo, il mese in corso è quello di riferimento) e in tal caso liquida solo le lezioni già concluse, che non possono più essere annullate né spostate. Un mese futuro resta rifiutato;
+- un'esecuzione parziale **non** matura l'indennizzo delle lezioni gratuite né i compensi assicurativi: sono operazioni idempotenti e restano all'esecuzione che chiude il mese;
+- rieseguire dopo la fine del mese la liquidazione completa è previsto: le lezioni già liquidate vengono riattribuite alla fascia definitiva e si registra solo la differenza.
+
+L'anteprima elenca, per insegnante, le ore del mese, la fascia e il numero di lezioni che l'esecuzione liquiderebbe, senza scrivere nulla né registrare un'esecuzione.
+
 L'elaborazione procede in quest'ordine:
 
 1. Per ogni insegnante con lezioni nel periodo, determinazione della fascia di ore raggiunta — con i limiti in vigore nel mese che si sta liquidando, non con quelli odierni — e scomposizione di ciascuna lezione nelle tre quote spettanti a insegnante, scuola esterna e piattaforma.

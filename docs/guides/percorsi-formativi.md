@@ -58,6 +58,10 @@ La conferma del percorso restituisce il collegamento a una sessione di pagamento
 
 L'asimmetria sulla cancellazione è rilevante per chi realizza un client: una lezione appartenente a un percorso non può essere annullata, ma solo spostata. Le implicazioni sulla copertura assicurativa sono descritte in [Copertura assicurativa](/guides/assicurazione).
 
+## Limite di prenotazione
+
+Se è in vigore un [limite di prenotazione](/guides/disponibilita#quanto-in-anticipo-si-può-prenotare), un percorso le cui lezioni (anche quelle generate settimana dopo settimana) cadano oltre l'ultimo giorno prenotabile viene rifiutato per intero: la ricerca non offre percorsi che non possono essere completati entro il limite.
+
 ## Invito al rinnovo
 
 Quando sta per iniziare l'**ultima lezione** di un percorso, insieme al promemoria della lezione il genitore riceve un'email che lo invita a prenotare un nuovo percorso. È un invito e non una comunicazione sulla lezione, quindi è inviato solo a chi ha dato il consenso alle comunicazioni via email. Viaggia sulla stessa finestra del promemoria (si veda [Attività pianificate e comandi console](/guides/attivita-pianificate)), che scatta una sola volta per lezione, e non ha bisogno di un proprio contrassegno di invio.

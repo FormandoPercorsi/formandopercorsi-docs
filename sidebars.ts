@@ -77,6 +77,7 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Admin - Availability',
       'Admin - Band Changes',
       'Admin - Bands',
+      'Admin - Booking windows',
       'Admin - Credits',
       'Admin - Diagnostics',
       'Admin - External Schools',

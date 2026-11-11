@@ -32,7 +32,19 @@ L'unico comportamento specifico è che la piattaforma non può fatturare né pag
 
 L'assegnazione dei comuni a una scuola esterna è un'operazione amministrativa. La regola che la governa è una sola, e ha una motivazione precisa: la ricerca della scuola competente per una città restituisce **un solo soggetto**, quindi una città rivendicata da due scuole renderebbe arbitrario chi incassa. L'assegnazione di una città già assegnata ad altra scuola viene pertanto **rifiutata, non unita**.
 
-Riassegnare alla stessa scuola una città che già possiede non produce alcun effetto, così che una ripetizione dell'operazione resti innocua. La revoca di una città, come già detto, vale dalle prenotazioni successive.
+Riassegnare alla stessa scuola una città che già possiede non produce alcun effetto, così che una ripetizione dell'operazione resti innocua.
+
+### La competenza ha una data
+
+L'appartenenza di un comune a una scuola è una **finestra di tempo** (data di inizio e data di fine, entrambe incluse; senza data di fine vale senza scadenza), non un fatto senza data. Assegnazione e revoca accettano quindi una decorrenza, per programmare per tempo un cambio di competenza invece di eseguirlo il giorno stesso:
+
+- la **competenza di un comune si risolve al giorno della prenotazione** e viene poi congelata sull'ordine. Una lezione acquistata a novembre per dicembre conserva la scuola che era competente a novembre, anche se dal 1° dicembre il comune non le appartiene più;
+- il vincolo «una sola scuola per comune» vale **giorno per giorno**: un'assegnazione è rifiutata se si sovrappone alla finestra di un'altra scuola, mentre una scuola può subentrare dal giorno successivo alla fine della precedente;
+- una **decorrenza nel passato è rifiutata**, perché cambierebbe la competenza di prenotazioni già risolte;
+- una revoca con decorrenza chiude la finestra il giorno prima e **ne conserva la riga**, così che resti ricostruibile chi era competente e quando. Una finestra che non è mai iniziata (assegnata per il futuro e subito ritirata) viene invece eliminata, perché non c'è nulla da ricostruire. Riassegnare la stessa scuola annulla una fine programmata;
+- senza una scuola in vigore il provider è l'insegnante stesso, come per qualunque comune privo di competenza. Se su un ordine già pagato cambia l'insegnante dopo la variazione, la ripartizione delle quote viene ricalcolata, secondo le regole di [Modifiche e cancellazioni](/guides/modifiche-cancellazioni).
+
+L'elenco e il dettaglio delle scuole mostrano le finestre in vigore e quelle programmate; le finestre già concluse si ottengono con il parametro `with_history`. Anche la procedura da riga di comando (`external-schools/assign-cities`) passa dallo stesso servizio, con l'opzione `--from=YYYY-MM-DD`.
 
 ## Creazione e abilitazione sui servizi esterni
 
@@ -106,7 +118,8 @@ Gli effetti economici di ciascuna configurazione sono descritti in [Pagamenti, p
 - Provider e scuola di competenza rispondono a due domande diverse e non sempre coincidono.
 - L'insegnante incassa in prima persona se è in regime occasionale o se la sua scuola ha scelto la modalità di incasso «insegnante»; la scuola conserva in entrambi i casi la propria quota, fatturandola all'insegnante.
 - La piattaforma può essere essa stessa scuola di competenza, e in tal caso non emette documenti né dispone bonifici verso se stessa.
-- Un comune appartiene a una sola scuola esterna: un'assegnazione in conflitto viene rifiutata.
+- Un comune appartiene a una sola scuola esterna in un dato giorno: un'assegnazione in conflitto viene rifiutata, e un cambio di competenza si programma con una decorrenza.
+- La scuola di un ordine è quella competente al giorno della prenotazione, non quella del giorno della lezione.
 - Creazione e abilitazione sui servizi esterni sono separate: la prima è atomica, la seconda ritentabile.
 - Una scuola può gestire delle sedi, di cui consulta agenda e occupazione; è un legame distinto dalla sua sede di base.
 - Una scuola legge le statistiche della sola propria competenza, senza i costi della piattaforma.

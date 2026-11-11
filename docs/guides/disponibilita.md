@@ -86,9 +86,21 @@ La stima è volutamente semplice, di tipo stagionale: una settimana è attesa co
 
 I valori nulli sono deliberati e vanno mostrati come «stima non disponibile», non come zero: senza un anno di storico, o con un periodo recente vuoto, non c'è stima (un periodo vuoto significa assenza di dati, non un mercato azzerato); un insegnante senza lezioni nelle ultime 12 settimane riceve l'indice di domanda ma non le ore attese. Le ore sono quelle **di calendario**, non la durata tariffata della lezione: la misura riguarda il tempo occupato, non le fasce di ore.
 
+## Quanto in anticipo si può prenotare
+
+Un insegnante può dichiarare disponibilità anche molto avanti nel tempo, ma l'amministrazione può stabilire fino a quando una famiglia può **prenotare**: una regola con una data limite («ultimo giorno prenotabile») e una decorrenza. Non limita le disponibilità, solo ciò che è prenotabile.
+
+- la regola è **versionata** come i listini: inizia in un giorno e vale fino alla versione successiva. Una versione senza data limite toglie il limite. Una regola in vigore non si cancella ma si sostituisce con una nuova versione; si può ritirare solo una non ancora in vigore;
+- vale per tutte le città, oppure per una città soltanto: la regola propria di una città prevale su quella generale, anche quando serve a toglierle il limite;
+- si applica al **giorno della prenotazione**, per la città della famiglia, e una lezione è prenotabile se **inizia entro** l'ultimo giorno incluso;
+- è una sola regola per tutti i punti d'ingresso: la ricerca non offre gli slot oltre il limite, e la prenotazione di una lezione, la modifica di una già fissata, le proposte e le richieste dell'insegnante e ogni lezione di un percorso la rifiutano con un errore esplicito. Un percorso con anche una sola lezione oltre il limite viene **rifiutato**, non accorciato;
+- per lo stesso motivo una lezione già fissata oltre il limite non può essere spostata a un altro orario oltre il limite.
+
+La gestione è riservata all'amministrazione (categoria «Booking windows» nella [API Reference](/api/formando-percorsi-api)).
+
 ## Quando un insegnante non compare
 
-La ricerca della famiglia parte dagli slot prenotabili descritti sopra e applica una propria catena di filtri, quindi un insegnante con disponibilità dichiarate può ugualmente non comparire fra i risultati. Per ricostruire quale filtro lo esclude, e più in generale perché una certa famiglia non riesce a prenotare un certo insegnante, l'amministrazione dispone della [Diagnostica delle prenotazioni](/guides/diagnostica-prenotazioni).
+La ricerca della famiglia parte dagli slot prenotabili descritti sopra, entro l'eventuale [limite di prenotazione](#quanto-in-anticipo-si-può-prenotare), e applica una propria catena di filtri, quindi un insegnante con disponibilità dichiarate può ugualmente non comparire fra i risultati. Per ricostruire quale filtro lo esclude, e più in generale perché una certa famiglia non riesce a prenotare un certo insegnante, l'amministrazione dispone della [Diagnostica delle prenotazioni](/guides/diagnostica-prenotazioni).
 
 :::note
 Gli indicatori di prenotabilità agli estremi e il contatore delle settimane consecutive sono predisposti per la prenotazione dei percorsi periodici, ma l'applicazione web attualmente in uso non li utilizza. È opportuno verificarne lo stato di adozione prima di assumerli operativi, e altrettanto prima di considerarli codice inutilizzato.

@@ -50,6 +50,8 @@ Una terza consultazione riguarda l'**ordinamento in ricerca**: restituisce gli i
 
 Due configurazioni incidono direttamente su quanto ciascun soggetto percepisce e sono per questo **versionate**, con decorrenza, storico e possibilità di ritiro: i **listini** per durata, città e regime fiscale, e i **limiti delle fasce di ore**. Entrambe si amministrano con le stesse operazioni — anteprima senza scrittura, programmazione, elenco con lo stato derivato dalla decorrenza, dettaglio, ritiro di una variazione non ancora in vigore o già in vigore, e consultazione di ciò che è in vigore a una data — ed entrambe rifiutano una correzione «in sovrascrittura»: correggere una variazione programmata significa ritirarla, e il ritiro lascia traccia. Le regole e le ragioni di questa impostazione sono descritte in [Pagamenti, payout e fatturazione](/guides/pagamenti); per i listini è inoltre disponibile un'operazione che elenca le entità tariffate e le città che già dispongono di un listino proprio, necessaria per costruire un'interfaccia dato che una tariffa è identificata da soli riferimenti numerici.
 
+Una terza configurazione versionata riguarda non i soldi ma l'**orizzonte di prenotazione**: fino a quale giorno le famiglie possono prenotare, per tutte le città o per una (descritto in [Disponibilità](/guides/disponibilita#quanto-in-anticipo-si-può-prenotare)). Come per i listini, una regola in vigore si sostituisce con una nuova versione, mentre si ritira solo una non ancora in vigore. Anche la **competenza** dei comuni è ora a finestre di tempo e se ne programma il cambio con una decorrenza ([Scuole esterne](/guides/scuole-esterne#la-competenza-ha-una-data)).
+
 Le **[promozioni](/guides/promozioni)** si amministrano da operazioni distinte da quelle rivolte alle famiglie: l'operazione disponibile a una famiglia non è un elenco, ma restituisce solo ciò che quella famiglia può attivare. Tre regole governano il ciclo di vita di una promozione:
 
 - non viene mai **eliminata definitivamente**, perché gli utilizzi già concessi sono l'unica traccia di ciò che è stato scontato: la si disattiva;
@@ -85,6 +87,6 @@ Due strumenti completano l'area:
 - La consultazione delle liquidazioni è di sola lettura: la riesecuzione resta un'operazione da riga di comando.
 - I due arretrati di bollo sono code distinte perché sono dovuti da soggetti distinti.
 - Le code mostrano solo gli adempimenti aperti; per controllare le ricevute già completate esiste l'archivio dei documenti fiscali, di sola lettura.
-- Listini e limiti delle fasce si modificano programmando una nuova versione, non riscrivendo quella in vigore.
+- Listini, limiti delle fasce, orizzonte di prenotazione e competenza dei comuni si modificano programmando una nuova versione con decorrenza, non riscrivendo quella in vigore.
 - Una promozione si disattiva, non si elimina.
 - Il credito si corregge con una rettifica motivata e visibile al destinatario, mai modificando i movimenti esistenti.
