@@ -180,7 +180,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Amministrazione e dati',
-      items: ['guides/amministrazione', 'guides/statistiche', 'guides/tracking-metriche'],
+      items: ['guides/amministrazione', 'guides/simulazione-tariffe', 'guides/statistiche', 'guides/tracking-metriche'],
     },
     {
       type: 'category',
