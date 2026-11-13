@@ -57,6 +57,10 @@ Le voci che si ripartiscono su una quantità hanno bisogno di un volume. Per imp
 
 Un volume che non esiste è *sconosciuto*, mai zero: una voce che lo richiede viene **rifiutata** con un messaggio che lo dice, invece di dividere per niente o di considerarla gratuita. Succede, per esempio, su un database senza bonifici registrati; i collegamenti fra bonifici e lezioni esistono solo per le elaborazioni eseguite da quando vengono scritti. In alternativa i volumi si possono indicare a mano (`volume.source: "explicit"`) o escludere (`"none"`).
 
+### Correggere le ore
+
+Se sai che per qualche motivo le ore dell'anno prossimo saranno più o meno di quelle osservate, `volume.adjust` le corregge **sopra qualunque origine**: per ciascuno dei tre volumi (`delivered_hours`, `hours_per_payout`, `hours_per_active_account_month`) una variazione in percentuale (`{"type": "percent", "value": 20}`, anche negativa) oppure un valore indicato a mano (`{"type": "absolute", "value": 12000}`). Il calcolo usa le ore corrette; la risposta riporta in `volume` le ore **osservate**, la correzione e le ore **usate**, così si vede sempre su quante ore si basa la stima. Una percentuale su un volume che non esiste resta senza volume, e la voce che lo richiede viene rifiutata come sempre.
+
 ## Una simulazione
 
 ```
@@ -108,11 +112,36 @@ Se un prodotto indica `reference_hours` (le ore vendute nel periodo di riferimen
 
 La proiezione usa **le stesse ore prima e dopo**: non modella come la domanda reagisce al prezzo. È una stima dell'effetto contabile di un aumento, non una previsione di vendite.
 
+## Dai prezzi proposti ai prezzi finali
+
+Il calcolo dice quali costi fissi e quale margine servono perché l'insegnante tenga il netto richiesto. I prezzi veri li scegli tu: «i costi fissi dovrebbero essere 0,90 €, ma voglio 1 €». Se un prodotto ha il blocco `final` (anche vuoto), la risposta contiene per ogni fascia i **prezzi finali**:
+
+- `fixed_costs_per_hour`: i costi fissi scelti (vuoto = quelli proposti);
+- `competence_school_per_hour` e `fpc_variable_per_hour`, per fascia: la quota della scuola di competenza e la quota variabile di FPC. Se ne indichi **una**, l'altra si ricava; se non indichi né l'una né l'altra, la parte variabile resta **indivisa**, perché la regola con cui si divide fra FPC e scuola non è nota al sistema e non viene indovinata.
+
+La piattaforma calcola la quota dell'insegnante come **residuo** del prezzo dopo costi fissi e quote. Perciò, finché non scegli tutte e tre le voci, `costi fissi + quota variabile FPC + quota scuola` resta uguale alla quota proposta e **il netto dell'insegnante non cambia**: scegliere 1,00 € al posto di 0,90 € riduce di 0,10 € la parte variabile. Se le scegli tutte e tre, il netto dell'insegnante può cambiare e la risposta lo segnala (`teacher_below_target`). Una ripartizione che non regge (costi fissi oltre il totale, una quota negativa) è segnalata in `issues`.
+
+La differenza fra i costi fissi scelti e i costi reali (`fixed_vs_cost_per_hour`) è un **extra** sui costi se positiva, uno **sconto** se negativa; con `reference_hours` la risposta (`final_projection`) la totalizza sulle ore. `per_order` riporta gli stessi importi per l'intero ordine, come stanno nelle righe del listino.
+
+I prezzi finali si calcolano sul prezzo indicato nel prodotto: per fissarli a un prezzo aumentato, indica quel prezzo nel prodotto (la variazione `adjustment` resta una prova a parte). La simulazione non modifica alcun prezzo: i prezzi si cambiano soltanto dagli aggiornamenti dei prezzi.
+
+## Controllare i calcoli
+
+Ogni numero mostrato si può verificare. Nella risposta, `steps` (in ogni risultato `before`/`after` e nei prezzi finali) elenca in ordine ogni passaggio: la formula di ogni voce di costo con i numeri sostituiti e l'eventuale arrotondamento, poi imposte, ricavo netto, disponibile, costi fissi, margine, quota, controllo di coerenza e, per i prezzi finali, ogni passaggio che ricava le quote. La pagina li mostra sotto «Mostra i calcoli». Gli importi sono all'ora; nelle espressioni il separatore decimale è il punto.
+
 ## Scenari salvati
 
 Un'ipotesi su cui si vuole tornare si salva come **scenario**: un nome, una nota e la richiesta, conservata così com'è scritta (una `as_of` omessa resta omessa, e ogni esecuzione risolve i costi e i volumi di quel giorno). Salvare uno scenario non applica nulla ai listini. La richiesta viene validata al salvataggio, quindi uno scenario accettato si può sempre eseguire.
 
 Eseguire uno scenario restituisce la simulazione e ne conserva l'esito e l'ora, per confrontarlo con la volta successiva. Uno scenario non si elimina: si **archivia**, e uno archiviato è in sola lettura (non si modifica né si esegue). Quando si invia una `request` in modifica, sostituisce l'intera richiesta precedente.
+
+
+Per ripartire da un preventivo già fatto, carica lo scenario e usa **Salva come nuovo**: la copia parte dalle ipotesi che vedi in quel momento (modifiche non salvate comprese) e l'originale non cambia. Per non ricominciare da zero, il sistema contiene già due scenari con i valori del foglio dei prezzi, che si caricano dal menu come qualunque altro:
+
+- **Prezzi generali (foglio Fuori Ferrara)**: lezione singola e percorsi da 6, 12 e 18 ore, con prezzo e quota netta dell'insegnante per fascia, nel regime forfettario start-up.
+- **Con scuola che fattura (foglio Ferrara)**: i prezzi dove una scuola esterna fattura alle famiglie. Il foglio parte dalla quota *lorda* dell'insegnante (13, 14 e 15 €), non toglie imposte né bollo (la scuola applica il bollo a proprio carico, dentro la propria quota, così all'insegnante e a FPC arriva sempre lo stesso) e lascia a FPC i soli costi fissi: tutto il margine è la quota della scuola e FPC non ha quota variabile. Lo scenario lo riproduce senza regime, con il bollo azzerato e la quota variabile FPC a zero. I percorsi da 12 e 18 ore hanno prezzo 0 nel foglio (non ancora fissato) e non sono riportati.
+
+Sono i valori del foglio al 13/11/2026, inseriti da una migrazione, non un collegamento: se il foglio cambia, si aggiorna lo scenario (o se ne salva una copia con **Salva come nuovo**). Uno scenario già presente non viene mai sovrascritto da una nuova esecuzione della migrazione. I costi fissi calcolati possono scostarsi di qualche decimo dal foglio, perché il sistema usa le voci di costo reali (per esempio la quota per account attivo).
 
 ## Amministrare le voci di costo
 
