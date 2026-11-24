@@ -1,0 +1,45 @@
+[project]
+name = "formandopercorsi-docs"
+languages = ["typescript", "html"]
+
+[commands]  # run from the project root; empty or missing = skipped. Wrap in docker/ssh here if needed.
+
+# format_check = ""
+# lint = ""
+typecheck = "npm run typecheck"
+# test = ""
+# test_one = ""
+build = "npm run build"
+
+[limits]  # used by ffcode lint; project overrides of the defaults
+max_function_lines = 50
+max_file_lines = 500
+max_params = 5
+max_line_length = 100
+dup_window = 10
+
+[commit]
+style = "conventional"  # conventional | imperative
+max_subject = 72
+
+# coverage = ""   # e.g. "pytest --cov=. --cov-report=xml"; then set [coverage] report
+[coverage]
+# report = "coverage.xml"  # Cobertura, Clover or lcov
+# min = 80  # minimum diff coverage in percent
+
+# [mutation]  # optional, slow: areas where a surviving mutant costs money or data
+# critical = ["services/payments/**"]
+# command = "mutmut run --paths-to-mutate {files}"
+
+[check]
+secrets = true
+base = "main"  # branch used for --changed
+
+ui = true  # run ffcode uilint in check (a11y, tokens, motion, i18n)
+
+[frontend]  # design context; empty = PRODUCT.md/DESIGN.md at the root if present, else .ffcode/product.md, design.md
+# product = ""
+# design = ""
+
+[infer]
+exclude = ["^legacy-cra/"]

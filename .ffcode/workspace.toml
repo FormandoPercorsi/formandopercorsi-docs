@@ -1,0 +1,24 @@
+# Multi-repo workspace. Clones live in .ffcode/repos/<name> (git-ignored). Run: ff workspace sync
+[[repo]]
+name = "formandopercorsi-docs"
+self = true
+role = "docs"
+url = "git@github.com:FormandoPercorsi/formandopercorsi-docs.git"
+branch = "master"
+depends_on = ["formandopercorsi-backend", "formandopercorsi-frontend"]
+
+[[repo]]
+name = "formandopercorsi-backend"
+role = "backend"
+url = "git@github.com:FormandoPercorsi/formandopercorsi-backend.git"
+branch = "develop"
+local = "~/Documents/FPC-DEV/formandopercorsi-backend"
+contracts = ["docs/doc_generate.php", "migrations", ".env"]   # OpenAPI generator (spec served at /doc/openapi.yaml), schema, env keys
+
+[[repo]]
+name = "formandopercorsi-frontend"
+role = "frontend"
+url = "git@github.com:FormandoPercorsi/formandopercorsi-frontend.git"
+branch = "develop"
+local = "~/Documents/FPC-DEV/formandopercorsi-frontend"
+depends_on = ["formandopercorsi-backend"]

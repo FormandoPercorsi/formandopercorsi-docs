@@ -1,0 +1,25 @@
+# Inferred by `ff arch infer` from directories, imports, names and .ffcode/arch-answers.toml. Review before trusting.
+[architecture]
+style = "packages"      # rest-layered | mvc | hexagonal | components ...
+summary = "Sito di documentazione Docusaurus (guide + API OpenAPI generate); dipende da backend (spec OpenAPI) e frontend."
+
+[[layer]]
+# 1 files, level 0; imports: no imports of other layers seen
+name = "docusaurus.config"
+paths = ["docusaurus.config.ts"]
+may_import = []   # imports no other layer
+example = "docusaurus.config.ts"
+
+[[layer]]
+# 2 files, level 0; imports: no imports of other layers seen
+name = "scripts"
+paths = ["scripts/**"]
+may_import = []   # imports no other layer
+example = "scripts/fetch-openapi.js"
+
+[[layer]]
+# 1 files, level 0; imports: no imports of other layers seen
+name = "sidebars"
+paths = ["sidebars.ts"]
+may_import = []   # imports no other layer
+example = "sidebars.ts"
