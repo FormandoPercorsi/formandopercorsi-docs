@@ -48,6 +48,7 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
       'Lesson',
       'Availability',
       'Availability Group',
+      'Booking windows',
       'Promotion',
       'Contract',
     ],
@@ -63,7 +64,7 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
   // 'Track' is the event-collection endpoint, not a didactic "track": it belongs with the
   // metric definitions that aggregate the events it collects, not with subjects and exercises.
   {label: 'Tracking & metriche', tags: ['Track', 'Admin - Tracking Metrics', 'Metric Options']},
-  {label: 'Pagamenti & Fatturazione', tags: ['Invoice', 'InvoiceLegislation', 'CreditNote']},
+  {label: 'Pagamenti & Fatturazione', tags: ['PriceList', 'Invoice', 'InvoiceLegislation', 'CreditNote']},
   // Called by Stripe and ACube, never by a client: kept apart so nobody wires them into a UI.
   {label: 'Webhook (server to server)', tags: ['Webhooks']},
   {label: 'Notifiche & annunci', tags: ['Notification', 'Announcements']},
@@ -74,20 +75,25 @@ const TOPIC_GROUPS: Array<{label: string; tags: string[]}> = [
   {
     label: 'Amministrazione',
     tags: [
+      'Admin',
       'Admin - Availability',
       'Admin - Band Changes',
       'Admin - Bands',
       'Admin - Booking windows',
+      'Admin - Cost Items',
       'Admin - Credits',
       'Admin - Diagnostics',
       'Admin - External Schools',
       'Admin - Finance',
       'Admin - Incentives',
+      'Admin - Invoices',
       'Admin - Job Runs',
       'Admin - Lesson orders',
       'Admin - Lessons',
       'Admin - Monitoring',
+      'Admin - Platform fee',
       'Admin - Price Changes',
+      'Admin - Pricing Simulation',
       'Admin - Products',
       'Admin - Provisioning',
       'Admin - Settlements',

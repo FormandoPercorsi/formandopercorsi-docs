@@ -31,7 +31,7 @@ La versione in vigore **non è dichiarata, è derivata**: è la più alta fra qu
 | `current` | In vigore oggi. |
 | `upcoming` | Pubblicata ma con decorrenza futura: è il **periodo di preavviso**, che per gli insegnanti è di 15 giorni ai sensi del Regolamento UE 2019/1150. Può già essere accettata. |
 
-La **3.0**, pubblicata il 15 ottobre 2026 per entrambe le categorie, è in vigore dal **20 ottobre 2026** sul branch `develop`: la decorrenza, inizialmente fissata al 1° dicembre 2026, è stata anticipata prima che la versione arrivasse in produzione. Fino ad allora la versione in vigore era la **2.0** (dal 5 dicembre 2025). Da quella data ogni famiglia e ogni insegnante che non abbia accettato esplicitamente la 3.0 è bloccato alle scritture, come descritto [più sotto](#che-cosa-succede-a-chi-non-ha-accettato). L'esempio di stato riportato più avanti mostra la situazione durante il preavviso.
+La **3.0**, pubblicata il 15 ottobre 2026 per entrambe le categorie, ha decorrenza **1° febbraio 2027**. La decorrenza è stata spostata più volte prima che la versione arrivasse in produzione (dal 1° dicembre 2026 al 20 ottobre 2026, poi al 1° febbraio 2027): fino a che nessuno l'ha accettata o è entrata in vigore, la data è l'unico elemento che si può correggere. Fino ad allora la versione in vigore resta la **2.0** (dal 5 dicembre 2025) e la 3.0 è `upcoming`: chi la accetta in anticipo lo può fare, e da quella data ogni famiglia e ogni insegnante che non l'abbia accettata esplicitamente è bloccato alle scritture, come descritto [più sotto](#che-cosa-succede-a-chi-non-ha-accettato). L'esempio di stato riportato più avanti mostra la situazione durante il preavviso.
 
 ### Testo di una versione
 
@@ -66,10 +66,10 @@ Il flusso è sempre lo stesso, all'accesso e a ogni cambio di versione:
     "content_hash": "…",
     "specific_approval_clauses": [{"number": "3", "title": "…"}]
   },
-  "accepted": {"version": "2.0", "accepted_at": null, "legacy": true},
+  "accepted": {"version": "2.0", "accepted_at": "2026-11-14 10:00:00"},
   "upcoming": {
     "version": "3.0",
-    "effective_from": "2026-12-01",
+    "effective_from": "2027-02-01",
     "content_hash": "…",
     "specific_approval_clauses": [{"number": "1.5", "title": null}],
     "accepted": false
@@ -78,7 +78,7 @@ Il flusso è sempre lo stesso, all'accesso e a ogni cambio di versione:
 ```
 
 - `must_accept` è vero quando l'utente **non ha accettato la versione in vigore** (o una successiva). È il solo campo che decide se l'utente è bloccato.
-- `accepted` è l'ultima versione accettata. Con `legacy: true` l'utente ha accettato **prima che il versionamento esistesse**: di quell'accettazione si conosce solo il fatto, non la data né il testo, e `accepted_at` è nullo.
+- `accepted` è l'ultima versione accettata, o nullo se l'utente non ne ha accettata alcuna. Un'accettazione anteriore al versionamento non ha più un trattamento a sé: è stata riportata una volta sola come accettazione della 2.0, con la data della riconciliazione (vedi [sotto](#il-vecchio-flag-e-le-accettazioni-precedenti)).
 - `upcoming` è nullo se non c'è alcuna versione in attesa; altrimenti ha la forma di `current` più `accepted`, che dice se l'utente l'ha già accettata. Durante il preavviso il client dovrebbe proporla, affiancandole il [confronto con la versione precedente](#confronto-fra-versioni).
 
 ### L'accettazione
@@ -110,11 +110,18 @@ La conseguenza pratica da tenere presente: **pubblicare una versione con decorre
 
 ### Il vecchio flag e le accettazioni precedenti
 
-Prima del versionamento l'accettazione era un solo flag sull'utente, `terms_and_conditions`, impostato dalla casella della registrazione o da `POST /api/auth/accept-terms`. Quel flag vale oggi come accettazione della **versione 2.0, e di nessuna successiva** (versione configurata in `contracts.legacyAcceptedVersion`). Ne discende che:
+Prima del versionamento l'accettazione era un solo flag sull'utente, `terms_and_conditions`. **Oggi conta soltanto una riga di accettazione**: il flag non è più letto né scritto da alcun codice, e `POST /api/auth/accept-terms` e il campo `terms_and_conditions` nelle risposte di registrazione, profilo e accesso **non esistono più**. Per decidere se mostrare la schermata di accettazione si usa solo `must_accept`.
 
-- chi aveva accettato prima non è bloccato finché la 2.0 è in vigore, e deve accettare esplicitamente la 3.0 da quando è in vigore (20 ottobre 2026 su `develop`);
-- **`POST /api/auth/accept-terms` e la casella della registrazione non bastano più** a sbloccare un utente quando è in vigore una versione successiva alla 2.0: impostano il flag e nient'altro. Il client deve passare da `POST /api/contract/accept`, che oltre a registrare l'accettazione imposta anche il flag;
-- il campo `terms_and_conditions` restituito all'accesso continua a dire «ha mai accettato qualcosa», **non** «ha accettato la versione in vigore». Per decidere se mostrare la schermata di accettazione si usa `must_accept`.
+Per non bloccare chi aveva già accettato, una riconciliazione eseguita **una volta sola** (migrazione, idempotente) ha trasformato il flag in un'accettazione della **versione 2.0**: ogni famiglia e ogni insegnante con il flag ha ricevuto una riga con tutte le clausole da approvare specificamente, metodo di firma `legacy_flag`, senza IP né user agent, e come data quella della riconciliazione. Il flag copriva anche clausole e informativa, ed è per questo che la riga le riporta tutte. Ne discende che:
+
+- chi aveva accettato non è bloccato finché la 2.0 è in vigore, e deve accettare con un clic la 3.0 quando questa entra in vigore (1° febbraio 2027);
+- amministratori e studenti sono esclusi dalla riconciliazione: i primi non hanno obblighi, i secondi agiscono sotto l'accettazione della famiglia;
+- la riconciliazione è **legata alla 2.0**: una versione successiva si accetta sempre con un clic, non viene mai riportata;
+- chi non aveva il flag non ha alcuna riga, e deve accettare la versione in vigore (`must_accept` è vero).
+
+### Accettazione alla registrazione
+
+Le due registrazioni (`POST /api/auth/signup/family` e `POST /api/auth/signup/teacher`) accettano un oggetto facoltativo `contract_acceptance` con `version` e `specific_approvals`, con le stesse regole di `POST /api/contract/accept` (solo la versione in vigore o quella in arrivo, esattamente le clausole da approvare). L'accettazione è registrata **nella stessa transazione** dell'account: o si creano entrambi o nessuno dei due. Una versione o un elenco di clausole non validi sono un `400` prima che venga creato qualunque dato. Il motivo è pratico: dopo la registrazione il client perde lo stato locale con il ricaricamento della pagina, e `POST /api/contract/accept` richiede un utente già autenticato. Senza `contract_acceptance` l'account viene creato **senza accettazione**, e al primo accesso `must_accept` è vero.
 
 ## Consultare i testi
 

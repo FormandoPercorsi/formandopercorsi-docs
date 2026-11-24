@@ -96,7 +96,9 @@ Un insegnante può dichiarare disponibilità anche molto avanti nel tempo, ma l'
 - è una sola regola per tutti i punti d'ingresso: la ricerca non offre gli slot oltre il limite, e la prenotazione di una lezione, la modifica di una già fissata, le proposte e le richieste dell'insegnante e ogni lezione di un percorso la rifiutano con un errore esplicito. Un percorso con anche una sola lezione oltre il limite viene **rifiutato**, non accorciato;
 - per lo stesso motivo una lezione già fissata oltre il limite non può essere spostata a un altro orario oltre il limite.
 
-La gestione è riservata all'amministrazione (categoria «Booking windows» nella [API Reference](/api/formando-percorsi-api)).
+La gestione è riservata all'amministrazione (categoria «Admin - Booking windows» nella [API Reference](/api/formando-percorsi-api)).
+
+**Le regole in vigore le può leggere chiunque sia autenticato**, così che un'interfaccia possa avvisare in anticipo invece di far fallire la prenotazione: `GET /api/booking-windows` (categoria «Booking windows») elenca le regole che valgono oggi. Indicando `student_id` la risposta aggiunge la regola **già risolta** per quello studente, cioè quella della città di fatturazione della sua famiglia. L'accesso è limitato a chi ha titolo: l'amministrazione per qualunque studente, una famiglia per i propri, un insegnante per gli studenti con cui ha almeno una lezione non cancellata; in ogni altro caso la risposta è un `404`, identico a quello di uno studente inesistente. La ricerca delle disponibilità non riporta invece alcun campo con l'ultimo giorno prenotabile: la regola si legge da qui.
 
 ## Quando un insegnante non compare
 

@@ -88,10 +88,10 @@ La categoria utente restituita all'accesso può essere conservata dal client per
 
 ## Accesso tramite Google
 
-L'accesso può avvenire anche tramite Google, inviando il token rilasciato da Google insieme alla categoria utente. Nella risposta, un valore di `terms_and_conditions` pari a `0` indica che l'utente sta accedendo per la prima volta e deve ancora accettare i termini di servizio.
+L'accesso può avvenire anche tramite Google, inviando il token rilasciato da Google insieme alla categoria utente.
 
-:::caution I termini sono versionati
-`terms_and_conditions` dice soltanto se l'utente abbia **mai** accettato qualcosa: vale come accettazione della versione 2.0 delle condizioni e di nessuna successiva. Per sapere se l'utente debba accettare la versione in vigore, e per registrare l'accettazione, si usano `GET /api/contract/status` e `POST /api/contract/accept`, descritti in [Condizioni generali di contratto](/guides/condizioni-contrattuali). `POST /api/auth/accept-terms` imposta il solo flag e non sblocca più chi deve accettare una versione successiva alla 2.0.
+:::caution Le condizioni non sono più un flag
+L'accettazione delle condizioni non è più riportata nelle risposte di accesso, registrazione e profilo, e `POST /api/auth/accept-terms` è stato rimosso. Per sapere se l'utente debba accettare la versione in vigore, e per registrare l'accettazione, si usano `GET /api/contract/status` e `POST /api/contract/accept`, descritti in [Condizioni generali di contratto](/guides/condizioni-contrattuali). In registrazione l'accettazione si invia insieme ai dati, nel campo `contract_acceptance`.
 :::
 
 ## Evoluzioni previste

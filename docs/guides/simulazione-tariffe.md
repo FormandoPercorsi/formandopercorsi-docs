@@ -7,7 +7,7 @@ title: Simulazione delle tariffe
 La simulazione risponde a una domanda che l'amministrazione si pone prima di toccare un listino: **«se metto questo prezzo e lascio all'insegnante questa quota, che cosa resta alla piattaforma, una volta pagate imposte, commissioni e costi di struttura?»** — e, con una variazione di prezzo, **«che cosa cambia?»**. È la versione di sistema del foglio di calcolo con cui i listini venivano costruiti a mano.
 
 :::caution Stato di adozione
-La funzionalità è **in sviluppo** sul backend e non è ancora stata rilasciata: le operazioni descritte qui compaiono nella API Reference solo dopo il rilascio del backend e la ricostruzione di questo sito. Non scrive mai su un listino, su un ordine o sui costi fissi di una prenotazione: è uno **stimatore**. I costi fissi reali, quando la piattaforma deciderà di includervi anche i costi di struttura, si costruiranno a partire dai suoi risultati, in un passo separato.
+La funzionalità è disponibile sul backend di **sviluppo** (`develop`) e non è ancora in produzione: le operazioni descritte qui compaiono nella API Reference di produzione solo dopo il rilascio del backend e la ricostruzione di questo sito. Non scrive mai su un listino, su un ordine o sui costi fissi di una prenotazione: è uno **stimatore**. I costi fissi reali, quando la piattaforma deciderà di includervi anche i costi di struttura, si costruiranno a partire dai suoi risultati, in un passo separato.
 :::
 
 ## Come ragiona un calcolo
@@ -125,6 +125,30 @@ La differenza fra i costi fissi scelti e i costi reali (`fixed_vs_cost_per_hour`
 
 I prezzi finali si calcolano sul prezzo indicato nel prodotto: per fissarli a un prezzo aumentato, indica quel prezzo nel prodotto (la variazione `adjustment` resta una prova a parte). La simulazione non modifica alcun prezzo: i prezzi si cambiano soltanto dagli aggiornamenti dei prezzi.
 
+## Chi fattura alla famiglia
+
+Chi incassa dalla famiglia cambia su chi pesano le imposte e come si divide il resto. Il campo `provider` della richiesta lo dice:
+
+- **`teacher`** (predefinito): incassa l'insegnante. FPC e l'eventuale scuola di competenza fatturano all'insegnante le proprie quote. L'imposta sul reddito dell'insegnante si calcola sulla **sua fattura**, cioè sull'intero prezzo.
+- **`external_school`** (il caso «Ferrara»): incassa la scuola esterna. L'insegnante fattura alla scuola ciò che gli serve per arrivare al netto, e FPC fattura alla scuola i costi fissi più, se si vuole, una parte del resto.
+
+Altri due interruttori completano il quadro:
+
+- `fpc_bills_family`: FPC fattura **direttamente alla famiglia** i costi fissi, come quota d'uso della piattaforma (vedi [Pagamenti](/guides/pagamenti#quota-di-piattaforma-fatturata-alla-famiglia)). La fattura dell'insegnante è allora il prezzo meno quei costi, e se è lui il fornitore paga l'imposta su una base più bassa. Predefinito: falso.
+- `fpc_variable_share` (da 0 a 1): la parte della **quota variabile** (quota proposta meno costi fissi) che spetta a FPC, mentre il resto va alla scuola. Se omesso, la quota variabile resta indivisa per un fornitore insegnante, e vale 0 per una scuola fornitrice (FPC prende i soli costi fissi). Una cifra scelta per fascia nel blocco `final` prevale sempre sulla percentuale.
+
+L'imposta sul reddito dell'insegnante è **sempre calcolata sulla sua fattura**, quindi `teacher_net_per_hour` è sempre il netto **dopo** quell'imposta. Nel caso della scuola fornitrice la fattura è maggiorata in modo che, tolta l'imposta, l'insegnante tenga il netto richiesto: l'imposta è già *dentro* quella fattura e non si toglie una seconda volta dal prezzo (la risposta la riporta in `teacher_income_tax_per_hour`), e `fpc_bills_family` non la modifica. Le imposte non percentuali, come il bollo, si tolgono sempre dal prezzo. Le imposte della scuola e di FPC stesse (IRES, IRAP) non sono modellate. Il fornitore non cambia le voci di costo: `vat_type` resta il regime di chi fattura alla famiglia, e il bollo sostenuto dalla scuola resta una sostituzione di `bollo` a 0.
+
+### La ritenuta dell'insegnante occasionale
+
+La ritenuta d'acconto non è una voce di costo: la versa il sostituto d'imposta, trattenendola dalla ricevuta, ma cambia ciò che il pagatore deve trovare nel prezzo. Non si imposta con un interruttore: **si ricava** dalla richiesta, e si applica esattamente quando il regime è `occasionale` **e** il fornitore è `external_school` (la scuola è sostituto d'imposta; una famiglia no, quindi un insegnante fornitore incassa e rilascia la ricevuta senza ritenuta).
+
+`teacher_net_per_hour` resta ciò che l'insegnante **riceve**; la ricevuta è maggiorata di conseguenza e la divisione di FPC parte da quel lordo. L'aliquota si legge dalla legislazione fiscale del regime occasionale e non si digita: la risposta la riporta in `teacher_withholding`, e nei prezzi finali compare il netto dopo la ritenuta. Il vecchio campo `teacher_withholding` della richiesta è stato rimosso; uno scenario salvato che lo contiene lo ignora.
+
+### Correggere i costi fissi
+
+`fixed_costs_correction` ritocca i costi fissi calcolati: una `percent` (5 = +5%, applicata per prima) e/o un `amount_per_hour`, anche negativi, e il risultato è arrotondato per difetto a 0,10 € come i costi stessi. **Il netto dell'insegnante e la quota totale di FPC non cambiano**: ciò che si aggiunge ai costi fissi esce dalla parte variabile, che viene ricalcolata. La risposta riporta i costi `fixed_costs_calculated_per_hour` accanto a quelli corretti.
+
 ## Controllare i calcoli
 
 Ogni numero mostrato si può verificare. Nella risposta, `steps` (in ogni risultato `before`/`after` e nei prezzi finali) elenca in ordine ogni passaggio: la formula di ogni voce di costo con i numeri sostituiti e l'eventuale arrotondamento, poi imposte, ricavo netto, disponibile, costi fissi, margine, quota, controllo di coerenza e, per i prezzi finali, ogni passaggio che ricava le quote. La pagina li mostra sotto «Mostra i calcoli». Gli importi sono all'ora; nelle espressioni il separatore decimale è il punto.
@@ -154,7 +178,8 @@ Le voci di costo si leggono e si programmano con operazioni proprie, con la stes
 
 ## Che cosa non è ancora coperto
 
-- Il **regime occasionale** e le **tariffe per livello scolastico** non sono ancora modellati: le regole di calcolo non sono state definite.
+- Le **tariffe per livello scolastico** non sono ancora modellate: le regole di calcolo non sono state definite. Il regime occasionale lo è solo nella ritenuta d'acconto (vedi sopra).
+- La simulazione **non legge i listini per singolo insegnante** (quote proprie, vedi [Pagamenti](/guides/pagamenti#la-ripartizione-propria-di-un-insegnante)): la ripartizione di un insegnante si simula salvando uno scenario con una propria `fpc_variable_share` o `fixed_costs_correction`, chiamato in modo da riconoscerlo.
 - I **prodotti** di una simulazione si indicano a mano (prezzo all'ora, ore dell'ordine, quota insegnante per fascia): non si leggono ancora dal listino in vigore.
 - La stima dei **0,05 € l'ora** sul bonifico è provvisoria: il costo reale è di 0,10 € a bonifico, e la voce `fixed_per_payout` lo ripartisce sulle ore che un bonifico copre davvero, quando quei volumi sono disponibili.
 - L'imposta si applica al regime di **chi fattura alla famiglia**, che coincide con quello dell'insegnante solo quando l'insegnante è il fornitore dell'ordine.

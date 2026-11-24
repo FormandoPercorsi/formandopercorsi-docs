@@ -51,6 +51,41 @@ Poiché i limiti determinano quanto ciascun insegnante percepisce, l'amministraz
 
 Il prezzo proposto alla famiglia può inoltre essere modificato da un codice promozionale, dal credito eventualmente maturato dalla famiglia — si veda [Crediti e programma referral](/guides/referral-crediti) — e dall'eventuale acquisto della [copertura assicurativa](/guides/assicurazione).
 
+### Come cambiano i listini
+
+Un listino si modifica **solo** con un aggiornamento dei prezzi (pagina «Tariffe» dell'area amministrativa, o `price-change` da console), mai riscrivendo le righe. Oltre ad aggiornare i valori esistenti, un aggiornamento può:
+
+- **aprire un listino proprio** a una città, a uno o più livelli scolastici o a un regime fiscale, copiando la riga più generale in vigore alla decorrenza; non è mai un'operazione neutra, perché la città o il regime si staccano dal listino generale e da lì in poi vanno aggiornati a parte. Una città senza riga propria viene saltata quando si apre un regime, proprio perché quella riga la staccherebbe dal listino generale;
+- **chiudere** i prezzi speciali di una città, di un regime, di un livello o di un insegnante: dalla decorrenza tornano a valere quelli più generali, senza cancellare la storia;
+- annullare o ritirare un aggiornamento: le righe create si eliminano e le catene si ricompongono. Due versioni della stessa chiave che partono lo stesso giorno sono rifiutate.
+
+Per ogni combinazione, il listino cerca la riga più specifica: prima il regime dell'insegnante, poi la città, infine il livello scolastico dello studente, e ripiega sulla riga generale. Una riga trovata **sostituisce per intero** la riga più generale, non la completa colonna per colonna. Il livello scolastico viene congelato sull'ordine.
+
+### La ripartizione propria di un insegnante
+
+Un insegnante può avere quote **sue**, senza che la famiglia paghi di più o di meno: costi fissi di piattaforma e quote di FPC e della scuola per fascia. La riga dell'insegnante contiene soltanto le quote, **senza prezzo**: il prezzo resta quello che il listino ordinario risolve, così un aggiornamento del listino lo raggiunge da solo e i due non si possono mai disallineare.
+
+- Per le **quote** la riga dell'insegnante prevale su ogni altra dimensione (regime, città, livello); l'insegnante senza riga segue il comportamento ordinario. Per il prezzo si ricade sempre sul listino ordinario: se questo viene tolto, non c'è più nulla su cui prezzare.
+- Le quote devono **stare sotto il prezzo**, perché l'insegnante percepisce il residuo. L'aggiornamento è rifiutato se la fascia più pesante (costi fissi più quote di FPC e della scuola) supera il prezzo più basso a cui la riga potrebbe applicarsi, e lo è anche un aggiornamento del listino ordinario che lasci scoperte le quote di un insegnante. Altrimenti l'errore emergerebbe alla liquidazione come bonifico negativo.
+- Si programma con la modalità per insegnante, indicando gli insegnanti; città e livelli scolastici restringono la chiave (vuoto = qualsiasi). Si chiude con la chiusura per insegnante. La consultazione dei riferimenti dell'area amministrativa elenca gli insegnanti che hanno già righe proprie.
+
+### Il listino pubblico
+
+`GET /api/price-list` (senza autenticazione, categoria «PriceList») restituisce il prezzo di listino di lezioni e percorsi **per livello scolastico**, pensato per le pagine pubbliche. Con `city_id` legge il listino di quella città. Risolve i prezzi con le stesse catene della prenotazione, con il regime predefinito, senza promozioni né credito e solo con le righe in vigore oggi; per ogni livello indica se il prezzo è proprio del livello o ereditato dalla riga valida per tutti (`generic`). La risposta è memorizzabile per cinque minuti.
+
+### Quota di piattaforma fatturata alla famiglia
+
+Per impostazione la quota fissa di FPC è tolta dal prezzo e fatturata al fornitore. Un'opzione, **spenta finché non si programma una regola**, la porta invece a carico diretto della famiglia come **quota d'uso della piattaforma**:
+
+- la regola è **versionata** come i listini (decorrenza, valida fino alla successiva), generale o per città; si risolve al giorno della prenotazione per la città di fatturazione della famiglia e poi si congela sull'ordine. Una regola non ancora in vigore si ritira (operazioni «Admin - Platform fee» nella API Reference);
+- dove è attiva, i costi fissi dell'ordine diventano 0 e l'importo dovuto al fornitore si riduce della stessa somma, che resta registrata sull'ordine (IVA inclusa, mai oltre l'importo). Il fornitore fattura e incassa dunque ciò che gli spetta, senza casi particolari su fatture, note di credito e quota dell'insegnante, e la famiglia paga **importo + quota**. Credito e promozioni riducono soltanto la parte del fornitore;
+- nel pagamento la quota è una riga a sé, che arriva alla piattaforma subito, insieme al premio assicurativo, come commissione. Non si applica se il fornitore è FPC né a un ordine gratuito;
+- FPC emette **un solo documento per ordine**: con la copertura assicurativa, quota e premio sono due righe della stessa fattura, mentre la nota di credito del premio resta separata;
+- uno spostamento a un altro insegnante lascia la lezione fatturata con la quota;
+- un **rimborso** sull'incasso del fornitore è addebitato a lui, quindi la quota è restituita con un importo esatto prelevato dal saldo di FPC, mai in proporzione all'intero addebito (trascinerebbe il premio). Con la cancellazione della famiglia si rimborsano lezione e quota, **mai il premio**, ed è emessa la nota di credito della quota; con la cancellazione dell'intero ordine da parte dell'amministrazione il rimborso è importo più quota, più il premio solo se richiesto, con passaggi riprendibili.
+
+Le statistiche finanziarie leggono ancora il prezzo della lezione, che non comprende la quota: gli incassi di FPC da questa voce non compaiono ancora in ricavi e margine.
+
 ## Incasso
 
 La sessione di pagamento viene creata sul conto del provider dell'ordine, non su quello della piattaforma. Due comportamenti si discostano da questo schema:
